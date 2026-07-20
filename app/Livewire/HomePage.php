@@ -2,7 +2,7 @@
 
 namespace App\Livewire;
 
-use App\Models\System;
+use App\Models\University;
 use Livewire\Component;
 
 class HomePage extends Component
@@ -11,12 +11,12 @@ class HomePage extends Component
 
     public function render()
     {
-        $systems = System::where('is_active', true)
+        $systems = University::coordination()->where('IS_IT_ENABLE', 1)
             ->when($this->search, function ($query) {
-                $query->where('name', 'like', '%' . $this->search . '%')
-                    ->orWhere('description', 'like', '%' . $this->search . '%');
+                $query->where('U_NAME', 'like', '%' . $this->search . '%')
+                    ->orWhere('EN_U_NAME', 'like', '%' . $this->search . '%');
             })
-            ->orderBy('display_order')
+            ->orderBy('ORDERIG')
             ->get();
 
         return view('livewire.home-page', [

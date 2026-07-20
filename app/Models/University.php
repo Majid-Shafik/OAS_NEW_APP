@@ -1,0 +1,28 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class University extends Model
+{
+    protected $table = 'university';
+    protected $primaryKey = 'UNID';
+    public $incrementing = false;
+    public $timestamps = false;
+    protected $fillable = [
+        'UNID', 'NEW_ID', 'U_NAME', 'NEW_NAME', 'EN_U_NAME', 'IS_IT_ENABLE', 'CLEARING_UN'
+    ];
+
+    public function scopeClearing(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder
+    {
+        return $query->where('CLEARING_UN', 1);
+    }
+
+    public function scopeCoordination(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder
+    {
+        return $query->where(function ($q) {
+            $q->where('CLEARING_UN', '!=', 1)->orWhereNull('CLEARING_UN');
+        });
+    }
+}

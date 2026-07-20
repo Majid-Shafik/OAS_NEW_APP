@@ -2,31 +2,68 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Database\Factories\UserFactory;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Models\Contracts\HasName;
+use Filament\Panel;
 
-#[Fillable(['name', 'email', 'password'])]
-#[Hidden(['password', 'remember_token'])]
-class User extends Authenticatable
+class User extends Authenticatable implements FilamentUser, HasName
 {
-    /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
+    protected $table = 'users';
+    protected $primaryKey = 'USER_IDENT';
+    public $timestamps = false;
+
+    protected $fillable = [
+        'USER_NAME',
+        'LOGON_ID',
+        'LOGON_PASS',
+        'EMAIL',
+        'MOBILE_PHONE',
+        'GENDER',
+        'GROUP_IDENT',
+        'PROGRAM_IDENT',
+        'IS_IT_ENABLE',
+        'remember_token',
+    ];
+
+    protected $casts = [
+        'FIRST_TIME' => 'boolean',
+        'IS_IT_ENABLE' => 'boolean',
+        'RECORDDATE' => 'datetime',
+    ];
+
+    protected $hidden = [
+        'LOGON_PASS',
+        'remember_token'
+    ];
+
+    public function getAuthIdentifierName()
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+        return 'USER_IDENT';
+    }
+
+    public function getAuthPasswordName()
+    {
+        return 'LOGON_PASS';
+    }
+
+    public function getAuthPassword()
+    {
+        return $this->LOGON_PASS;
+    }
+
+    public function canAccessPanel(Panel $panel): bool
+    {
+        \Illuminate\Support\Facades\Log::info('canAccessPanel called for user: ' . $this->USER_IDENT . ', IS_IT_ENABLE: ' . $this->IS_IT_ENABLE . ', DB: ' . config('database.connections.tenant.database'));
+        return $this->IS_IT_ENABLE == 1;
+    }
+
+    public function getFilamentName(): string
+    {
+        return (string) ($this->USER_NAME ?? $this->LOGON_ID ?? 'User');
     }
 }
