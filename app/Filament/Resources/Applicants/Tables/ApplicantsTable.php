@@ -21,10 +21,10 @@ class ApplicantsTable
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('APPLICANT_IDENT')
-                    ->numeric()
+                    ->numeric(locale: 'en')
                     ->sortable(),
                 TextColumn::make('NATIONAL_NUMBER')
-                    ->numeric()
+                    ->numeric(locale: 'en')
                     ->sortable(),
                 TextColumn::make('FIRST_NAME')
                     ->searchable(),
@@ -63,23 +63,23 @@ class ApplicantsTable
                 TextColumn::make('SEC_SCHOOL_TERRITORY')
                     ->searchable(),
                 TextColumn::make('SEC_SCHOOL_YEAR')
-                    ->numeric()
+                    ->numeric(locale: 'en')
                     ->sortable(),
                 TextColumn::make('SEC_SCHOOL_NAME')
                     ->searchable(),
                 TextColumn::make('SEC_SCHOOL_RATE')
-                    ->numeric()
+                    ->numeric(locale: 'en')
                     ->sortable(),
                 TextColumn::make('SEC_SCHOOL_SEATNO')
                     ->searchable(),
                 TextColumn::make('SEC_SCHOOL_MARK')
-                    ->numeric()
+                    ->numeric(locale: 'en')
                     ->sortable(),
                 TextColumn::make('SEC_SCHOOL_OVERALLMARK')
-                    ->numeric()
+                    ->numeric(locale: 'en')
                     ->sortable(),
                 TextColumn::make('ADMITTED_OFFERING')
-                    ->numeric()
+                    ->numeric(locale: 'en')
                     ->sortable(),
                 TextColumn::make('program.PROGRAM_NAME')
                     ->label(__('ADMITTED_PROGRAM'))
@@ -112,16 +112,16 @@ class ApplicantsTable
                     ->boolean()
                     ->sortable(),
                 TextColumn::make('INSERTED_BY')
-                    ->numeric()
+                    ->numeric(locale: 'en')
                     ->sortable(),
                 TextColumn::make('LAST_UPDATED_BY')
-                    ->numeric()
+                    ->numeric(locale: 'en')
                     ->sortable(),
                 TextColumn::make('LAST_UPDATED_ON')
                     ->dateTime()
                     ->sortable(),
                 TextColumn::make('APPROVED_BY')
-                    ->numeric()
+                    ->numeric(locale: 'en')
                     ->sortable(),
                 TextColumn::make('APPROVED_ON')
                     ->dateTime()
@@ -149,7 +149,7 @@ class ApplicantsTable
                     ->boolean()
                     ->sortable(),
                 TextColumn::make('REVIEW_BY')
-                    ->numeric()
+                    ->numeric(locale: 'en')
                     ->sortable(),
                 TextColumn::make('REVIEW_ON')
                     ->dateTime()
@@ -160,7 +160,7 @@ class ApplicantsTable
                     ->boolean()
                     ->sortable(),
                 TextColumn::make('SECOND_REVIEWED_BY')
-                    ->numeric()
+                    ->numeric(locale: 'en')
                     ->sortable(),
                 TextColumn::make('SECOND_REVIEWED_ON')
                     ->dateTime()

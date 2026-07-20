@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\HasUniversityScope;
+use Awobaz\Compoships\Compoships;
 
 class Offering extends Model
 {
-    use HasFactory, \Awobaz\Compoships\Compoships;
+    use HasFactory, Compoships, HasUniversityScope;
 
     protected $table = 'offerings';
     protected $primaryKey = 'OFFERING_IDENT';
@@ -22,6 +24,11 @@ class Offering extends Model
     public function lastUpdatedBy()
     {
         return $this->belongsTo(User::class, 'LAST_UPDATED_BY', 'USER_IDENT');
+    }
+
+    public function offeringDhs()
+    {
+        return $this->hasMany(OfferingDh::class, 'OFFERING_IDENT', 'OFFERING_IDENT');
     }
 
     public function approvalBy()

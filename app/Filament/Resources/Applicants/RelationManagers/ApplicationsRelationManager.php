@@ -53,10 +53,10 @@ class ApplicationsRelationManager extends RelationManager
             ->headerActions([
                 // Read-only
             ])
-            ->actions([
+            ->recordActions([
                 // Read-only
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 // Read-only
             ]);
     }

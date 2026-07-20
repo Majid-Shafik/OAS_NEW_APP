@@ -59,6 +59,12 @@ class User extends Authenticatable implements FilamentUser, HasName
     public function canAccessPanel(Panel $panel): bool
     {
         \Illuminate\Support\Facades\Log::info('canAccessPanel called for user: ' . $this->USER_IDENT . ', IS_IT_ENABLE: ' . $this->IS_IT_ENABLE . ', DB: ' . config('database.connections.tenant.database'));
+        
+        // إذا كان رقم الجامعة غير معروف (لا هو 0 للمشرف، ولا يوجد له سجل في جدول الجامعات) نمنع الدخول
+        if ($this->UNID != 0 && !$this->university) {
+            return false;
+        }
+
         return $this->IS_IT_ENABLE == 1;
     }
 
@@ -66,4 +72,10 @@ class User extends Authenticatable implements FilamentUser, HasName
     {
         return (string) ($this->USER_NAME ?? $this->LOGON_ID ?? 'User');
     }
+
+    public function university()
+    {
+        return $this->belongsTo(University::class, 'UNID', 'UNID');
+    }
 }
+

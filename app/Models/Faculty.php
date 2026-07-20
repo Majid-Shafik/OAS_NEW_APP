@@ -9,6 +9,7 @@ use Awobaz\Compoships\Compoships;
 
 class Faculty extends Model
 {
+    use \App\Traits\HasUniversityScope;
     use HasCompositeKey, Compoships {
         HasCompositeKey::setKeysForSaveQuery insteadof Compoships;
     }
@@ -32,3 +33,4 @@ class Faculty extends Model
         return $this->hasMany(Program::class, ['UNID', 'FACULTY_IDENT'], ['UNID', 'FACULTY_IDENT']);
     }
 }
+

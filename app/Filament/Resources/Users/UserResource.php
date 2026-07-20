@@ -66,10 +66,10 @@ class UserResource extends Resource
                     ->required(),
                 DateTimePicker::make('RECORDDATE'),
                 TextInput::make('INSERTED_BY')
-                    ->numeric(),
+                    ->numeric(locale: 'en'),
                 TextInput::make('IS_IT_ENABLE')
                     ->required()
-                    ->numeric()
+                    ->numeric(locale: 'en')
                     ->default(1),
                 \Filament\Forms\Components\Select::make('FACULTY_IDENT')
                     ->label('الكلية')
@@ -124,7 +124,7 @@ class UserResource extends Resource
                     ->dateTime()
                     ->sortable(),
                 TextColumn::make('INSERTED_BY')
-                    ->numeric()
+                    ->numeric(locale: 'en')
                     ->sortable(),
 
                 TextColumn::make('FACULTY_IDENT')
@@ -168,5 +168,13 @@ class UserResource extends Resource
         return [
             'index' => ManageUsers::route('/'),
         ];
+    }
+
+    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        $query = parent::getEloquentQuery();
+        
+        // Apply the same logic as the HasUniversityScope trait here manually
+        return $query->withGlobalScope('universityScope', new \App\Models\Scopes\UniversityScope());
     }
 }

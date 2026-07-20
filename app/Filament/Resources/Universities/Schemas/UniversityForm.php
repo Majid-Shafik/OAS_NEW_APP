@@ -15,7 +15,7 @@ class UniversityForm
                 TextInput::make('UNID')
                     ->label(__('UNID'))
                     ->required()
-                    ->numeric(),
+                    ->numeric(locale: 'en'),
                 TextInput::make('U_NAME')
                     ->label(__('U_NAME'))
                     ->required()

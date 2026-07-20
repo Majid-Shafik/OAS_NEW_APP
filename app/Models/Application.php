@@ -8,6 +8,7 @@ use Awobaz\Compoships\Compoships;
 
 class Application extends Model
 {
+    use \App\Traits\HasUniversityScope;
     use HasCompositeKey, Compoships {
         HasCompositeKey::setKeysForSaveQuery insteadof Compoships;
     }
@@ -61,3 +62,4 @@ class Application extends Model
         return $this->belongsTo(User::class, 'INSERTED_BY', 'USER_IDENT');
     }
 }
+

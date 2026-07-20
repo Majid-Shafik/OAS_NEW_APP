@@ -19,7 +19,7 @@ class ApplicationForm
                 TextInput::make('APPLICATION_IDENT')
                     ->label(__('APPLICATION_IDENT'))
                     ->required()
-                    ->numeric(),
+                    ->numeric(locale: 'en'),
                 Select::make('APPLICANT_IDENT')
                     ->label(__('APPLICANT_IDENT'))
                     ->options(\App\Models\Applicant::pluck('FULL_NAME', 'APPLICANT_IDENT'))

@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use App\Traits\HasUniversityScope;
 use Illuminate\Database\Eloquent\Model;
 
 class University extends Model
 {
+    use HasUniversityScope;
     protected $table = 'university';
     protected $primaryKey = 'UNID';
     public $incrementing = false;

@@ -3,6 +3,8 @@
 namespace App\Filament\Resources\Offerings;
 
 use App\Filament\Resources\Offerings\Pages\ManageOfferings;
+use App\Filament\Resources\Offerings\Pages\ViewOffering;
+use App\Filament\Resources\Offerings\OfferingResource\RelationManagers\OfferingDhsRelationManager;
 use App\Models\Offering;
 use BackedEnum;
 use Filament\Actions\BulkActionGroup;
@@ -45,35 +47,35 @@ class OfferingResource extends Resource
             ->components([
                 TextInput::make('UNID')
                     ->required()
-                    ->numeric(),
+                    ->numeric(locale: 'en'),
                 TextInput::make('OFFER_GROUP_IDENT')
                     ->required()
-                    ->numeric()
+                    ->numeric(locale: 'en')
                     ->default(0),
                 TextInput::make('FACULTY_IDENT')
                     ->required()
-                    ->numeric(),
+                    ->numeric(locale: 'en'),
                 TextInput::make('PROGRAM_IDENT')
                     ->required()
-                    ->numeric(),
+                    ->numeric(locale: 'en'),
                 TextInput::make('STUDYTYPE_IDENT')
                     ->required()
-                    ->numeric(),
+                    ->numeric(locale: 'en'),
                 TextInput::make('SEC_SCHOOL_TYPE')
                     ->required(),
                 TextInput::make('SEC_SCHOOL_ACCEPT_RATE')
                     ->required()
-                    ->numeric(),
+                    ->numeric(locale: 'en'),
                 TextInput::make('ENTRANCE_EXAM_WEIGHT')
                     ->required()
-                    ->numeric()
+                    ->numeric(locale: 'en')
                     ->default(0.0),
                 TextInput::make('Y_SEC_SCHOOL_MAX_AGE')
                     ->required()
-                    ->numeric(),
+                    ->numeric(locale: 'en'),
                 TextInput::make('NY_SEC_SCHOOL_MAX_AGE')
                     ->required()
-                    ->numeric()
+                    ->numeric(locale: 'en')
                     ->default(0),
                 TextInput::make('STUDY_FEES')
                     ->default('1000'),
@@ -90,15 +92,15 @@ class OfferingResource extends Resource
                     ->required(),
                 TextInput::make('RECORD_BY')
                     ->required()
-                    ->numeric(),
+                    ->numeric(locale: 'en'),
                 DateTimePicker::make('LAST_UPDATED_ON')
                     ->required(),
                 TextInput::make('LAST_UPDATED_BY')
                     ->required()
-                    ->numeric(),
+                    ->numeric(locale: 'en'),
                 Toggle::make('APPROVAL'),
                 TextInput::make('APPROVAL_BY')
-                    ->numeric(),
+                    ->numeric(locale: 'en'),
                 Section::make('البيانات الأساسية')
                     ->schema([
                         \Filament\Forms\Components\Select::make('UNID')
@@ -109,18 +111,18 @@ class OfferingResource extends Resource
                             ->required(),
                         \Filament\Forms\Components\Select::make('FACULTY_IDENT')
                             ->label('الكلية')
-                            ->relationship('faculty', 'FACULTY_NAME', fn (\Illuminate\Database\Eloquent\Builder $query, \Filament\Schemas\Components\Utilities\Get $get) => $query->where('UNID', $get('UNID')))
+                            ->relationship('faculty', 'FACULTY_NAME', fn(\Illuminate\Database\Eloquent\Builder $query, \Filament\Schemas\Components\Utilities\Get $get) => $query->where('UNID', $get('UNID')))
                             ->live()
                             ->searchable()
                             ->required(),
                         \Filament\Forms\Components\Select::make('PROGRAM_IDENT')
                             ->label('التخصص')
-                            ->relationship('program', 'PROGRAM_NAME', fn (\Illuminate\Database\Eloquent\Builder $query, \Filament\Schemas\Components\Utilities\Get $get) => $query->where('UNID', $get('UNID'))->where('FACULTY_IDENT', $get('FACULTY_IDENT')))
+                            ->relationship('program', 'PROGRAM_NAME', fn(\Illuminate\Database\Eloquent\Builder $query, \Filament\Schemas\Components\Utilities\Get $get) => $query->where('UNID', $get('UNID'))->where('FACULTY_IDENT', $get('FACULTY_IDENT')))
                             ->searchable()
                             ->required(),
                         \Filament\Forms\Components\Select::make('STUDYTYPE_IDENT')
                             ->label('النوع الدراسي')
-                            ->relationship('studyType', 'STUDYTYPE_NAME', fn (\Illuminate\Database\Eloquent\Builder $query, \Filament\Schemas\Components\Utilities\Get $get) => clone $get('UNID') ? $query->where('UNID', clone $get('UNID')) : $query)
+                            ->relationship('studyType', 'STUDYTYPE_NAME', fn(\Illuminate\Database\Eloquent\Builder $query, \Filament\Schemas\Components\Utilities\Get $get) => clone $get('UNID') ? $query->where('UNID', clone $get('UNID')) : $query)
                             ->searchable()
                             ->required(),
                         \Filament\Forms\Components\Select::make('SEC_SCHOOL_TYPE')
@@ -140,22 +142,22 @@ class OfferingResource extends Resource
                     ->schema([
                         \Filament\Forms\Components\TextInput::make('SEC_SCHOOL_ACCEPT_RATE')
                             ->label('معدل القبول')
-                            ->numeric(),
+                            ->numeric(locale: 'en'),
                         \Filament\Forms\Components\TextInput::make('ENTRANCE_EXAM_WEIGHT')
                             ->label('وزن امتحان القبول')
-                            ->numeric(),
+                            ->numeric(locale: 'en'),
                         \Filament\Forms\Components\TextInput::make('Y_SEC_SCHOOL_MAX_AGE')
                             ->label('أقصى عمر لثانوية اليمن')
-                            ->numeric(),
+                            ->numeric(locale: 'en'),
                         \Filament\Forms\Components\TextInput::make('NY_SEC_SCHOOL_MAX_AGE')
                             ->label('أقصى عمر لثانوية غير اليمن')
-                            ->numeric(),
+                            ->numeric(locale: 'en'),
                         \Filament\Forms\Components\TextInput::make('STUDY_FEES')
                             ->label('الرسوم الدراسية')
-                            ->numeric(),
+                            ->numeric(locale: 'en'),
                         \Filament\Forms\Components\TextInput::make('STUDY_FEES_NY')
                             ->label('الرسوم الدراسية (غير يمني)')
-                            ->numeric(),
+                            ->numeric(locale: 'en'),
                         \Filament\Forms\Components\Toggle::make('ENTRANCE_EXAM_REQUIRED')
                             ->label('امتحان القبول مطلوب؟'),
                         \Filament\Forms\Components\DatePicker::make('FROM_DATE')
@@ -213,6 +215,10 @@ class OfferingResource extends Resource
     {
         return $table
             ->columns([
+                TextColumn::make('OFFERING_IDENT')
+                    ->label('الرقم')
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('university.U_NAME')
                     ->label('الجامعة')
                     ->searchable()
@@ -234,14 +240,14 @@ class OfferingResource extends Resource
                     ->searchable(),
                 TextColumn::make('SEC_SCHOOL_ACCEPT_RATE')
                     ->label('معدل القبول')
-                    ->numeric()
+                    ->numeric(locale: 'en')
                     ->sortable(),
                 TextColumn::make('ENTRANCE_EXAM_WEIGHT')
                     ->label('وزن امتحان القبول')
-                    ->numeric()
+                    ->numeric(locale: 'en')
                     ->sortable(),
 
-                ColumnGroup::make("فترة التنسيق", [ 
+                ColumnGroup::make("فترة التنسيق", [
                     TextColumn::make('FROM_DATE')
                         ->label('من تاريخ')
                         ->date()
@@ -254,36 +260,68 @@ class OfferingResource extends Resource
                 ColumnGroup::make('عمر الثانوية', [
                     TextColumn::make('Y_SEC_SCHOOL_MAX_AGE')
                         ->label('عمر الثانوي (يمني)')
-                        ->numeric()
+                        ->numeric(locale: 'en')
                         ->sortable(),
                     TextColumn::make('NY_SEC_SCHOOL_MAX_AGE')
                         ->label('عمر الثانوي (غير يمني)')
-                        ->numeric()
+                        ->numeric(locale: 'en')
                         ->sortable(),
                 ]),
                 IconColumn::make('ENTRANCE_EXAM_REQUIRED')
                     ->label('امتحان مطلوب')
                     ->boolean(),
+                ColumnGroup::make('معلومات التسجيل والمراجعة', [
+                    TextColumn::make('lastUpdatedBy.USER_NAME')
+                        ->label('تم التعديل بواسطة')
+                        ->sortable()
+                        ->toggleable(isToggledHiddenByDefault: true),
+                    TextColumn::make('LAST_UPDATED_ON')
+                        ->label('تاريخ التحديث')
+                        ->dateTime()
+                        ->sortable()
+                        ->toggleable(isToggledHiddenByDefault: true),
+                    TextColumn::make('approvalBy.USER_NAME')
+                        ->label('الاعتماد بواسطة')
+                        ->sortable()
+                        ->toggleable(isToggledHiddenByDefault: true),
+                    TextColumn::make('APPROVAL_ON')
+                        ->label('تاريخ الاعتماد')
+                        ->dateTime()
+                        ->sortable()
+                        ->toggleable(isToggledHiddenByDefault: true),
+                    IconColumn::make('APPROVAL')
+                        ->label('حالة الاعتماد')
+                        ->boolean()
+                        ->toggleable(isToggledHiddenByDefault: true),
+                ]),
             ])
             ->filters([
                 \App\Filament\Filters\AcademicFilter::make(),
             ])
-            ->actions([
+            ->recordActions([
                 ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make(),
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
             ]);
     }
 
+    public static function getRelations(): array
+    {
+        return [
+            OfferingDhsRelationManager::class,
+        ];
+    }
+
     public static function getPages(): array
     {
         return [
             'index' => ManageOfferings::route('/'),
+            'view' => ViewOffering::route('/{record}'),
         ];
     }
 }

@@ -17,7 +17,7 @@ class FacultiesTable
         return $table
             ->columns([
                 TextColumn::make('UNID')
-                    ->numeric()
+                    ->numeric(locale: 'en')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('university.U_NAME')
@@ -25,7 +25,7 @@ class FacultiesTable
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('NEW_ID')
-                    ->numeric()
+                    ->numeric(locale: 'en')
                     ->sortable(),
                 TextColumn::make('FACULTY_NAME')
                     ->searchable(),
@@ -34,25 +34,25 @@ class FacultiesTable
                 IconColumn::make('IS_IT_ENABLE')
                     ->boolean(),
                 TextColumn::make('F_ACCEPT')
-                    ->numeric()
+                    ->numeric(locale: 'en')
                     ->sortable(),
                 TextColumn::make('F_ACCEPT_EXAM_IDENT')
-                    ->numeric()
+                    ->numeric(locale: 'en')
                     ->sortable(),
                 TextColumn::make('SHOW_CONFIRMED')
-                    ->numeric()
+                    ->numeric(locale: 'en')
                     ->sortable(),
                 TextColumn::make('ORDERING_MOD_ID')
-                    ->numeric()
+                    ->numeric(locale: 'en')
                     ->sortable(),
                 TextColumn::make('USE_LIMIT_APPS')
-                    ->numeric()
+                    ->numeric(locale: 'en')
                     ->sortable(),
                 TextColumn::make('ORDERBY')
-                    ->numeric()
+                    ->numeric(locale: 'en')
                     ->sortable(),
                 TextColumn::make('FACULTY_ORDER')
-                    ->numeric()
+                    ->numeric(locale: 'en')
                     ->sortable(),
             ])
             ->filters([

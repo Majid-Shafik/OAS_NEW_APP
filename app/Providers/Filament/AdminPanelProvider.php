@@ -22,6 +22,7 @@ use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Illuminate\Support\Facades\Blade;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -72,7 +73,12 @@ class AdminPanelProvider extends PanelProvider
             ->maxContentWidth(Width::Full)
             // ->collapsedSidebarWidth('2rem')
             // ->viteTheme('resources/css/filament/admin/theme.css')
-            ->collapsedSidebarWidth('9rem')
+            ->renderHook(
+                // PanelsRenderHook::SIDEBAR_NAV_START,
+                // PanelsRenderHook::TOPBAR_START,
+                PanelsRenderHook::GLOBAL_SEARCH_BEFORE,
+                fn(): string => Blade::render('@livewire(\'university-switcher\')'),
+            )
             ->collapsedSidebarWidth('5rem')
             ->renderHook(
                 PanelsRenderHook::GLOBAL_SEARCH_BEFORE,

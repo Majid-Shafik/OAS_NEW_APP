@@ -17,7 +17,7 @@ class ProgramsTable
         return $table
             ->columns([
                 TextColumn::make('UNID')
-                    ->numeric()
+                    ->numeric(locale: 'en')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('university.U_NAME')
@@ -25,7 +25,7 @@ class ProgramsTable
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('FACULTY_IDENT')
-                    ->numeric()
+                    ->numeric(locale: 'en')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('faculty.FACULTY_NAME')
@@ -33,17 +33,17 @@ class ProgramsTable
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('NEW_ID')
-                    ->numeric()
+                    ->numeric(locale: 'en')
                     ->sortable(),
                 TextColumn::make('PROGRAM_NAME')
                     ->searchable(),
                 TextColumn::make('NEW_NAME')
                     ->searchable(),
                 TextColumn::make('PROGRAM_CLASS_ID')
-                    ->numeric()
+                    ->numeric(locale: 'en')
                     ->sortable(),
                 TextColumn::make('PROGRAM_LEVEL_ID')
-                    ->numeric()
+                    ->numeric(locale: 'en')
                     ->sortable(),
                 IconColumn::make('IS_IT_ENABLE')
                     ->boolean(),

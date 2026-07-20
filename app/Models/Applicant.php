@@ -9,6 +9,7 @@ use Awobaz\Compoships\Compoships;
 
 class Applicant extends Model
 {
+    use \App\Traits\HasUniversityScope;
     use HasCompositeKey, Compoships {
         HasCompositeKey::setKeysForSaveQuery insteadof Compoships;
     }
@@ -72,3 +73,4 @@ class Applicant extends Model
         return $this->belongsTo(User::class, 'SECOND_REVIEWED_BY', 'USER_IDENT');
     }
 }
+

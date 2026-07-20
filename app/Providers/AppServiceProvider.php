@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Auth\LegacyUserProvider;
 use Filament\Forms\Components\Placeholder;
+use Filament\Infolists\Components\TextEntry;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\ServiceProvider;
 
@@ -26,6 +27,11 @@ class AppServiceProvider extends ServiceProvider
             return new LegacyUserProvider($app['hash'], $config['model']);
         });
 
+
+        // Force all numbers formatted by Laravel/Filament to use English digits (0-9)
+        if (class_exists(\Illuminate\Support\Number::class)) {
+            \Illuminate\Support\Number::useLocale('en');
+        }
         $this->autoTranslateLabels();
         $this->configureToggleableComponents();
         $this->configureGlobalTableSettings();

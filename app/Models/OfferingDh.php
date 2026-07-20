@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class OfferingDh extends Model
 {
+    use \App\Traits\HasUniversityScope;
     use HasFactory, \Awobaz\Compoships\Compoships;
 
     protected $table = 'offerings_dh';
@@ -14,7 +15,11 @@ class OfferingDh extends Model
     public $timestamps = false;
     protected $guarded = [];
 
-    public function user()
+    protected $casts = [
+        'ACTION' => \App\Enums\ActionType::class,
+    ];
+
+    public function actionUser()
     {
         return $this->belongsTo(User::class, 'USER', 'USER_IDENT');
     }
@@ -54,3 +59,4 @@ class OfferingDh extends Model
         return $this->belongsTo(StudyType::class, 'STUDYTYPE_IDENT', 'STUDYTYPE_IDENT');
     }
 }
+
