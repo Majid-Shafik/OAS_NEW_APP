@@ -23,14 +23,13 @@ class UserGroupResource extends Resource
 {
     protected static ?string $model = UserGroup::class;
 
-    protected static ?string $modelLabel = 'دور وظيفي';
+    protected static ?string $modelLabel = 'مجموعة المستخدمين';
 
-    protected static ?string $pluralModelLabel = 'الأدوار الوظيفية (المجموعات)';
+    protected static ?string $pluralModelLabel = 'مجموعات المستخدمين';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedShieldCheck;
 
     protected static UnitEnum|string|null $navigationGroup = 'المستخدمين والصلاحيات';
-
     protected static ?int $navigationSort = 1;
 
     protected static ?string $recordTitleAttribute = 'GROUP_NAME';
@@ -40,7 +39,7 @@ class UserGroupResource extends Resource
         return $schema
             ->components([
                 TextInput::make('GROUP_NAME')
-                    ->label('اسم الدور (المجموعة)')
+                    ->label('اسم المجموعة')
                     ->required(),
                 TextInput::make('NOTE')
                     ->label('ملاحظات'),
@@ -61,7 +60,7 @@ class UserGroupResource extends Resource
             ->recordTitleAttribute('GROUP_NAME')
             ->columns([
                 TextColumn::make('GROUP_NAME')
-                    ->label('اسم الدور')
+                    ->label('اسم المجموعة')
                     ->searchable(),
                 TextColumn::make('NOTE')
                     ->label('ملاحظات')

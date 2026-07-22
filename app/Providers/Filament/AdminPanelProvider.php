@@ -4,6 +4,7 @@ namespace App\Providers\Filament;
 
 use App\Filament\Pages\Auth\CustomLogin;
 use App\Http\Middleware\TenantMiddleware;
+use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -77,12 +78,37 @@ class AdminPanelProvider extends PanelProvider
                 // PanelsRenderHook::SIDEBAR_NAV_START,
                 // PanelsRenderHook::TOPBAR_START,
                 PanelsRenderHook::GLOBAL_SEARCH_BEFORE,
-                fn (): string => Blade::render('@livewire(\'university-switcher\')'),
+                fn(): string => Blade::render('@livewire(\'university-switcher\')'),
             )
             ->collapsedSidebarWidth('5rem')
             ->renderHook(
                 PanelsRenderHook::GLOBAL_SEARCH_BEFORE,
-                fn () => view('filament.user-info-topbar')
-            );
+                fn() => view('filament.user-info-topbar')
+            )
+            ->plugins([
+                FilamentShieldPlugin::make()
+                    ->resourceCheckboxListColumns([
+                        'default' => 1,
+                        'sm' => 2,
+                    ]),
+                FilamentShieldPlugin::make()
+                    ->gridColumns([
+                        'default' => 1,
+                        'sm' => 2,
+                        'lg' => 3
+                    ])
+                    ->sectionColumnSpan(1)
+                    ->checkboxListColumns([
+                        'default' => 1,
+                        'sm' => 3,
+                        'lg' => 4,
+                    ])
+                    ->resourceCheckboxListColumns([
+                        'default' => 1,
+                        'sm' => 2,
+                    ]),
+                // FilamentLoggerPlugin::make(),
+                // ApiServicePlugin::make(),
+            ]);
     }
 }
