@@ -13,9 +13,9 @@ class FacultyInfolist
         return $schema
             ->components([
                 TextEntry::make('UNID')
-                    ->numeric(locale: 'en'),
+                    ->numeric(),
                 TextEntry::make('NEW_ID')
-                    ->numeric(locale: 'en')
+                    ->numeric()
                     ->placeholder('-'),
                 TextEntry::make('FACULTY_NAME'),
                 TextEntry::make('NEW_NAME')
@@ -23,20 +23,20 @@ class FacultyInfolist
                 IconEntry::make('IS_IT_ENABLE')
                     ->boolean(),
                 TextEntry::make('F_ACCEPT')
-                    ->numeric(locale: 'en'),
+                    ->numeric(),
                 TextEntry::make('F_ACCEPT_EXAM_IDENT')
-                    ->numeric(locale: 'en')
+                    ->numeric()
                     ->placeholder('-'),
                 TextEntry::make('SHOW_CONFIRMED')
-                    ->numeric(locale: 'en'),
+                    ->numeric(),
                 TextEntry::make('ORDERING_MOD_ID')
-                    ->numeric(locale: 'en'),
+                    ->numeric(),
                 TextEntry::make('USE_LIMIT_APPS')
-                    ->numeric(locale: 'en'),
+                    ->numeric(),
                 TextEntry::make('ORDERBY')
-                    ->numeric(locale: 'en'),
+                    ->numeric(),
                 TextEntry::make('FACULTY_ORDER')
-                    ->numeric(locale: 'en')
+                    ->numeric()
                     ->placeholder('-'),
             ]);
     }

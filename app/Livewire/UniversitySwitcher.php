@@ -2,8 +2,9 @@
 
 namespace App\Livewire;
 
-use Livewire\Component;
+use App\Models\Scopes\UniversityScope;
 use App\Models\University;
+use Livewire\Component;
 
 class UniversitySwitcher extends Component
 {
@@ -22,7 +23,7 @@ class UniversitySwitcher extends Component
 
     public function render()
     {
-        $universities = University::withoutGlobalScope(\App\Models\Scopes\UniversityScope::class)->coordination()->pluck('U_NAME', 'UNID')->prepend('الكل (جميع الجامعات)', 0);
+        $universities = University::withoutGlobalScope(UniversityScope::class)->coordination()->pluck('U_NAME', 'UNID')->prepend('الكل (جميع الجامعات)', 0);
 
         return view('livewire.university-switcher', [
             'universities' => $universities,

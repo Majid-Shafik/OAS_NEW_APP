@@ -11,11 +11,11 @@ use App\Filament\Resources\Programs\Schemas\ProgramInfolist;
 use App\Filament\Resources\Programs\Tables\ProgramsTable;
 use App\Models\Program;
 use BackedEnum;
-use UnitEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class ProgramResource extends Resource
 {
@@ -28,6 +28,7 @@ class ProgramResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedAcademicCap;
 
     protected static UnitEnum|string|null $navigationGroup = 'الكليات والبرامج';
+
     protected static ?int $navigationSort = 3;
 
     protected static ?string $recordTitleAttribute = 'PROGRAM_NAME';

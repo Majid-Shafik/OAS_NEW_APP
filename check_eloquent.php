@@ -1,10 +1,12 @@
 <?php
+
 require __DIR__.'/vendor/autoload.php';
 $app = require_once __DIR__.'/bootstrap/app.php';
-$kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
+$kernel = $app->make(Kernel::class);
 $kernel->bootstrap();
 
 use App\Models\Applicant;
+use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Support\Facades\DB;
 
 // Temporarily set tenant DB
@@ -14,6 +16,6 @@ DB::setDefaultConnection('tenant');
 
 $applicants = Applicant::limit(5)->get();
 
-foreach($applicants as $a) {
+foreach ($applicants as $a) {
     echo "Model PK ({$a->getKeyName()}): {$a->getKey()}, UNID: {$a->UNID}, Name: {$a->FULL_NAME}\n";
 }

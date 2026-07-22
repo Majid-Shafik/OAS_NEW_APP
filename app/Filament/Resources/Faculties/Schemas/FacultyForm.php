@@ -14,9 +14,9 @@ class FacultyForm
             ->components([
                 TextInput::make('UNID')
                     ->required()
-                    ->numeric(locale: 'en'),
+                    ->numeric(),
                 TextInput::make('NEW_ID')
-                    ->numeric(locale: 'en'),
+                    ->numeric(),
                 TextInput::make('FACULTY_NAME')
                     ->required(),
                 TextInput::make('NEW_NAME'),
@@ -24,28 +24,28 @@ class FacultyForm
                     ->required(),
                 TextInput::make('F_ACCEPT')
                     ->required()
-                    ->numeric(locale: 'en')
+                    ->numeric()
                     ->default(0),
                 TextInput::make('F_ACCEPT_EXAM_IDENT')
-                    ->numeric(locale: 'en'),
+                    ->numeric(),
                 TextInput::make('SHOW_CONFIRMED')
                     ->required()
-                    ->numeric(locale: 'en')
+                    ->numeric()
                     ->default(0),
                 TextInput::make('ORDERING_MOD_ID')
                     ->required()
-                    ->numeric(locale: 'en')
+                    ->numeric()
                     ->default(1),
                 TextInput::make('USE_LIMIT_APPS')
                     ->required()
-                    ->numeric(locale: 'en')
+                    ->numeric()
                     ->default(0),
                 TextInput::make('ORDERBY')
                     ->required()
-                    ->numeric(locale: 'en')
+                    ->numeric()
                     ->default(1),
                 TextInput::make('FACULTY_ORDER')
-                    ->numeric(locale: 'en')
+                    ->numeric()
                     ->default(1),
             ]);
     }

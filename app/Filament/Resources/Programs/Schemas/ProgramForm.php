@@ -14,20 +14,20 @@ class ProgramForm
             ->components([
                 TextInput::make('UNID')
                     ->required()
-                    ->numeric(locale: 'en'),
+                    ->numeric(),
                 TextInput::make('FACULTY_IDENT')
                     ->required()
-                    ->numeric(locale: 'en'),
+                    ->numeric(),
                 TextInput::make('NEW_ID')
-                    ->numeric(locale: 'en'),
+                    ->numeric(),
                 TextInput::make('PROGRAM_NAME')
                     ->required(),
                 TextInput::make('NEW_NAME'),
                 TextInput::make('PROGRAM_CLASS_ID')
-                    ->numeric(locale: 'en')
+                    ->numeric()
                     ->default(2),
                 TextInput::make('PROGRAM_LEVEL_ID')
-                    ->numeric(locale: 'en')
+                    ->numeric()
                     ->default(2),
                 Toggle::make('IS_IT_ENABLE')
                     ->required(),

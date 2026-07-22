@@ -11,11 +11,11 @@ use App\Filament\Resources\Faculties\Schemas\FacultyInfolist;
 use App\Filament\Resources\Faculties\Tables\FacultiesTable;
 use App\Models\Faculty;
 use BackedEnum;
-use UnitEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class FacultyResource extends Resource
 {
@@ -28,6 +28,7 @@ class FacultyResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingOffice;
 
     protected static UnitEnum|string|null $navigationGroup = 'الكليات والبرامج';
+
     protected static ?int $navigationSort = 2;
 
     protected static ?string $recordTitleAttribute = 'FACULTY_NAME';

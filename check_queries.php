@@ -1,15 +1,13 @@
 <?php
+
 require __DIR__.'/vendor/autoload.php';
 $app = require_once __DIR__.'/bootstrap/app.php';
-$kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
+$kernel = $app->make(Kernel::class);
 $kernel->bootstrap();
 
-use App\Filament\Resources\Applicants\ApplicantResource;
-use App\Filament\Resources\Applicants\Tables\ApplicantsTable;
 use App\Models\Applicant;
-use Filament\Tables\Table;
+use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Support\Facades\DB;
-use Livewire\Component;
 
 // We just want to dump Applicant::query()->paginate(5) using the same DB settings.
 config(['database.connections.tenant.database' => 'p_oas_db_2022']);
@@ -21,7 +19,7 @@ $records = Applicant::query()->paginate(5);
 $queries = DB::getQueryLog();
 
 foreach ($records as $r) {
-    echo "ID: " . $r->getKey() . " Name: " . $r->FULL_NAME . "\n";
+    echo 'ID: '.$r->getKey().' Name: '.$r->FULL_NAME."\n";
 }
 
 print_r($queries);

@@ -2,20 +2,22 @@
 
 namespace App\Filament\Filters;
 
-use Filament\Tables\Filters\Filter;
+use App\Models\Faculty;
+use App\Models\Program;
+use App\Models\University;
 use Filament\Forms\Components\Select;
-use Illuminate\Database\Eloquent\Builder;
 use Filament\Schemas\Components\Utilities\Get;
+use Filament\Tables\Filters\Filter;
+use Illuminate\Database\Eloquent\Builder;
 
 class AcademicFilter
 {
     /**
      * Create a reusable filter for University, Faculty, and Program.
      *
-     * @param string $name The name of the filter.
-     * @param string $facultyColumn The database column name for faculty (e.g., FACULTY_IDENT, ADMITTED_FACULITY).
-     * @param string $programColumn The database column name for program (e.g., PROGRAM_IDENT, ADMITTED_PROGRAM).
-     * @return Filter
+     * @param  string  $name  The name of the filter.
+     * @param  string  $facultyColumn  The database column name for faculty (e.g., FACULTY_IDENT, ADMITTED_FACULITY).
+     * @param  string  $programColumn  The database column name for program (e.g., PROGRAM_IDENT, ADMITTED_PROGRAM).
      */
     public static function make(
         string $name = 'university_faculty_program',
@@ -26,17 +28,17 @@ class AcademicFilter
             ->form([
                 Select::make('UNID')
                     ->label('الجامعة')
-                    ->options(\App\Models\University::pluck('U_NAME', 'UNID')->prepend('غير محدد', 0))
+                    ->options(University::pluck('U_NAME', 'UNID')->prepend('غير محدد', 0))
                     ->live()
                     ->searchable(),
                 Select::make($facultyColumn)
                     ->label('الكلية')
-                    ->options(fn (Get $get) => \App\Models\Faculty::where('UNID', $get('UNID'))->pluck('FACULTY_NAME', 'FACULTY_IDENT')->prepend('غير محدد', 0))
+                    ->options(fn (Get $get) => Faculty::where('UNID', $get('UNID'))->pluck('FACULTY_NAME', 'FACULTY_IDENT')->prepend('غير محدد', 0))
                     ->live()
                     ->searchable(),
                 Select::make($programColumn)
                     ->label('التخصص')
-                    ->options(fn (Get $get) => \App\Models\Program::where('UNID', $get('UNID'))
+                    ->options(fn (Get $get) => Program::where('UNID', $get('UNID'))
                         ->where('FACULTY_IDENT', $get($facultyColumn))
                         ->pluck('PROGRAM_NAME', 'PROGRAM_IDENT')->prepend('غير محدد', 0))
                     ->searchable(),

@@ -2,12 +2,19 @@
 
 namespace App\Filament\Resources\Applicants\Tables;
 
+use App\Enums\ApplicantStatus;
+use App\Enums\Gender;
+use App\Filament\Filters\AcademicFilter;
+use App\Models\Applicant;
+use App\Models\Country;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 
 class ApplicantsTable
@@ -21,10 +28,10 @@ class ApplicantsTable
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('APPLICANT_IDENT')
-                    ->numeric(locale: 'en')
+                    ->numeric()
                     ->sortable(),
                 TextColumn::make('NATIONAL_NUMBER')
-                    ->numeric(locale: 'en')
+                    ->numeric()
                     ->sortable(),
                 TextColumn::make('FIRST_NAME')
                     ->searchable(),
@@ -63,23 +70,23 @@ class ApplicantsTable
                 TextColumn::make('SEC_SCHOOL_TERRITORY')
                     ->searchable(),
                 TextColumn::make('SEC_SCHOOL_YEAR')
-                    ->numeric(locale: 'en')
+                    ->numeric()
                     ->sortable(),
                 TextColumn::make('SEC_SCHOOL_NAME')
                     ->searchable(),
                 TextColumn::make('SEC_SCHOOL_RATE')
-                    ->numeric(locale: 'en')
+                    ->numeric()
                     ->sortable(),
                 TextColumn::make('SEC_SCHOOL_SEATNO')
                     ->searchable(),
                 TextColumn::make('SEC_SCHOOL_MARK')
-                    ->numeric(locale: 'en')
+                    ->numeric()
                     ->sortable(),
                 TextColumn::make('SEC_SCHOOL_OVERALLMARK')
-                    ->numeric(locale: 'en')
+                    ->numeric()
                     ->sortable(),
                 TextColumn::make('ADMITTED_OFFERING')
-                    ->numeric(locale: 'en')
+                    ->numeric()
                     ->sortable(),
                 TextColumn::make('program.PROGRAM_NAME')
                     ->label(__('ADMITTED_PROGRAM'))
@@ -112,16 +119,16 @@ class ApplicantsTable
                     ->boolean()
                     ->sortable(),
                 TextColumn::make('INSERTED_BY')
-                    ->numeric(locale: 'en')
+                    ->numeric()
                     ->sortable(),
                 TextColumn::make('LAST_UPDATED_BY')
-                    ->numeric(locale: 'en')
+                    ->numeric()
                     ->sortable(),
                 TextColumn::make('LAST_UPDATED_ON')
                     ->dateTime()
                     ->sortable(),
                 TextColumn::make('APPROVED_BY')
-                    ->numeric(locale: 'en')
+                    ->numeric()
                     ->sortable(),
                 TextColumn::make('APPROVED_ON')
                     ->dateTime()
@@ -136,9 +143,9 @@ class ApplicantsTable
                             $tt = 'B';
                         }
                         if ($record->IS_CLEARING == 0) {
-                            return $tt . '-' . 'اعتيادي';
+                            return $tt.'-'.'اعتيادي';
                         } else {
-                            return $tt . '-' . 'مقاصة';
+                            return $tt.'-'.'مقاصة';
                         }
                     })
                     ->sortable(),
@@ -149,7 +156,7 @@ class ApplicantsTable
                     ->boolean()
                     ->sortable(),
                 TextColumn::make('REVIEW_BY')
-                    ->numeric(locale: 'en')
+                    ->numeric()
                     ->sortable(),
                 TextColumn::make('REVIEW_ON')
                     ->dateTime()
@@ -160,7 +167,7 @@ class ApplicantsTable
                     ->boolean()
                     ->sortable(),
                 TextColumn::make('SECOND_REVIEWED_BY')
-                    ->numeric(locale: 'en')
+                    ->numeric()
                     ->sortable(),
                 TextColumn::make('SECOND_REVIEWED_ON')
                     ->dateTime()
@@ -172,25 +179,25 @@ class ApplicantsTable
                     ->sortable(),
             ])
             ->filters([
-                \App\Filament\Filters\AcademicFilter::make('university_faculty_program', 'ADMITTED_FACULITY', 'ADMITTED_PROGRAM'),
-                \Filament\Tables\Filters\SelectFilter::make('GENDER')
+                AcademicFilter::make('university_faculty_program', 'ADMITTED_FACULITY', 'ADMITTED_PROGRAM'),
+                SelectFilter::make('GENDER')
                     ->label('الجنس')
-                    ->options(\App\Enums\Gender::class),
-                \Filament\Tables\Filters\SelectFilter::make('STATUS')
+                    ->options(Gender::class),
+                SelectFilter::make('STATUS')
                     ->label('حالة الملف')
-                    ->options(\App\Enums\ApplicantStatus::class),
-                \Filament\Tables\Filters\TernaryFilter::make('FREEZE')
+                    ->options(ApplicantStatus::class),
+                TernaryFilter::make('FREEZE')
                     ->label('حالة التجميد')
                     ->placeholder('الكل')
                     ->trueLabel('مجمد')
                     ->falseLabel('غير مجمد'),
-                \Filament\Tables\Filters\SelectFilter::make('SEC_SCHOOL_TYPE')
+                SelectFilter::make('SEC_SCHOOL_TYPE')
                     ->label('نوع الثانوية')
-                    ->options(fn () => \App\Models\Applicant::distinct()->whereNotNull('SEC_SCHOOL_TYPE')->pluck('SEC_SCHOOL_TYPE', 'SEC_SCHOOL_TYPE')->filter(fn($v) => !empty($v))->toArray())
+                    ->options(fn () => Applicant::distinct()->whereNotNull('SEC_SCHOOL_TYPE')->pluck('SEC_SCHOOL_TYPE', 'SEC_SCHOOL_TYPE')->filter(fn ($v) => ! empty($v))->toArray())
                     ->searchable(),
-                \Filament\Tables\Filters\SelectFilter::make('COUNTRY_NAME')
+                SelectFilter::make('COUNTRY_NAME')
                     ->label('الدولة')
-                    ->options(fn () => \App\Models\Country::pluck('COUNTRY_NAME', 'COUNTRY_NAME')->filter(fn($v) => !empty($v))->toArray())
+                    ->options(fn () => Country::pluck('COUNTRY_NAME', 'COUNTRY_NAME')->filter(fn ($v) => ! empty($v))->toArray())
                     ->searchable(),
             ])
             ->recordActions([

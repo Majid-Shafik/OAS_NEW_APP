@@ -8,6 +8,7 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
 class FacultiesTable
@@ -17,7 +18,7 @@ class FacultiesTable
         return $table
             ->columns([
                 TextColumn::make('UNID')
-                    ->numeric(locale: 'en')
+                    ->numeric()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('university.U_NAME')
@@ -25,7 +26,7 @@ class FacultiesTable
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('NEW_ID')
-                    ->numeric(locale: 'en')
+                    ->numeric()
                     ->sortable(),
                 TextColumn::make('FACULTY_NAME')
                     ->searchable(),
@@ -34,29 +35,29 @@ class FacultiesTable
                 IconColumn::make('IS_IT_ENABLE')
                     ->boolean(),
                 TextColumn::make('F_ACCEPT')
-                    ->numeric(locale: 'en')
+                    ->numeric()
                     ->sortable(),
                 TextColumn::make('F_ACCEPT_EXAM_IDENT')
-                    ->numeric(locale: 'en')
+                    ->numeric()
                     ->sortable(),
                 TextColumn::make('SHOW_CONFIRMED')
-                    ->numeric(locale: 'en')
+                    ->numeric()
                     ->sortable(),
                 TextColumn::make('ORDERING_MOD_ID')
-                    ->numeric(locale: 'en')
+                    ->numeric()
                     ->sortable(),
                 TextColumn::make('USE_LIMIT_APPS')
-                    ->numeric(locale: 'en')
+                    ->numeric()
                     ->sortable(),
                 TextColumn::make('ORDERBY')
-                    ->numeric(locale: 'en')
+                    ->numeric()
                     ->sortable(),
                 TextColumn::make('FACULTY_ORDER')
-                    ->numeric(locale: 'en')
+                    ->numeric()
                     ->sortable(),
             ])
             ->filters([
-                \Filament\Tables\Filters\SelectFilter::make('UNID')
+                SelectFilter::make('UNID')
                     ->label(__('University'))
                     ->relationship('university', 'U_NAME'),
             ])

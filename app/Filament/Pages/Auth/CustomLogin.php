@@ -2,13 +2,13 @@
 
 namespace App\Filament\Pages\Auth;
 
+use Filament\Auth\Http\Responses\Contracts\LoginResponse;
 use Filament\Auth\Pages\Login as BaseLogin;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
-use Illuminate\Support\Facades\DB;
+use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Schema;
-use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\DB;
 
 class CustomLogin extends BaseLogin
 {
@@ -40,7 +40,7 @@ class CustomLogin extends BaseLogin
             ->extraAttributes(['tabindex' => 1]);
     }
 
-    protected function getLogonIdFormComponent(): \Filament\Schemas\Components\Component
+    protected function getLogonIdFormComponent(): Component
     {
         return TextInput::make('LOGON_ID')
             ->label('اسم المستخدم')
@@ -66,9 +66,10 @@ class CustomLogin extends BaseLogin
         ];
     }
 
-    public function authenticate(): ?\Filament\Auth\Http\Responses\Contracts\LoginResponse
+    public function authenticate(): ?LoginResponse
     {
         $response = parent::authenticate();
+
         return $response;
     }
 }

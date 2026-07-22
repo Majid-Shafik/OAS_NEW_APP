@@ -2,14 +2,12 @@
 
 namespace App\Filament\Resources\Offerings\OfferingResource\RelationManagers;
 
+use App\Filament\Resources\OfferingDhs\OfferingDhResource;
 use Filament\Actions\ViewAction;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
-use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
 
 class OfferingDhsRelationManager extends RelationManager
 {
@@ -30,8 +28,10 @@ class OfferingDhsRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->columns(\App\Filament\Resources\OfferingDhs\OfferingDhResource::getSharedTableColumns(true))
-            ->filters(\App\Filament\Resources\OfferingDhs\OfferingDhResource::getSharedTableFilters())
+            ->columns(OfferingDhResource::getSharedTableColumns(true))
+            ->filters([
+                //
+            ])
             ->headerActions([
                 //
             ])

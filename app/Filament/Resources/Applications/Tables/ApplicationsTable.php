@@ -2,14 +2,19 @@
 
 namespace App\Filament\Resources\Applications\Tables;
 
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Table;
-use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
+use App\Enums\ApplicationStatus;
+use App\Filament\Filters\AcademicFilter;
+use App\Models\StudyType;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
+use Filament\Tables\Columns\ColumnGroup;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
+use Filament\Tables\Table;
 
 class ApplicationsTable
 {
@@ -49,7 +54,7 @@ class ApplicationsTable
                     ->label('طريقة الدفع')
                     ->sortable()
                     ->searchable(),
-                \Filament\Tables\Columns\ColumnGroup::make('مقبول | مؤكد')
+                ColumnGroup::make('مقبول | مؤكد')
                     ->columns([
                         IconColumn::make('ACCEPTED')
                             ->label('مقبول')
@@ -66,22 +71,22 @@ class ApplicationsTable
                     ->sortable(),
             ])
             ->filters([
-                \App\Filament\Filters\AcademicFilter::make(),
+                AcademicFilter::make(),
                 SelectFilter::make('PAYMENT_FLAG')
                     ->label('طريقة الدفع')
                     ->relationship('paymentMethod', 'PAY_METHOD'),
                 SelectFilter::make('STUDYTYPE_IDENT')
                     ->label('نوع الدراسة')
-                    ->options(\App\Models\StudyType::pluck('STUDYTYPE_NAME', 'STUDYTYPE_IDENT')),
+                    ->options(StudyType::pluck('STUDYTYPE_NAME', 'STUDYTYPE_IDENT')),
                 SelectFilter::make('STATUS')
                     ->label('الحالة')
-                    ->options(\App\Enums\ApplicationStatus::class),
-                \Filament\Tables\Filters\TernaryFilter::make('ACCEPTED')
+                    ->options(ApplicationStatus::class),
+                TernaryFilter::make('ACCEPTED')
                     ->label('حالة القبول')
                     ->placeholder('الكل')
                     ->trueLabel('مقبول')
                     ->falseLabel('غير مقبول'),
-                \Filament\Tables\Filters\TernaryFilter::make('CONFIRMED_BY_APPLICANT')
+                TernaryFilter::make('CONFIRMED_BY_APPLICANT')
                     ->label('حالة التأكيد')
                     ->placeholder('الكل')
                     ->trueLabel('مؤكد')

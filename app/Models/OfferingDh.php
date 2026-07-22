@@ -2,21 +2,26 @@
 
 namespace App\Models;
 
+use App\Enums\ActionType;
+use App\Traits\HasUniversityScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class OfferingDh extends Model
 {
-    use \App\Traits\HasUniversityScope;
-    use HasFactory, \Awobaz\Compoships\Compoships;
+    use \Awobaz\Compoships\Compoships, HasFactory;
+    use HasUniversityScope;
 
     protected $table = 'offerings_dh';
+
     protected $primaryKey = 'REVESION';
+
     public $timestamps = false;
+
     protected $guarded = [];
 
     protected $casts = [
-        'ACTION' => \App\Enums\ActionType::class,
+        'ACTION' => ActionType::class,
     ];
 
     public function actionUser()
@@ -58,5 +63,9 @@ class OfferingDh extends Model
     {
         return $this->belongsTo(StudyType::class, 'STUDYTYPE_IDENT', 'STUDYTYPE_IDENT');
     }
-}
 
+    public function offeringGroup()
+    {
+        return $this->belongsTo(OfferingGroup::class, 'OFFER_GROUP_IDENT', 'OFFER_GROUP_IDENT');
+    }
+}

@@ -49,7 +49,7 @@ class ApplicantInfolist
                                         TextEntry::make('SEC_SCHOOL_TYPE')->label('نوع الثانوية')->placeholder('-'),
                                         TextEntry::make('SEC_SCHOOL_NAME')->label('اسم المدرسة')->placeholder('-'),
                                         TextEntry::make('SEC_SCHOOL_SEATNO')->label('رقم الجلوس')->placeholder('-'),
-                                        TextEntry::make('SEC_SCHOOL_RATE')->label('المعدل')->placeholder('-'),
+                                        TextEntry::make('SEC_SCHOOL_RATE')->label('المعدل')->placeholder('-')->suffix('%'),
                                         TextEntry::make('SEC_SCHOOL_MARK')->label('المجموع')->placeholder('-'),
                                         TextEntry::make('SEC_SCHOOL_OVERALLMARK')->label('المجموع الكلي')->placeholder('-'),
                                         TextEntry::make('SEC_SCHOOL_PROVINCE')->label('محافظة الثانوية')->placeholder('-'),

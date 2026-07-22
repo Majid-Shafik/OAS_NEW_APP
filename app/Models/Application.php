@@ -2,29 +2,35 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use App\Enums\ApplicationStatus;
 use App\Traits\HasCompositeKey;
+use App\Traits\HasUniversityScope;
 use Awobaz\Compoships\Compoships;
+use Illuminate\Database\Eloquent\Model;
 
 class Application extends Model
 {
-    use \App\Traits\HasUniversityScope;
-    use HasCompositeKey, Compoships {
+    use Compoships, HasCompositeKey {
         HasCompositeKey::setKeysForSaveQuery insteadof Compoships;
     }
+    use HasUniversityScope;
 
     protected $table = 'applications';
+
     protected $primaryKey = 'APPLICATION_IDENT';
+
     protected $compositeKeys = ['UNID', 'APPLICATION_IDENT'];
+
     public $incrementing = false;
+
     public $timestamps = false;
-    
+
     protected $fillable = [
-        'APPLICATION_IDENT', 'UNID', 'APPLICANT_IDENT', 'FACULTY_IDENT', 'PROGRAM_IDENT', 'OFFERING_IDENT', 'OFFER_GROUP_IDENT', 'STUDYTYPE_IDENT', 'CHOICE_NO', 'SEC_SCHOOL_RATE', 'F_ACCEPT', 'ACCEPTED', 'ENTRANCE_EXAM_AVERAGE', 'ENTRANCE_EXAM_WEIGHT', 'FINAL_MARK', 'CONFIRMED_BY_APPLICANT', 'CONFIRMED_ON', 'RECORDDATE', 'INSERTED_BY', 'APP_BILL_IDENT', 'PAYMENT_FLAG', 'STATUS', 'SHAW_APPLICANT_RESULTE', 'IMPORTED', 'STUDENT_CODE', 'EXPORTED'
+        'APPLICATION_IDENT', 'UNID', 'APPLICANT_IDENT', 'FACULTY_IDENT', 'PROGRAM_IDENT', 'OFFERING_IDENT', 'OFFER_GROUP_IDENT', 'STUDYTYPE_IDENT', 'CHOICE_NO', 'SEC_SCHOOL_RATE', 'F_ACCEPT', 'ACCEPTED', 'ENTRANCE_EXAM_AVERAGE', 'ENTRANCE_EXAM_WEIGHT', 'FINAL_MARK', 'CONFIRMED_BY_APPLICANT', 'CONFIRMED_ON', 'RECORDDATE', 'INSERTED_BY', 'APP_BILL_IDENT', 'PAYMENT_FLAG', 'STATUS', 'SHAW_APPLICANT_RESULTE', 'IMPORTED', 'STUDENT_CODE', 'EXPORTED',
     ];
 
     protected $casts = [
-        'STATUS' => \App\Enums\ApplicationStatus::class,
+        'STATUS' => ApplicationStatus::class,
     ];
 
     public function university()
@@ -62,4 +68,3 @@ class Application extends Model
         return $this->belongsTo(User::class, 'INSERTED_BY', 'USER_IDENT');
     }
 }
-

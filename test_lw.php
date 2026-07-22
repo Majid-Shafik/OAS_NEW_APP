@@ -1,10 +1,12 @@
 <?php
+
 require __DIR__.'/vendor/autoload.php';
 $app = require_once __DIR__.'/bootstrap/app.php';
-$kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
+$kernel = $app->make(Kernel::class);
 $kernel->bootstrap();
 
 use App\Models\Applicant;
+use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Support\Facades\DB;
 use Livewire\Mechanisms\HandleComponents\Synthesizers\ModelSynthesizer;
 
@@ -14,13 +16,13 @@ DB::setDefaultConnection('tenant');
 
 $applicants = Applicant::limit(5)->get();
 
-foreach($applicants as $a) {
-    echo "ID: " . $a->getKey() . "\n";
+foreach ($applicants as $a) {
+    echo 'ID: '.$a->getKey()."\n";
 }
 
 $syn = app(ModelSynthesizer::class);
 $dehydrated = [];
-foreach($applicants as $a) {
+foreach ($applicants as $a) {
     $dehydrated[] = $syn->dehydrate($a);
 }
 

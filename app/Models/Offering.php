@@ -2,18 +2,21 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use App\Traits\HasUniversityScope;
 use Awobaz\Compoships\Compoships;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class Offering extends Model
 {
-    use HasFactory, Compoships, HasUniversityScope;
+    use Compoships, HasFactory, HasUniversityScope;
 
     protected $table = 'offerings';
+
     protected $primaryKey = 'OFFERING_IDENT';
+
     public $timestamps = false;
+
     protected $guarded = [];
 
     public function recordedBy()
@@ -54,5 +57,15 @@ class Offering extends Model
     public function studyType()
     {
         return $this->belongsTo(StudyType::class, 'STUDYTYPE_IDENT', 'STUDYTYPE_IDENT');
+    }
+
+    public function offeringGroup()
+    {
+        return $this->belongsTo(OfferingGroup::class, 'OFFER_GROUP_IDENT', 'OFFER_GROUP_IDENT');
+    }
+
+    public function requestAdjustOfferings()
+    {
+        return $this->hasMany(RequestAdjustOffering::class, 'OFFERING_IDENT', 'OFFERING_IDENT');
     }
 }

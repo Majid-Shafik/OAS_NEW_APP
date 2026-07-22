@@ -1,10 +1,12 @@
 <?php
+
 require __DIR__.'/vendor/autoload.php';
 $app = require_once __DIR__.'/bootstrap/app.php';
-$kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
+$kernel = $app->make(Kernel::class);
 $kernel->bootstrap();
 
 use App\Models\Applicant;
+use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Support\Facades\DB;
 
 config(['database.connections.tenant.database' => 'p_oas_db_2022']);
@@ -14,4 +16,4 @@ DB::setDefaultConnection('tenant');
 $a = Applicant::first();
 echo "Attributes:\n";
 print_r(array_keys($a->getAttributes()));
-echo "getKey() result: " . var_export($a->getKey(), true) . "\n";
+echo 'getKey() result: '.var_export($a->getKey(), true)."\n";

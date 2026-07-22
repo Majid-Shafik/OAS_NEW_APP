@@ -6,16 +6,18 @@ use App\Filament\Resources\Applicants\Pages\CreateApplicant;
 use App\Filament\Resources\Applicants\Pages\EditApplicant;
 use App\Filament\Resources\Applicants\Pages\ListApplicants;
 use App\Filament\Resources\Applicants\Pages\ViewApplicant;
+use App\Filament\Resources\Applicants\RelationManagers\ApplicationsRelationManager;
 use App\Filament\Resources\Applicants\Schemas\ApplicantForm;
 use App\Filament\Resources\Applicants\Schemas\ApplicantInfolist;
 use App\Filament\Resources\Applicants\Tables\ApplicantsTable;
 use App\Models\Applicant;
 use BackedEnum;
-use UnitEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
+use UnitEnum;
 
 class ApplicantResource extends Resource
 {
@@ -46,13 +48,13 @@ class ApplicantResource extends Resource
         ];
     }
 
-    public static function getGlobalSearchResultDetails(\Illuminate\Database\Eloquent\Model $record): array
+    public static function getGlobalSearchResultDetails(Model $record): array
     {
         return [
             'رقم التنسيق' => $record->APPLICANT_IDENT,
             'رقم الجلوس' => $record->SEC_SCHOOL_SEATNO,
             'الهاتف' => $record->MOBILE_PHONE,
-            'المحافظة/المديرية' => $record->PROVINCE . ' - ' . $record->TERRITORY,
+            'المحافظة/المديرية' => $record->PROVINCE.' - '.$record->TERRITORY,
         ];
     }
 
@@ -74,7 +76,7 @@ class ApplicantResource extends Resource
     public static function getRelations(): array
     {
         return [
-            \App\Filament\Resources\Applicants\RelationManagers\ApplicationsRelationManager::class,
+            ApplicationsRelationManager::class,
         ];
     }
 

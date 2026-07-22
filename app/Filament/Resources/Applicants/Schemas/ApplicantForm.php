@@ -2,8 +2,13 @@
 
 namespace App\Filament\Resources\Applicants\Schemas;
 
+use App\Enums\ApplicantStatus;
+use App\Enums\Gender;
+use App\Models\Applicant;
+use App\Models\Country;
 use App\Models\Faculty;
 use App\Models\Program;
+use App\Models\Province;
 use App\Models\University;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
@@ -38,39 +43,40 @@ class ApplicantForm
                                             ->label('الاسم الكامل')
                                             ->readOnly()
                                             ->required(),
-                                        TextInput::make('NATIONAL_NUMBER')->label('الرقم الوطني')->numeric(locale: 'en'),
+                                        TextInput::make('NATIONAL_NUMBER')->label('الرقم الوطني')->numeric(),
                                         TextInput::make('FIRST_NAME')
                                             ->label('الاسم الأول')
                                             ->required()
                                             ->live(onBlur: true)
                                             ->afterStateUpdated(function (Get $get, Set $set, ?string $state) {
-                                                $set('FULL_NAME', trim($state . ' ' . $get('LAST_NAME')));
+                                                $set('FULL_NAME', trim($state.' '.$get('LAST_NAME')));
                                             }),
                                         TextInput::make('LAST_NAME')
                                             ->label('اللقب')
                                             ->live(onBlur: true)
                                             ->afterStateUpdated(function (Get $get, Set $set, ?string $state) {
-                                                $set('FULL_NAME', trim($get('FIRST_NAME') . ' ' . $state));
+                                                $set('FULL_NAME', trim($get('FIRST_NAME').' '.$state));
                                             }),
-                                        Select::make('GENDER')->label('الجنس')->options(\App\Enums\Gender::class),
+                                        Select::make('GENDER')->label('الجنس')->options(Gender::class),
                                         DatePicker::make('DATE_OF_BIRTH')->label('تاريخ الميلاد'),
                                         TextInput::make('PLACE_OF_BIRTH')->label('محل الميلاد'),
                                         Select::make('PROVINCE')->label('المحافظة')
-                                            ->options(fn () => \App\Models\Province::pluck('NAME', 'NAME')->filter(fn($v) => !empty($v))->toArray())
+                                            ->options(fn () => Province::pluck('NAME', 'NAME')->filter(fn ($v) => ! empty($v))->toArray())
                                             ->live()
                                             ->searchable(),
                                         Select::make('TERRITORY')->label('المديرية')
                                             ->options(function (Get $get) {
                                                 $province = $get('PROVINCE');
-                                                $query = \App\Models\Applicant::distinct()->whereNotNull('TERRITORY');
+                                                $query = Applicant::distinct()->whereNotNull('TERRITORY');
                                                 if ($province) {
                                                     $query->where('PROVINCE', $province);
                                                 }
-                                                return $query->pluck('TERRITORY', 'TERRITORY')->filter(fn($v) => !empty($v))->toArray();
+
+                                                return $query->pluck('TERRITORY', 'TERRITORY')->filter(fn ($v) => ! empty($v))->toArray();
                                             })
                                             ->searchable(),
                                         Select::make('COUNTRY_NAME')->label('الدولة')
-                                            ->options(fn () => \App\Models\Country::pluck('COUNTRY_NAME', 'COUNTRY_NAME')->filter(fn($v) => !empty($v))->toArray())
+                                            ->options(fn () => Country::pluck('COUNTRY_NAME', 'COUNTRY_NAME')->filter(fn ($v) => ! empty($v))->toArray())
                                             ->required()->searchable(),
                                         TextInput::make('IDENT_TYPE')->label('نوع الهوية'),
                                         TextInput::make('IDENT_NO')->label('رقم الهوية'),
@@ -83,27 +89,28 @@ class ApplicantForm
                                 Tab::make('بيانات الثانوية')
                                     ->icon('heroicon-o-academic-cap')
                                     ->schema([
-                                        TextInput::make('SEC_SCHOOL_YEAR')->label('سنة التخرج')->numeric(locale: 'en'),
+                                        TextInput::make('SEC_SCHOOL_YEAR')->label('سنة التخرج')->numeric(),
                                         Select::make('SEC_SCHOOL_TYPE')->label('نوع الثانوية')
-                                            ->options(fn () => \App\Models\Applicant::distinct()->whereNotNull('SEC_SCHOOL_TYPE')->pluck('SEC_SCHOOL_TYPE', 'SEC_SCHOOL_TYPE')->filter(fn($v) => !empty($v))->toArray())
+                                            ->options(fn () => Applicant::distinct()->whereNotNull('SEC_SCHOOL_TYPE')->pluck('SEC_SCHOOL_TYPE', 'SEC_SCHOOL_TYPE')->filter(fn ($v) => ! empty($v))->toArray())
                                             ->searchable(),
                                         TextInput::make('SEC_SCHOOL_NAME')->label('اسم المدرسة'),
                                         TextInput::make('SEC_SCHOOL_SEATNO')->label('رقم الجلوس'),
-                                        TextInput::make('SEC_SCHOOL_RATE')->label('المعدل')->numeric(locale: 'en'),
-                                        TextInput::make('SEC_SCHOOL_MARK')->label('المجموع')->numeric(locale: 'en'),
-                                        TextInput::make('SEC_SCHOOL_OVERALLMARK')->label('المجموع الكلي')->numeric(locale: 'en'),
+                                        TextInput::make('SEC_SCHOOL_RATE')->label('المعدل')->numeric()->suffix('%'),
+                                        TextInput::make('SEC_SCHOOL_MARK')->label('المجموع')->numeric(),
+                                        TextInput::make('SEC_SCHOOL_OVERALLMARK')->label('المجموع الكلي')->numeric(),
                                         Select::make('SEC_SCHOOL_PROVINCE')->label('محافظة الثانوية')
-                                            ->options(fn () => \App\Models\Province::pluck('NAME', 'NAME')->filter(fn($v) => !empty($v))->toArray())
+                                            ->options(fn () => Province::pluck('NAME', 'NAME')->filter(fn ($v) => ! empty($v))->toArray())
                                             ->live()
                                             ->searchable(),
                                         Select::make('SEC_SCHOOL_TERRITORY')->label('مديرية الثانوية')
                                             ->options(function (Get $get) {
                                                 $province = $get('SEC_SCHOOL_PROVINCE');
-                                                $query = \App\Models\Applicant::distinct()->whereNotNull('SEC_SCHOOL_TERRITORY');
+                                                $query = Applicant::distinct()->whereNotNull('SEC_SCHOOL_TERRITORY');
                                                 if ($province) {
                                                     $query->where('SEC_SCHOOL_PROVINCE', $province);
                                                 }
-                                                return $query->pluck('SEC_SCHOOL_TERRITORY', 'SEC_SCHOOL_TERRITORY')->filter(fn($v) => !empty($v))->toArray();
+
+                                                return $query->pluck('SEC_SCHOOL_TERRITORY', 'SEC_SCHOOL_TERRITORY')->filter(fn ($v) => ! empty($v))->toArray();
                                             })
                                             ->required()->searchable(),
                                         TextInput::make('SEC_SCHOOL_PLACE')->label('مكان الثانوية'),
@@ -112,7 +119,7 @@ class ApplicantForm
                                 Tab::make('بيانات المقاصة والقبول')
                                     ->icon('heroicon-o-document-check')
                                     ->schema([
-                                        TextInput::make('APPLICANT_TYPE')->label('نوع المتقدم')->numeric(locale: 'en')->default(1)->required(),
+                                        TextInput::make('APPLICANT_TYPE')->label('نوع المتقدم')->numeric()->default(1)->required(),
                                         DatePicker::make('ADMITTED_ON')->label('تاريخ القبول'),
                                         Select::make('ADMITTED_FACULITY')->label('الكلية المقبول بها')->required()
                                             ->options(fn (Get $get) => Faculty::where('UNID', $get('UNID'))->pluck('FACULTY_NAME', 'FACULTY_IDENT'))
@@ -122,7 +129,7 @@ class ApplicantForm
                                                 ->where('FACULTY_IDENT', $get('ADMITTED_FACULITY'))
                                                 ->pluck('PROGRAM_NAME', 'PROGRAM_IDENT'))
                                             ->searchable(),
-                                        TextInput::make('ADMITTED_OFFERING')->label('رقم العرض')->numeric(locale: 'en'),
+                                        TextInput::make('ADMITTED_OFFERING')->label('رقم العرض')->numeric(),
                                     ])
                                     ->columns(2)
                                     ->visible(fn ($record, Get $get) => $get('IS_CLEARING') || $record?->IS_CLEARING),
@@ -131,19 +138,19 @@ class ApplicantForm
                                     ->icon('heroicon-o-server')
                                     ->schema([
                                         DateTimePicker::make('RECORDDATE')->label('تاريخ التسجيل')->required(),
-                                        TextInput::make('INSERTED_BY')->label('تم الإدخال بواسطة')->numeric(locale: 'en')->default(-1)->required(),
-                                        TextInput::make('LAST_UPDATED_BY')->label('آخر تحديث بواسطة')->numeric(locale: 'en'),
+                                        TextInput::make('INSERTED_BY')->label('تم الإدخال بواسطة')->numeric()->default(-1)->required(),
+                                        TextInput::make('LAST_UPDATED_BY')->label('آخر تحديث بواسطة')->numeric(),
                                         DateTimePicker::make('LAST_UPDATED_ON')->label('تاريخ آخر تحديث')->required(),
-                                        TextInput::make('APPROVED_BY')->label('تم الاعتماد بواسطة')->numeric(locale: 'en'),
+                                        TextInput::make('APPROVED_BY')->label('تم الاعتماد بواسطة')->numeric(),
                                         DateTimePicker::make('APPROVED_ON')->label('تاريخ الاعتماد'),
                                         Toggle::make('IMPORTED')->label('مستورد')->default(false)->required(),
                                         Toggle::make('EXPORTED')->label('مُصدّر')->default(false),
                                         Toggle::make('REVIEWED')->label('تمت المراجعة')->default(false),
-                                        TextInput::make('REVIEW_BY')->label('المراجع')->numeric(locale: 'en'),
+                                        TextInput::make('REVIEW_BY')->label('المراجع')->numeric(),
                                         DateTimePicker::make('REVIEW_ON')->label('تاريخ المراجعة'),
                                         TextInput::make('REJECT_REASON')->label('سبب الرفض'),
                                         Toggle::make('SECOND_REVIEWED')->label('مراجعة ثانية')->default(false),
-                                        TextInput::make('SECOND_REVIEWED_BY')->label('المراجع الثاني')->numeric(locale: 'en'),
+                                        TextInput::make('SECOND_REVIEWED_BY')->label('المراجع الثاني')->numeric(),
                                         DateTimePicker::make('SECOND_REVIEWED_ON')->label('تاريخ المراجعة الثانية'),
                                         TextInput::make('SECOND_REJECT_REASON')->label('سبب الرفض الثاني'),
                                         Textarea::make('NOTE')->label('ملاحظات')->columnSpanFull(),
@@ -158,7 +165,7 @@ class ApplicantForm
                             ->schema([
                                 Select::make('STATUS')
                                     ->label('حالة الملف')
-                                    ->options(\App\Enums\ApplicantStatus::class)
+                                    ->options(ApplicantStatus::class)
                                     ->default('NEW'),
                                 Select::make('UNID')
                                     ->label('الجامعة')

@@ -13,20 +13,20 @@ class ProgramInfolist
         return $schema
             ->components([
                 TextEntry::make('UNID')
-                    ->numeric(locale: 'en'),
+                    ->numeric(),
                 TextEntry::make('FACULTY_IDENT')
-                    ->numeric(locale: 'en'),
+                    ->numeric(),
                 TextEntry::make('NEW_ID')
-                    ->numeric(locale: 'en')
+                    ->numeric()
                     ->placeholder('-'),
                 TextEntry::make('PROGRAM_NAME'),
                 TextEntry::make('NEW_NAME')
                     ->placeholder('-'),
                 TextEntry::make('PROGRAM_CLASS_ID')
-                    ->numeric(locale: 'en')
+                    ->numeric()
                     ->placeholder('-'),
                 TextEntry::make('PROGRAM_LEVEL_ID')
-                    ->numeric(locale: 'en')
+                    ->numeric()
                     ->placeholder('-'),
                 IconEntry::make('IS_IT_ENABLE')
                     ->boolean(),

@@ -2,8 +2,13 @@
 
 namespace App\Filament\Resources\Applications\Schemas;
 
-use Filament\Forms\Components\TextInput;
+use App\Enums\ApplicationStatus;
+use App\Models\Applicant;
+use App\Models\Faculty;
+use App\Models\Program;
+use App\Models\StudyType;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 
 class ApplicationForm
@@ -19,21 +24,21 @@ class ApplicationForm
                 TextInput::make('APPLICATION_IDENT')
                     ->label(__('APPLICATION_IDENT'))
                     ->required()
-                    ->numeric(locale: 'en'),
+                    ->numeric(),
                 Select::make('APPLICANT_IDENT')
                     ->label(__('APPLICANT_IDENT'))
-                    ->options(\App\Models\Applicant::pluck('FULL_NAME', 'APPLICANT_IDENT'))
+                    ->options(Applicant::pluck('FULL_NAME', 'APPLICANT_IDENT'))
                     ->searchable()
                     ->required(),
                 Select::make('FACULTY_IDENT')
                     ->label(__('Faculty'))
-                    ->options(\App\Models\Faculty::pluck('FACULTY_NAME', 'FACULTY_IDENT')),
+                    ->options(Faculty::pluck('FACULTY_NAME', 'FACULTY_IDENT')),
                 Select::make('PROGRAM_IDENT')
                     ->label(__('Program'))
-                    ->options(\App\Models\Program::pluck('PROGRAM_NAME', 'PROGRAM_IDENT')),
+                    ->options(Program::pluck('PROGRAM_NAME', 'PROGRAM_IDENT')),
                 Select::make('STUDYTYPE_IDENT')
                     ->label(__('STUDYTYPE_IDENT'))
-                    ->options(\App\Models\StudyType::pluck('STUDYTYPE_NAME', 'STUDYTYPE_IDENT')),
+                    ->options(StudyType::pluck('STUDYTYPE_NAME', 'STUDYTYPE_IDENT')),
                 Select::make('CHOICE_NO')
                     ->label(__('CHOICE_NO'))
                     ->options([
@@ -48,7 +53,7 @@ class ApplicationForm
                 Select::make('STATUS')
                     ->label(__('STATUS'))
                     ->badge()
-                    ->options(\App\Enums\ApplicationStatus::class)
+                    ->options(ApplicationStatus::class)
                     ->required(),
             ]);
     }

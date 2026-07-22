@@ -2,14 +2,22 @@
 
 namespace App\Filament\Resources\Users;
 
+use App\Enums\Gender;
+use App\Filament\Filters\AcademicFilter;
 use App\Filament\Resources\Users\Pages\ManageUsers;
+use App\Models\Faculty;
+use App\Models\Program;
+use App\Models\Scopes\UniversityScope;
+use App\Models\University;
 use App\Models\User;
+use App\Models\UserGroup;
 use BackedEnum;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
@@ -18,7 +26,9 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use UnitEnum;
 
 class UserResource extends Resource
@@ -26,9 +36,13 @@ class UserResource extends Resource
     protected static ?string $model = User::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+
     protected static UnitEnum|string|null $navigationGroup = 'المستخدمين والصلاحيات';
+
     protected static ?int $navigationSort = 2;
+
     protected static ?string $modelLabel = 'مستخدم';
+
     protected static ?string $pluralModelLabel = 'المستخدمين';
 
     protected static ?string $recordTitleAttribute = 'name';
@@ -37,15 +51,15 @@ class UserResource extends Resource
     {
         return $schema
             ->components([
-                \Filament\Forms\Components\Select::make('UNID')
+                Select::make('UNID')
                     ->label('الجامعة')
-                    ->options(\App\Models\University::pluck('U_NAME', 'UNID')->prepend('غير محدد', 0))
+                    ->options(University::pluck('U_NAME', 'UNID')->prepend('غير محدد', 0))
                     ->live()
                     ->searchable()
                     ->default(0),
-                \Filament\Forms\Components\Select::make('GROUP_IDENT')
+                Select::make('GROUP_IDENT')
                     ->label('المجموعة (الدور)')
-                    ->options(\App\Models\UserGroup::pluck('GROUP_NAME', 'GROUP_IDENT'))
+                    ->options(UserGroup::pluck('GROUP_NAME', 'GROUP_IDENT'))
                     ->searchable(),
                 TextInput::make('USER_NAME')
                     ->required(),
@@ -66,20 +80,20 @@ class UserResource extends Resource
                     ->required(),
                 DateTimePicker::make('RECORDDATE'),
                 TextInput::make('INSERTED_BY')
-                    ->numeric(locale: 'en'),
+                    ->numeric(),
                 TextInput::make('IS_IT_ENABLE')
                     ->required()
-                    ->numeric(locale: 'en')
+                    ->numeric()
                     ->default(1),
-                \Filament\Forms\Components\Select::make('FACULTY_IDENT')
+                Select::make('FACULTY_IDENT')
                     ->label('الكلية')
-                    ->options(fn(Get $get) => \App\Models\Faculty::where('UNID', $get('UNID'))->pluck('FACULTY_NAME', 'FACULTY_IDENT')->prepend('غير محدد', 0))
+                    ->options(fn (Get $get) => Faculty::where('UNID', $get('UNID'))->pluck('FACULTY_NAME', 'FACULTY_IDENT')->prepend('غير محدد', 0))
                     ->live()
                     ->searchable()
                     ->default(0),
-                \Filament\Forms\Components\Select::make('PROGRAM_IDENT')
+                Select::make('PROGRAM_IDENT')
                     ->label('التخصص')
-                    ->options(fn(Get $get) => \App\Models\Program::where('UNID', $get('UNID'))
+                    ->options(fn (Get $get) => Program::where('UNID', $get('UNID'))
                         ->where('FACULTY_IDENT', $get('FACULTY_IDENT'))
                         ->pluck('PROGRAM_NAME', 'PROGRAM_IDENT')->prepend('غير محدد', 0))
                     ->searchable()
@@ -95,11 +109,11 @@ class UserResource extends Resource
             ->columns([
                 TextColumn::make('UNID')
                     ->label('الجامعة')
-                    ->formatStateUsing(fn($state) => $state == 0 ? 'غير محدد' : \App\Models\University::find($state)?->U_NAME ?? $state)
+                    ->formatStateUsing(fn ($state) => $state == 0 ? 'غير محدد' : University::find($state)?->U_NAME ?? $state)
                     ->sortable(),
                 TextColumn::make('GROUP_IDENT')
                     ->label('المجموعة')
-                    ->formatStateUsing(fn($state) => \App\Models\UserGroup::find($state)?->GROUP_NAME ?? $state)
+                    ->formatStateUsing(fn ($state) => UserGroup::find($state)?->GROUP_NAME ?? $state)
                     ->sortable(),
                 TextColumn::make('USER_NAME')
                     ->searchable(),
@@ -124,28 +138,28 @@ class UserResource extends Resource
                     ->dateTime()
                     ->sortable(),
                 TextColumn::make('INSERTED_BY')
-                    ->numeric(locale: 'en')
+                    ->numeric()
                     ->sortable(),
 
                 TextColumn::make('FACULTY_IDENT')
                     ->label('الكلية')
-                    ->formatStateUsing(fn($state) => $state == 0 ? 'غير محدد' : \App\Models\Faculty::find($state)?->FACULTY_NAME ?? $state)
+                    ->formatStateUsing(fn ($state) => $state == 0 ? 'غير محدد' : Faculty::find($state)?->FACULTY_NAME ?? $state)
                     ->sortable(),
                 TextColumn::make('PROGRAM_IDENT')
                     ->label('التخصص')
-                    ->formatStateUsing(fn($state) => $state == 0 ? 'غير محدد' : \App\Models\Program::find($state)?->PROGRAM_NAME ?? $state)
+                    ->formatStateUsing(fn ($state) => $state == 0 ? 'غير محدد' : Program::find($state)?->PROGRAM_NAME ?? $state)
                     ->sortable(),
             ])
             ->filters([
-                \App\Filament\Filters\AcademicFilter::make(),
-                \Filament\Tables\Filters\SelectFilter::make('GENDER')
+                AcademicFilter::make(),
+                SelectFilter::make('GENDER')
                     ->label('النوع (الجنس)')
-                    ->options(\App\Enums\Gender::class),
-                \Filament\Tables\Filters\SelectFilter::make('GROUP_IDENT')
+                    ->options(Gender::class),
+                SelectFilter::make('GROUP_IDENT')
                     ->label('المجموعة (الدور)')
-                    ->options(\App\Models\UserGroup::pluck('GROUP_NAME', 'GROUP_IDENT'))
+                    ->options(UserGroup::pluck('GROUP_NAME', 'GROUP_IDENT'))
                     ->searchable(),
-                \Filament\Tables\Filters\SelectFilter::make('IS_IT_ENABLE')
+                SelectFilter::make('IS_IT_ENABLE')
                     ->label('حالة الحساب')
                     ->options([
                         1 => 'مفعل',
@@ -170,11 +184,11 @@ class UserResource extends Resource
         ];
     }
 
-    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    public static function getEloquentQuery(): Builder
     {
         $query = parent::getEloquentQuery();
-        
+
         // Apply the same logic as the HasUniversityScope trait here manually
-        return $query->withGlobalScope('universityScope', new \App\Models\Scopes\UniversityScope());
+        return $query->withGlobalScope('universityScope', new UniversityScope);
     }
 }

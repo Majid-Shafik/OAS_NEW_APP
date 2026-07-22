@@ -1,10 +1,11 @@
 <?php
+
 require __DIR__.'/vendor/autoload.php';
 $app = require_once __DIR__.'/bootstrap/app.php';
-$kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
+$kernel = $app->make(Kernel::class);
 $kernel->bootstrap();
 
-use App\Models\Applicant;
+use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
 
@@ -15,7 +16,7 @@ DB::setDefaultConnection('tenant');
 $html = Livewire::mount('app.filament.resources.applicants.pages.list-applicants');
 if (preg_match_all('/wire:key="([^"]+table\.records\.[^"]+)"/', $html, $matches)) {
     // Print all matches that are JUST the record wrapper (no column specifics)
-    $records = array_filter($matches[1], function($v) {
+    $records = array_filter($matches[1], function ($v) {
         return preg_match('/\.table\.records\.[^\.]+$/', $v);
     });
     print_r(array_values($records));

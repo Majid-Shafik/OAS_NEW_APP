@@ -5,7 +5,6 @@ namespace App\Filament\Resources\UserGroups;
 use App\Filament\Resources\UserGroups\Pages\ManageUserGroups;
 use App\Models\UserGroup;
 use BackedEnum;
-use UnitEnum;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -18,16 +17,22 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class UserGroupResource extends Resource
 {
     protected static ?string $model = UserGroup::class;
 
     protected static ?string $modelLabel = 'دور وظيفي';
+
     protected static ?string $pluralModelLabel = 'الأدوار الوظيفية (المجموعات)';
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedShieldCheck;
+
     protected static UnitEnum|string|null $navigationGroup = 'المستخدمين والصلاحيات';
+
     protected static ?int $navigationSort = 1;
+
     protected static ?string $recordTitleAttribute = 'GROUP_NAME';
 
     public static function form(Schema $schema): Schema

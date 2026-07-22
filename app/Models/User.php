@@ -2,19 +2,22 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasName;
 use Filament\Panel;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Log;
 
 class User extends Authenticatable implements FilamentUser, HasName
 {
     use HasFactory, Notifiable;
 
     protected $table = 'users';
+
     protected $primaryKey = 'USER_IDENT';
+
     public $timestamps = false;
 
     protected $fillable = [
@@ -38,7 +41,7 @@ class User extends Authenticatable implements FilamentUser, HasName
 
     protected $hidden = [
         'LOGON_PASS',
-        'remember_token'
+        'remember_token',
     ];
 
     public function getAuthIdentifierName()
@@ -58,10 +61,10 @@ class User extends Authenticatable implements FilamentUser, HasName
 
     public function canAccessPanel(Panel $panel): bool
     {
-        \Illuminate\Support\Facades\Log::info('canAccessPanel called for user: ' . $this->USER_IDENT . ', IS_IT_ENABLE: ' . $this->IS_IT_ENABLE . ', DB: ' . config('database.connections.tenant.database'));
-        
+        Log::info('canAccessPanel called for user: '.$this->USER_IDENT.', IS_IT_ENABLE: '.$this->IS_IT_ENABLE.', DB: '.config('database.connections.tenant.database'));
+
         // إذا كان رقم الجامعة غير معروف (لا هو 0 للمشرف، ولا يوجد له سجل في جدول الجامعات) نمنع الدخول
-        if ($this->UNID != 0 && !$this->university) {
+        if ($this->UNID != 0 && ! $this->university) {
             return false;
         }
 
@@ -78,4 +81,3 @@ class User extends Authenticatable implements FilamentUser, HasName
         return $this->belongsTo(University::class, 'UNID', 'UNID');
     }
 }
-

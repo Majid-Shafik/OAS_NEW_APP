@@ -2,10 +2,16 @@
 
 namespace App\Filament\Resources\Offerings;
 
+use App\Filament\Filters\AcademicFilter;
+use App\Filament\Resources\Offerings\OfferingResource\RelationManagers\OfferingDhsRelationManager;
+use App\Filament\Resources\Offerings\OfferingResource\RelationManagers\RequestAdjustOfferingsRelationManager;
 use App\Filament\Resources\Offerings\Pages\ManageOfferings;
 use App\Filament\Resources\Offerings\Pages\ViewOffering;
-use App\Filament\Resources\Offerings\OfferingResource\RelationManagers\OfferingDhsRelationManager;
+use App\Models\Faculty;
 use App\Models\Offering;
+use App\Models\Program;
+use App\Models\StudyType;
+use App\Models\University;
 use BackedEnum;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -14,12 +20,15 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\ColumnGroup;
@@ -35,8 +44,11 @@ class OfferingResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     protected static UnitEnum|string|null $navigationGroup = 'المعايير';
+
     protected static ?int $navigationSort = 1;
+
     protected static ?string $modelLabel = 'معيار';
+
     protected static ?string $pluralModelLabel = 'المعايير';
 
     protected static ?string $recordTitleAttribute = 'OFFERING_IDENT';
@@ -45,139 +57,145 @@ class OfferingResource extends Resource
     {
         return $schema
             ->components([
-                TextInput::make('UNID')
-                    ->required()
-                    ->numeric(locale: 'en'),
-                TextInput::make('OFFER_GROUP_IDENT')
-                    ->required()
-                    ->numeric(locale: 'en')
-                    ->default(0),
-                TextInput::make('FACULTY_IDENT')
-                    ->required()
-                    ->numeric(locale: 'en'),
-                TextInput::make('PROGRAM_IDENT')
-                    ->required()
-                    ->numeric(locale: 'en'),
-                TextInput::make('STUDYTYPE_IDENT')
-                    ->required()
-                    ->numeric(locale: 'en'),
-                TextInput::make('SEC_SCHOOL_TYPE')
-                    ->required(),
-                TextInput::make('SEC_SCHOOL_ACCEPT_RATE')
-                    ->required()
-                    ->numeric(locale: 'en'),
-                TextInput::make('ENTRANCE_EXAM_WEIGHT')
-                    ->required()
-                    ->numeric(locale: 'en')
-                    ->default(0.0),
-                TextInput::make('Y_SEC_SCHOOL_MAX_AGE')
-                    ->required()
-                    ->numeric(locale: 'en'),
-                TextInput::make('NY_SEC_SCHOOL_MAX_AGE')
-                    ->required()
-                    ->numeric(locale: 'en')
-                    ->default(0),
-                TextInput::make('STUDY_FEES')
-                    ->default('1000'),
-                TextInput::make('STUDY_FEES_NY'),
-                Toggle::make('ENTRANCE_EXAM_REQUIRED'),
-                DatePicker::make('FROM_DATE')
-                    ->required(),
-                DatePicker::make('TO_DATE')
-                    ->required(),
-                Toggle::make('SHOW_ALL_APPLICANTS'),
-                Toggle::make('DIRCT_RIGESTER')
-                    ->required(),
-                DateTimePicker::make('RECORD_ON')
-                    ->required(),
-                TextInput::make('RECORD_BY')
-                    ->required()
-                    ->numeric(locale: 'en'),
-                DateTimePicker::make('LAST_UPDATED_ON')
-                    ->required(),
-                TextInput::make('LAST_UPDATED_BY')
-                    ->required()
-                    ->numeric(locale: 'en'),
-                Toggle::make('APPROVAL'),
-                TextInput::make('APPROVAL_BY')
-                    ->numeric(locale: 'en'),
                 Section::make('البيانات الأساسية')
+                    ->collapsible()
+                    ->columnSpanFull()
                     ->schema([
-                        \Filament\Forms\Components\Select::make('UNID')
-                            ->label('الجامعة')
-                            ->relationship('university', 'U_NAME')
+                        Select::make('UNID')
+                            ->translateLabel()
+                            ->options(University::pluck('U_NAME', 'UNID'))
+                            ->default(fn () => auth()->user()->UNID > 0 ? auth()->user()->UNID : null)
                             ->live()
                             ->searchable()
                             ->required(),
-                        \Filament\Forms\Components\Select::make('FACULTY_IDENT')
-                            ->label('الكلية')
-                            ->relationship('faculty', 'FACULTY_NAME', fn(\Illuminate\Database\Eloquent\Builder $query, \Filament\Schemas\Components\Utilities\Get $get) => $query->where('UNID', $get('UNID')))
+                        Select::make('FACULTY_IDENT')
+                            ->translateLabel()
+                            ->options(fn (Get $get) => Faculty::where('UNID', $get('UNID'))->pluck('FACULTY_NAME', 'FACULTY_IDENT'))
                             ->live()
                             ->searchable()
                             ->required(),
-                        \Filament\Forms\Components\Select::make('PROGRAM_IDENT')
-                            ->label('التخصص')
-                            ->relationship('program', 'PROGRAM_NAME', fn(\Illuminate\Database\Eloquent\Builder $query, \Filament\Schemas\Components\Utilities\Get $get) => $query->where('UNID', $get('UNID'))->where('FACULTY_IDENT', $get('FACULTY_IDENT')))
+                        Select::make('PROGRAM_IDENT')
+                            ->translateLabel()
+                            ->options(fn (Get $get) => Program::where('UNID', $get('UNID'))->where('FACULTY_IDENT', $get('FACULTY_IDENT'))->pluck('PROGRAM_NAME', 'PROGRAM_IDENT'))
+                            ->live()
                             ->searchable()
                             ->required(),
-                        \Filament\Forms\Components\Select::make('STUDYTYPE_IDENT')
-                            ->label('النوع الدراسي')
-                            ->relationship('studyType', 'STUDYTYPE_NAME', fn(\Illuminate\Database\Eloquent\Builder $query, \Filament\Schemas\Components\Utilities\Get $get) => clone $get('UNID') ? $query->where('UNID', clone $get('UNID')) : $query)
+                        Select::make('STUDYTYPE_IDENT')
+                            ->translateLabel()
+                            ->options(StudyType::pluck('STUDYTYPE_NAME', 'STUDYTYPE_IDENT'))
+                            ->live()
                             ->searchable()
                             ->required(),
-                        \Filament\Forms\Components\Select::make('SEC_SCHOOL_TYPE')
-                            ->label('نوع الثانوية')
+                        Select::make('SEC_SCHOOL_TYPE')
+                            ->translateLabel()
                             ->options([
                                 'علمي' => 'علمي',
                                 'أدبي' => 'أدبي',
+                                'علمي وأدبي' => 'علمي وأدبي',
                                 'تجاري' => 'تجاري',
                                 'صناعي' => 'صناعي',
-                                'أخرى' => 'أخرى',
+                                'مهني' => 'مهني',
+                                'حاسوب' => 'حاسوب',
+                                'دبلوم' => 'دبلوم',
                             ])
                             ->searchable()
                             ->required(),
                     ])->columns(2),
 
-                \Filament\Schemas\Components\Section::make('تفضيلات القبول')
+                Section::make('تفضيلات القبول')
+                    ->collapsible()
+                    ->columnSpanFull()
                     ->schema([
-                        \Filament\Forms\Components\TextInput::make('SEC_SCHOOL_ACCEPT_RATE')
+                        TextInput::make('SEC_SCHOOL_ACCEPT_RATE')
                             ->label('معدل القبول')
-                            ->numeric(locale: 'en'),
-                        \Filament\Forms\Components\TextInput::make('ENTRANCE_EXAM_WEIGHT')
-                            ->label('وزن امتحان القبول')
-                            ->numeric(locale: 'en'),
-                        \Filament\Forms\Components\TextInput::make('Y_SEC_SCHOOL_MAX_AGE')
-                            ->label('أقصى عمر لثانوية اليمن')
-                            ->numeric(locale: 'en'),
-                        \Filament\Forms\Components\TextInput::make('NY_SEC_SCHOOL_MAX_AGE')
-                            ->label('أقصى عمر لثانوية غير اليمن')
-                            ->numeric(locale: 'en'),
-                        \Filament\Forms\Components\TextInput::make('STUDY_FEES')
-                            ->label('الرسوم الدراسية')
-                            ->numeric(locale: 'en'),
-                        \Filament\Forms\Components\TextInput::make('STUDY_FEES_NY')
-                            ->label('الرسوم الدراسية (غير يمني)')
-                            ->numeric(locale: 'en'),
-                        \Filament\Forms\Components\Toggle::make('ENTRANCE_EXAM_REQUIRED')
-                            ->label('امتحان القبول مطلوب؟'),
-                        \Filament\Forms\Components\DatePicker::make('FROM_DATE')
-                            ->label('من تاريخ'),
-                        \Filament\Forms\Components\DatePicker::make('TO_DATE')
-                            ->label('إلى تاريخ'),
-                        \Filament\Forms\Components\Toggle::make('SHOW_ALL_APPLICANTS')
-                            ->label('إظهار كل المتقدمين'),
-                        \Filament\Forms\Components\Toggle::make('DIRCT_RIGESTER')
-                            ->label('تسجيل مباشر'),
+                            ->numeric()
+                            ->suffix('%')
+                            ->required(),
+                        TextInput::make('ENTRANCE_EXAM_WEIGHT')
+                            ->translateLabel()
+                            ->required()
+                            ->numeric()
+                            ->default(0.0),
+                        TextInput::make('Y_SEC_SCHOOL_MAX_AGE')
+                            ->translateLabel()
+                            ->required()
+                            ->numeric(),
+                        TextInput::make('NY_SEC_SCHOOL_MAX_AGE')
+                            ->translateLabel()
+                            ->required()
+                            ->numeric()
+                            ->default(0),
+                        TextInput::make('STUDY_FEES')
+                            ->translateLabel()
+                            ->default('1000'),
+                        TextInput::make('STUDY_FEES_NY')
+                            ->translateLabel(),
+
+                        DatePicker::make('FROM_DATE')
+                            ->translateLabel()
+                            ->required(),
+                        DatePicker::make('TO_DATE')
+                            ->translateLabel()
+                            ->required(),
+                        Grid::make(3)->schema([
+                            Toggle::make('ENTRANCE_EXAM_REQUIRED')
+                                ->translateLabel(),
+                            Toggle::make('SHOW_ALL_APPLICANTS')
+                                ->translateLabel(),
+                            Toggle::make('DIRCT_RIGESTER')
+                                ->translateLabel()
+                                ->required(),
+
+                        ])->columnSpanFull(),
+
                     ])->columns(2),
+
+                Section::make('إعدادات مجموعة التنسيق')
+                    ->relationship('offeringGroup')
+                    ->hiddenOn('create')
+                    ->collapsible()
+                    ->columnSpanFull()
+                    ->schema([
+                        TextInput::make('DESCRIPTION')->label('وصف المجموعة')->required(),
+                        TextInput::make('MIN_CHOICE')->label('الحد الأدنى للرغبات')->numeric()->required(),
+                        TextInput::make('MAX_CHOICE')->label('الحد الأعلى للرغبات')->numeric()->required(),
+                        TextInput::make('APPLYING_COST')->label('رسوم التنسيق')->numeric()->required(),
+                        Toggle::make('ENABLE_PAYMENT')->label('تفعيل الدفع'),
+                    ])->columns(2),
+
+                Section::make('التدقيق والمراجعة')
+                    ->collapsible()
+                    ->columnSpanFull()
+                    ->schema([
+                        DateTimePicker::make('RECORD_ON')
+                            ->translateLabel()
+                            ->required(),
+                        TextInput::make('RECORD_BY')
+                            ->translateLabel()
+                            ->required()
+                            ->numeric(),
+                        DateTimePicker::make('LAST_UPDATED_ON')
+                            ->translateLabel()
+                            ->required(),
+                        TextInput::make('LAST_UPDATED_BY')
+                            ->translateLabel()
+                            ->required()
+                            ->numeric(),
+                        Toggle::make('APPROVAL'),
+                        TextInput::make('APPROVAL_BY')
+                            ->numeric(),
+                    ])->columns(2)
+                    ->hiddenOn(['create', 'edit']),
             ]);
     }
 
-
-    public static function infolist(\Filament\Schemas\Schema $schema): \Filament\Schemas\Schema
+    public static function infolist(Schema $schema): Schema
     {
         return $schema
             ->components([
                 Section::make('معلومات المعيار الأساسية')
+                    ->collapsible()
+                    ->columnSpanFull()
                     ->schema([
                         TextEntry::make('university.U_NAME')->label('الجامعة'),
                         TextEntry::make('faculty.FACULTY_NAME')->label('الكلية'),
@@ -185,9 +203,21 @@ class OfferingResource extends Resource
                         TextEntry::make('studyType.STUDYTYPE_NAME')->label('النوع الدراسي'),
                         TextEntry::make('SEC_SCHOOL_TYPE')->label('نوع الثانوية'),
                     ])->columns(2),
-                Section::make('تفضيلات وإعدادات القبول')
+                Section::make('معلومات مجموعة التنسيق')
+                    ->collapsible()
+                    ->columnSpanFull()
                     ->schema([
-                        TextEntry::make('SEC_SCHOOL_ACCEPT_RATE')->label('معدل القبول'),
+                        TextEntry::make('offeringGroup.DESCRIPTION')->label('وصف المجموعة'),
+                        TextEntry::make('offeringGroup.MIN_CHOICE')->label('الحد الأدنى للرغبات'),
+                        TextEntry::make('offeringGroup.MAX_CHOICE')->label('الحد الأعلى للرغبات'),
+                        TextEntry::make('offeringGroup.APPLYING_COST')->label('رسوم التنسيق'),
+                        IconEntry::make('offeringGroup.ENABLE_PAYMENT')->label('تفعيل الدفع')->boolean(),
+                    ])->columns(3),
+                Section::make('تفضيلات وإعدادات القبول')
+                    ->collapsible()
+                    ->columnSpanFull()
+                    ->schema([
+                        TextEntry::make('SEC_SCHOOL_ACCEPT_RATE')->label('معدل القبول')->suffix('%'),
                         TextEntry::make('ENTRANCE_EXAM_WEIGHT')->label('وزن امتحان القبول'),
                         TextEntry::make('Y_SEC_SCHOOL_MAX_AGE')->label('أقصى عمر يمني'),
                         TextEntry::make('NY_SEC_SCHOOL_MAX_AGE')->label('أقصى عمر غير يمني'),
@@ -198,6 +228,8 @@ class OfferingResource extends Resource
                         TextEntry::make('TO_DATE')->label('إلى تاريخ')->date(),
                     ])->columns(3),
                 Section::make('معلومات التسجيل والمراجعة')
+                    ->collapsible()
+                    ->columnSpanFull()
                     ->schema([
                         TextEntry::make('recordedBy.USER_NAME')->label('بواسطة (إضافة)'),
                         TextEntry::make('RECORD_ON')->label('تاريخ الإضافة')->dateTime(),
@@ -238,16 +270,21 @@ class OfferingResource extends Resource
                 TextColumn::make('SEC_SCHOOL_TYPE')
                     ->label('نوع الثانوية')
                     ->searchable(),
+                TextColumn::make('offeringGroup.DESCRIPTION')
+                    ->label('مجموعة التنسيق')
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('SEC_SCHOOL_ACCEPT_RATE')
                     ->label('معدل القبول')
-                    ->numeric(locale: 'en')
+                    ->numeric()
+                    ->suffix('%')
                     ->sortable(),
                 TextColumn::make('ENTRANCE_EXAM_WEIGHT')
                     ->label('وزن امتحان القبول')
-                    ->numeric(locale: 'en')
+                    ->numeric()
                     ->sortable(),
 
-                ColumnGroup::make("فترة التنسيق", [
+                ColumnGroup::make('فترة التنسيق', [
                     TextColumn::make('FROM_DATE')
                         ->label('من تاريخ')
                         ->date()
@@ -260,11 +297,11 @@ class OfferingResource extends Resource
                 ColumnGroup::make('عمر الثانوية', [
                     TextColumn::make('Y_SEC_SCHOOL_MAX_AGE')
                         ->label('عمر الثانوي (يمني)')
-                        ->numeric(locale: 'en')
+                        ->numeric()
                         ->sortable(),
                     TextColumn::make('NY_SEC_SCHOOL_MAX_AGE')
                         ->label('عمر الثانوي (غير يمني)')
-                        ->numeric(locale: 'en')
+                        ->numeric()
                         ->sortable(),
                 ]),
                 IconColumn::make('ENTRANCE_EXAM_REQUIRED')
@@ -296,7 +333,7 @@ class OfferingResource extends Resource
                 ]),
             ])
             ->filters([
-                \App\Filament\Filters\AcademicFilter::make(),
+                AcademicFilter::make(),
             ])
             ->recordActions([
                 ViewAction::make(),
@@ -314,6 +351,7 @@ class OfferingResource extends Resource
     {
         return [
             OfferingDhsRelationManager::class,
+            RequestAdjustOfferingsRelationManager::class,
         ];
     }
 

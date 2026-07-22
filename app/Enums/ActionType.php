@@ -6,7 +6,7 @@ use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasIcon;
 use Filament\Support\Contracts\HasLabel;
 
-enum ActionType: string implements HasLabel, HasColor, HasIcon
+enum ActionType: string implements HasColor, HasIcon, HasLabel
 {
     case INSERT = 'INSERT';
     case UPDATE = 'UPDATE';
@@ -21,7 +21,7 @@ enum ActionType: string implements HasLabel, HasColor, HasIcon
         };
     }
 
-    public function getColor(): string | array | null
+    public function getColor(): string|array|null
     {
         return match ($this) {
             self::INSERT => 'success',

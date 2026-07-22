@@ -23,12 +23,12 @@ class UniversityScope implements Scope
                 // if (get_class($model) !== \App\Models\University::class) {
                 $selectedUnid = session('selected_unid', 0);
                 if ($selectedUnid != 0) {
-                    $builder->where($model->getTable() . '.UNID', $selectedUnid);
+                    $builder->where($model->getTable().'.UNID', $selectedUnid);
                 }
                 // }
             } else {
                 // University admin/user
-                $builder->where($model->getTable() . '.UNID', $user->UNID);
+                $builder->where($model->getTable().'.UNID', $user->UNID);
             }
         }
     }

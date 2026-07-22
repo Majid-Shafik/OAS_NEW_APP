@@ -23,8 +23,10 @@ trait HasCompositeKey
             foreach ($this->compositeKeys as $key) {
                 $query->where($key, '=', $this->getAttribute($key));
             }
+
             return $query;
         }
+
         return parent::setKeysForSaveQuery($query);
     }
 
@@ -38,8 +40,10 @@ trait HasCompositeKey
             foreach ($this->compositeKeys as $key) {
                 $keys[] = $this->getAttribute($key);
             }
+
             return implode('_', $keys);
         }
+
         return parent::getKey();
     }
 
@@ -63,9 +67,11 @@ trait HasCompositeKey
                 foreach ($this->compositeKeys as $index => $key) {
                     $query->where($key, $parts[$index]);
                 }
+
                 return $query->first();
             }
         }
+
         return parent::resolveRouteBinding($value, $field);
     }
 
@@ -74,13 +80,14 @@ trait HasCompositeKey
      */
     public function newEloquentBuilder($query)
     {
-        return new class($query) extends Builder {
+        return new class($query) extends Builder
+        {
             public function whereKey($id)
             {
                 $model = $this->getModel();
                 if (method_exists($model, 'getCompositeKeys') && property_exists($model, 'compositeKeys')) {
                     $keys = $model->getCompositeKeys();
-                    
+
                     if (is_array($id)) {
                         $this->where(function ($q) use ($id, $keys) {
                             foreach ($id as $composite) {
@@ -94,6 +101,7 @@ trait HasCompositeKey
                                 }
                             }
                         });
+
                         return $this;
                     }
 
@@ -102,13 +110,14 @@ trait HasCompositeKey
                         foreach ($keys as $index => $key) {
                             $this->where($key, $parts[$index]);
                         }
+
                         return $this;
                     }
                 }
 
                 return parent::whereKey($id);
             }
-            
+
             public function whereKeyNot($id)
             {
                 $model = $this->getModel();
@@ -126,6 +135,7 @@ trait HasCompositeKey
                                 });
                             }
                         }
+
                         return $this;
                     }
 
@@ -136,6 +146,7 @@ trait HasCompositeKey
                                 $q->where($key, '!=', $parts[$index]);
                             }
                         });
+
                         return $this;
                     }
                 }
