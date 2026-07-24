@@ -31,7 +31,9 @@ class Application extends Model
 
     protected $casts = [
         'STATUS' => ApplicationStatus::class,
+        'PAYMENT_FLAG' => \App\Enums\PaymentMethodEnum::class,
     ];
+ 
 
     public function university()
     {
@@ -63,8 +65,21 @@ class Application extends Model
         return $this->belongsTo(PaymentMethod::class, 'PAYMENT_FLAG', 'PAY_METHOD_ID');
     }
 
+    
+
     public function insertedBy()
     {
         return $this->belongsTo(User::class, 'INSERTED_BY', 'USER_IDENT');
+    }
+
+    protected static function booted()
+    {
+        static::deleted(function ($application) {
+            $data = $application->toArray();
+            $data['deleted_at'] = now();
+            $data['deleted_by'] = auth()->id();
+            
+            \App\Models\DeletedApplication::insert($data);
+        });
     }
 }

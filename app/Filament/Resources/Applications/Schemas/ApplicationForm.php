@@ -9,6 +9,7 @@ use App\Models\Program;
 use App\Models\StudyType;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 
 class ApplicationForm
@@ -38,7 +39,22 @@ class ApplicationForm
                     ->options(Program::pluck('PROGRAM_NAME', 'PROGRAM_IDENT')),
                 Select::make('STUDYTYPE_IDENT')
                     ->label(__('STUDYTYPE_IDENT'))
-                    ->options(StudyType::pluck('STUDYTYPE_NAME', 'STUDYTYPE_IDENT')),
+                    ->options(StudyType::pluck('STUDYTYPE_NAME', 'STUDYTYPE_IDENT'))
+                    ->rule(
+                        fn (Get $get, ?\App\Models\Application $record) => function (string $attribute, $value, \Closure $fail) use ($get, $record) {
+                            $query = \App\Models\Application::where('APPLICANT_IDENT', $get('APPLICANT_IDENT'))
+                                ->where('PROGRAM_IDENT', $get('PROGRAM_IDENT'))
+                                ->where('STUDYTYPE_IDENT', $value);
+
+                            if ($record) {
+                                $query->where('APPLICATION_IDENT', '!=', $record->APPLICATION_IDENT);
+                            }
+
+                            if ($query->exists()) {
+                                $fail('هذا المتقدم مسجل مسبقاً في نفس التخصص لنفس النظام الدراسي.');
+                            }
+                        }
+                    ),
                 Select::make('CHOICE_NO')
                     ->label(__('CHOICE_NO'))
                     ->options([
@@ -52,7 +68,6 @@ class ApplicationForm
                     ->relationship('paymentMethod', 'PAY_METHOD'),
                 Select::make('STATUS')
                     ->label(__('STATUS'))
-                    ->badge()
                     ->options(ApplicationStatus::class)
                     ->required(),
             ]);

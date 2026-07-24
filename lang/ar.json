@@ -105,5 +105,6 @@
     "SHOW_ALL_APPLICANTS": "عرض جميع المتقدمين",
     "DIRCT_RIGESTER": "تسجيل مباشر",
     "RECORD_ON": "تاريخ الإضافة",
-    "RECORD_BY": "أضيف بواسطة"
+    "RECORD_BY": "أضيف بواسطة",
+    "update_from_ministry_applicant": "تحديث بيانات المتقدم من الوزارة"
 }

@@ -31,7 +31,6 @@ class Applicant extends Model
     ];
 
     protected $casts = [
-        'GENDER' => Gender::class,
         'STATUS' => ApplicantStatus::class,
     ];
 

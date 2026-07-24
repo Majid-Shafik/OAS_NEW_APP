@@ -76,6 +76,24 @@ trait HasCompositeKey
     }
 
     /**
+     * Retrieve the model for a bound value.
+     */
+    public function resolveRouteBindingQuery($query, $value, $field = null)
+    {
+        if (isset($this->compositeKeys) && $field === null) {
+            $parts = explode('_', $value);
+            if (count($parts) === count($this->compositeKeys)) {
+                foreach ($this->compositeKeys as $index => $key) {
+                    $query->where($key, $parts[$index]);
+                }
+                return $query;
+            }
+        }
+
+        return parent::resolveRouteBindingQuery($query, $value, $field);
+    }
+
+    /**
      * Create a new Eloquent query builder for the model.
      */
     public function newEloquentBuilder($query)

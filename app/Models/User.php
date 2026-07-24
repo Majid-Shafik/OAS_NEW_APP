@@ -8,6 +8,7 @@ use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Spatie\Permission\Traits\HasRoles;
 
@@ -60,9 +61,17 @@ class User extends Authenticatable implements FilamentUser, HasName
         return $this->LOGON_PASS;
     }
 
+
+    protected static function booted(): void
+    {
+        static::creating(function ($record) {
+            $record->INSERTED_BY = Auth::id();
+        });
+    }
+
     public function canAccessPanel(Panel $panel): bool
     {
-        Log::info('canAccessPanel called for user: '.$this->USER_IDENT.', IS_IT_ENABLE: '.$this->IS_IT_ENABLE.', DB: '.config('database.connections.tenant.database'));
+        Log::info('canAccessPanel called for user: ' . $this->USER_IDENT . ', IS_IT_ENABLE: ' . $this->IS_IT_ENABLE . ', DB: ' . config('database.connections.tenant.database'));
 
         // إذا كان رقم الجامعة غير معروف (لا هو 0 للمشرف، ولا يوجد له سجل في جدول الجامعات) نمنع الدخول
         if ($this->UNID != 0 && ! $this->university) {
@@ -80,5 +89,10 @@ class User extends Authenticatable implements FilamentUser, HasName
     public function university()
     {
         return $this->belongsTo(University::class, 'UNID', 'UNID');
+    }
+
+    public function inserter()
+    {
+        return $this->belongsTo(User::class, 'INSERTED_BY', 'USER_IDENT');
     }
 }

@@ -11,6 +11,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Tables\Columns\ColumnGroup;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -23,6 +24,9 @@ class ApplicantsTable
     {
         return $table
             ->columns([
+                TextColumn::make('index')
+                    ->rowIndex()
+                    ->label('مسلسل'),
                 TextColumn::make('university.U_NAME')
                     ->label(__('UNID'))
                     ->searchable()
@@ -34,13 +38,13 @@ class ApplicantsTable
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('FIRST_NAME')
-                    ->searchable(),
+                    ->searchable()->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('LAST_NAME')
-                    ->searchable(),
+                    ->searchable()->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('FULL_NAME')
                     ->searchable(),
                 TextColumn::make('applications_count')
-                    ->state(fn ($record) => $record->applications()->count())
+                    ->counts('applications')
                     ->label('عدد التقديمات')
                     ->badge(),
                 TextColumn::make('PLACE_OF_BIRTH')
@@ -56,35 +60,40 @@ class ApplicantsTable
                 TextColumn::make('COUNTRY_NAME')
                     ->searchable(),
                 TextColumn::make('IDENT_TYPE')
+                    ->formatStateUsing(fn($state) => \App\Models\ComboValue::getLabel(7, $state))
                     ->searchable(),
                 TextColumn::make('IDENT_NO')
                     ->searchable(),
                 IconColumn::make('YEMEN_NATIONAL')
                     ->boolean(),
-                TextColumn::make('SEC_SCHOOL_TYPE')
-                    ->searchable(),
-                TextColumn::make('SEC_SCHOOL_PLACE')
-                    ->searchable(),
-                TextColumn::make('SEC_SCHOOL_PROVINCE')
-                    ->searchable(),
-                TextColumn::make('SEC_SCHOOL_TERRITORY')
-                    ->searchable(),
-                TextColumn::make('SEC_SCHOOL_YEAR')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('SEC_SCHOOL_NAME')
-                    ->searchable(),
-                TextColumn::make('SEC_SCHOOL_RATE')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('SEC_SCHOOL_SEATNO')
-                    ->searchable(),
-                TextColumn::make('SEC_SCHOOL_MARK')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('SEC_SCHOOL_OVERALLMARK')
-                    ->numeric()
-                    ->sortable(),
+                ColumnGroup::make('بيانات الثانوية')
+                    ->columns([
+                        TextColumn::make('SEC_SCHOOL_TYPE')
+                            ->formatStateUsing(fn($state) => \App\Models\ComboValue::getLabel(1, $state))
+                            ->searchable(),
+                        TextColumn::make('SEC_SCHOOL_PLACE')
+                            ->searchable(),
+                        TextColumn::make('SEC_SCHOOL_PROVINCE')
+                            ->searchable(),
+                        TextColumn::make('SEC_SCHOOL_TERRITORY')
+                            ->searchable(),
+                        TextColumn::make('SEC_SCHOOL_NAME')
+                            ->searchable(),
+                        TextColumn::make('SEC_SCHOOL_RATE')
+                            ->numeric()
+                            ->sortable(),
+                        TextColumn::make('SEC_SCHOOL_SEATNO')
+                            ->searchable(),
+                        TextColumn::make('SEC_SCHOOL_YEAR')
+                            ->numeric()
+                            ->sortable(),
+                        TextColumn::make('SEC_SCHOOL_MARK')
+                            ->numeric()
+                            ->sortable(),
+                        TextColumn::make('SEC_SCHOOL_OVERALLMARK')
+                            ->numeric()
+                            ->sortable(),
+                    ]),
                 TextColumn::make('ADMITTED_OFFERING')
                     ->numeric()
                     ->sortable(),
@@ -104,9 +113,11 @@ class ApplicantsTable
                 TextColumn::make('MOBILE_PHONE')
                     ->searchable(),
                 TextColumn::make('BLOOD_GROUP')
+                    ->formatStateUsing(fn($state) => \App\Models\ComboValue::getLabel(8, $state))
                     ->searchable(),
                 TextColumn::make('GENDER')
                     ->label(__('GENDER'))
+                    ->formatStateUsing(fn($state) => \App\Models\ComboValue::getLabel(6, $state))
                     ->badge()
                     ->searchable(),
                 TextColumn::make('RECORDDATE')
@@ -117,6 +128,10 @@ class ApplicantsTable
                     ->searchable(),
                 IconColumn::make('FREEZE')
                     ->boolean()
+                    ->trueIcon('heroicon-o-check-circle')
+                    ->falseIcon('heroicon-o-minus')
+                    ->trueColor('danger')
+                    ->falseColor('gray')
                     ->sortable(),
                 TextColumn::make('INSERTED_BY')
                     ->numeric()
@@ -133,24 +148,17 @@ class ApplicantsTable
                 TextColumn::make('APPROVED_ON')
                     ->dateTime()
                     ->sortable(),
-                IconColumn::make('IMPORTED')
-                    ->boolean()
+                TextColumn::make('IMPORTED')
+                    ->label('طريقة الإدخال')
+                    ->translateFromConfig('imported')
                     ->sortable(),
                 TextColumn::make('APPLICANT_TYPE')
-                    ->formatStateUsing(function ($state, $record) {
-                        $tt = 'A';
-                        if ($state == 2) {
-                            $tt = 'B';
-                        }
-                        if ($record->IS_CLEARING == 0) {
-                            return $tt.'-'.'اعتيادي';
-                        } else {
-                            return $tt.'-'.'مقاصة';
-                        }
-                    })
+                    ->label('نوع المتقدم')
+                    ->translateFromConfig('applicant_type')
                     ->sortable(),
-                IconColumn::make('IS_CLEARING')
-                    ->boolean()
+                TextColumn::make('IS_CLEARING')
+                    ->label('نظام المقاصة')
+                    ->translateFromConfig('is_clearing')
                     ->sortable(),
                 IconColumn::make('REVIEWED')
                     ->boolean()
@@ -182,7 +190,7 @@ class ApplicantsTable
                 AcademicFilter::make('university_faculty_program', 'ADMITTED_FACULITY', 'ADMITTED_PROGRAM'),
                 SelectFilter::make('GENDER')
                     ->label('الجنس')
-                    ->options(Gender::class),
+                    ->options(\App\Models\ComboValue::where('CODE', 6)->pluck('VALUE', 'VALUE')),
                 SelectFilter::make('STATUS')
                     ->label('حالة الملف')
                     ->options(ApplicantStatus::class),
@@ -193,11 +201,28 @@ class ApplicantsTable
                     ->falseLabel('غير مجمد'),
                 SelectFilter::make('SEC_SCHOOL_TYPE')
                     ->label('نوع الثانوية')
-                    ->options(fn () => Applicant::distinct()->whereNotNull('SEC_SCHOOL_TYPE')->pluck('SEC_SCHOOL_TYPE', 'SEC_SCHOOL_TYPE')->filter(fn ($v) => ! empty($v))->toArray())
+                    ->options(\App\Models\ComboValue::where('CODE', 1)->pluck('VALUE', 'VALUE'))
+                    ->searchable(),
+                SelectFilter::make('IS_CLEARING')
+                    ->label('نوع الطالب (مقاصة / اعتيادي)')
+                    ->options([
+                        '0' => 'اعتيادي',
+                        '1' => 'مقاصة',
+                    ]),
+                SelectFilter::make('APPLICANT_TYPE')
+                    ->label('نوع المتقدم')
+                    ->options(config('p.default.applicant_type', [])),
+                SelectFilter::make('PROVINCE')
+                    ->label('المحافظة')
+                    ->options(fn() => Applicant::select('PROVINCE')->distinct()->whereNotNull('PROVINCE')->pluck('PROVINCE', 'PROVINCE')->toArray())
+                    ->searchable(),
+                SelectFilter::make('SEC_SCHOOL_PROVINCE')
+                    ->label('محافظة الثانوية')
+                    ->options(fn() => Applicant::select('SEC_SCHOOL_PROVINCE')->distinct()->whereNotNull('SEC_SCHOOL_PROVINCE')->pluck('SEC_SCHOOL_PROVINCE', 'SEC_SCHOOL_PROVINCE')->toArray())
                     ->searchable(),
                 SelectFilter::make('COUNTRY_NAME')
                     ->label('الدولة')
-                    ->options(fn () => Country::pluck('COUNTRY_NAME', 'COUNTRY_NAME')->filter(fn ($v) => ! empty($v))->toArray())
+                    ->options(fn() => Country::pluck('COUNTRY_NAME', 'COUNTRY_NAME')->filter(fn($v) => ! empty($v))->toArray())
                     ->searchable(),
             ])
             ->recordActions([

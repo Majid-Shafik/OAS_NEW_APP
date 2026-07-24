@@ -55,7 +55,8 @@ class OfferingDhResource extends Resource
         $columns = [
             TextColumn::make('REVESION')->label('رقم المراجعة')->sortable(),
             TextColumn::make('ACTION')->label('نوع الإجراء')->badge(),
-            TextColumn::make('SEC_SCHOOL_TYPE')->label('نوع الثانوية'),
+            TextColumn::make('SEC_SCHOOL_TYPE')->label('نوع الثانوية')
+                ->formatStateUsing(fn ($state) => \App\Models\ComboValue::getLabel(1, $state)),
             TextColumn::make('SEC_SCHOOL_ACCEPT_RATE')->label('معدل القبول (الجديد)')->numeric()->suffix('%'),
             TextColumn::make('ENTRANCE_EXAM_WEIGHT')->label('وزن الامتحان (الجديد)')->numeric(),
             TextColumn::make('Y_SEC_SCHOOL_MAX_AGE')->label('عمر الثانوي (يمني)')->numeric(),
@@ -76,7 +77,7 @@ class OfferingDhResource extends Resource
             array_push(
                 $columns,
                 TextColumn::make('university.U_NAME')->label('الجامعة')->searchable()->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('faculty.FACULTY_NAME')->label('الكلية')->searchable()->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('faculty.FACULTY_NAME')->label('الكلية')->words(4)->searchable()->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('program.PROGRAM_NAME')->label('التخصص')->searchable()->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('studyType.STUDYTYPE_NAME')->label('النوع الدراسي')->searchable()->toggleable(isToggledHiddenByDefault: true)
             );
@@ -118,7 +119,8 @@ class OfferingDhResource extends Resource
                         TextEntry::make('faculty.FACULTY_NAME')->label('الكلية'),
                         TextEntry::make('program.PROGRAM_NAME')->label('التخصص'),
                         TextEntry::make('studyType.STUDYTYPE_NAME')->label('النوع الدراسي'),
-                        TextEntry::make('SEC_SCHOOL_TYPE')->label('نوع الثانوية'),
+                        TextEntry::make('SEC_SCHOOL_TYPE')->label('نوع الثانوية')
+                            ->formatStateUsing(fn ($state) => \App\Models\ComboValue::getLabel(1, $state)),
                         TextEntry::make('SEC_SCHOOL_ACCEPT_RATE')->label('معدل القبول')->suffix('%'),
                         TextEntry::make('ENTRANCE_EXAM_WEIGHT')->label('وزن امتحان القبول'),
                         TextEntry::make('STUDY_FEES')->label('الرسوم الدراسية'),

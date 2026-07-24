@@ -23,7 +23,7 @@ class ApplicantResource extends Resource
 {
     protected static ?string $model = Applicant::class;
 
-    protected static ?string $modelLabel = 'متقدم';
+    protected static ?string $modelLabel = 'متقدمين';
 
     protected static ?string $pluralModelLabel = 'المتقدمين';
 
@@ -54,7 +54,7 @@ class ApplicantResource extends Resource
             'رقم التنسيق' => $record->APPLICANT_IDENT,
             'رقم الجلوس' => $record->SEC_SCHOOL_SEATNO,
             'الهاتف' => $record->MOBILE_PHONE,
-            'المحافظة/المديرية' => $record->PROVINCE.' - '.$record->TERRITORY,
+            'المحافظة/المديرية' => $record->PROVINCE . ' - ' . $record->TERRITORY,
         ];
     }
 

@@ -37,39 +37,4 @@ class UniversityPolicy
         return $authUser->can('Delete:University');
     }
 
-    public function deleteAny(AuthUser $authUser): bool
-    {
-        return $authUser->can('DeleteAny:University');
-    }
-
-    public function restore(AuthUser $authUser, University $university): bool
-    {
-        return $authUser->can('Restore:University');
-    }
-
-    public function forceDelete(AuthUser $authUser, University $university): bool
-    {
-        return $authUser->can('ForceDelete:University');
-    }
-
-    public function forceDeleteAny(AuthUser $authUser): bool
-    {
-        return $authUser->can('ForceDeleteAny:University');
-    }
-
-    public function restoreAny(AuthUser $authUser): bool
-    {
-        return $authUser->can('RestoreAny:University');
-    }
-
-    public function replicate(AuthUser $authUser, University $university): bool
-    {
-        return $authUser->can('Replicate:University');
-    }
-
-    public function reorder(AuthUser $authUser): bool
-    {
-        return $authUser->can('Reorder:University');
-    }
-
 }

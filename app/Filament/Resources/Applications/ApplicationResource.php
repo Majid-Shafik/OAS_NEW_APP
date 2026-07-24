@@ -5,7 +5,9 @@ namespace App\Filament\Resources\Applications;
 use App\Filament\Resources\Applications\Pages\CreateApplication;
 use App\Filament\Resources\Applications\Pages\EditApplication;
 use App\Filament\Resources\Applications\Pages\ListApplications;
+use App\Filament\Resources\Applications\Pages\ViewApplication;
 use App\Filament\Resources\Applications\Schemas\ApplicationForm;
+use App\Filament\Resources\Applications\Schemas\ApplicationInfolist;
 use App\Filament\Resources\Applications\Tables\ApplicationsTable;
 use App\Models\Application;
 use BackedEnum;
@@ -23,11 +25,13 @@ class ApplicationResource extends Resource
 
     protected static UnitEnum|string|null $navigationGroup = 'إدارة المتقدمين';
 
+
+
     protected static ?string $recordTitleAttribute = 'APPLICATION_IDENT';
 
     public static function getModelLabel(): string
     {
-        return 'تقديم';
+        return 'طلبات التقديم';
     }
 
     public static function getPluralModelLabel(): string
@@ -45,6 +49,11 @@ class ApplicationResource extends Resource
         return ApplicationsTable::configure($table);
     }
 
+    public static function infolist(Schema $schema): Schema
+    {
+        return ApplicationInfolist::configure($schema);
+    }
+
     public static function getRelations(): array
     {
         return [
@@ -57,6 +66,7 @@ class ApplicationResource extends Resource
         return [
             'index' => ListApplications::route('/'),
             'create' => CreateApplication::route('/create'),
+            'view' => ViewApplication::route('/{record}'),
             'edit' => EditApplication::route('/{record}/edit'),
         ];
     }

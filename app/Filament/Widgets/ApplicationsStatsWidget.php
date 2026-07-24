@@ -14,22 +14,18 @@ class ApplicationsStatsWidget extends BaseWidget
     protected function getStats(): array
     {
         return [
-            Stat::make('إجمالي المتقدمين', Applicant::count())
-                ->description('الطلاب المسجلين بالنظام')
-                ->descriptionIcon('heroicon-m-users')
-                ->color('primary'),
-            Stat::make('طلبات التقديم (الرغبات)', Application::count())
-                ->description('إجمالي الرغبات المدخلة')
+            Stat::make('إجمالي الطلبات', Application::count())
+                ->description('إجمالي طلبات التقديم المرفوعة')
                 ->descriptionIcon('heroicon-m-document-text')
-                ->color('info'),
-            Stat::make('المقبولين', Application::where('ACCEPTED', 1)->count())
-                ->description('الطلاب الذين تم قبولهم')
+                ->color('primary'),
+            Stat::make('الطلبات المدفوعة', Application::where('PAYMENT_FLAG', 1)->count())
+                ->description('طلبات التقديم التي تم سداد رسومها')
+                ->descriptionIcon('heroicon-m-banknotes')
+                ->color('success'),
+            Stat::make('الطلبات المقبولة', Application::where('ACCEPTED', 1)->count())
+                ->description('طلبات التقديم المقبولة نهائياً')
                 ->descriptionIcon('heroicon-m-check-badge')
                 ->color('success'),
-            Stat::make('المؤكدين', Application::where('CONFIRMED_BY_APPLICANT', 1)->count())
-                ->description('الطلاب المؤكدين نهائياً')
-                ->descriptionIcon('heroicon-m-hand-thumb-up')
-                ->color('warning'),
         ];
     }
 }

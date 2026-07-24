@@ -3,7 +3,10 @@
 namespace App\Providers;
 
 use App\Auth\LegacyUserProvider;
+use App\Policies\ExportPolicy;
 use Filament\Actions\Action;
+use Filament\Actions\ExportAction;
+use Filament\Actions\Exports\Models\Export;
 use Filament\Forms\Components\Field;
 use Filament\Forms\Components\Placeholder;
 use Filament\Infolists\Components\TextEntry;
@@ -14,6 +17,7 @@ use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\BaseFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Number;
 use Illuminate\Support\ServiceProvider;
 
@@ -32,8 +36,62 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Gate::policy(Export::class, ExportPolicy::class);
+
         Auth::provider('legacy', function ($app, array $config) {
             return new LegacyUserProvider($app['hash'], $config['model']);
+        });
+
+        TextColumn::macro('translateFromConfig', function (string $configKey) {
+            return $this->formatStateUsing(function ($state, \Illuminate\Database\Eloquent\Model $record) use ($configKey) {
+                static $cache = [];
+                $dbName = $record->getConnectionName();
+                $cacheKey = "{$dbName}.{$configKey}.{$state}";
+
+                if (isset($cache[$cacheKey])) {
+                    return $cache[$cacheKey];
+                }
+
+                $configPath = config()->has("p.{$dbName}") 
+                    ? "p.{$dbName}.{$configKey}.{$state}" 
+                    : "p.default.{$configKey}.{$state}";
+
+                $result = config($configPath, $state);
+                $cache[$cacheKey] = $result;
+
+                return $result;
+            });
+        });
+
+        TextEntry::macro('translateFromConfig', function (string $configKey) {
+            return $this->formatStateUsing(function ($state, \Illuminate\Database\Eloquent\Model $record) use ($configKey) {
+                static $cache = [];
+                $dbName = $record->getConnectionName();
+                $cacheKey = "{$dbName}.{$configKey}.{$state}";
+
+                if (isset($cache[$cacheKey])) {
+                    return $cache[$cacheKey];
+                }
+
+                $configPath = config()->has("p.{$dbName}") 
+                    ? "p.{$dbName}.{$configKey}.{$state}" 
+                    : "p.default.{$configKey}.{$state}";
+
+                $result = config($configPath, $state);
+                $cache[$cacheKey] = $result;
+
+                return $result;
+            });
+        });
+
+        \Filament\Forms\Components\Select::macro('optionsFromConfig', function (string $configKey) {
+            return $this->options(function (?\Illuminate\Database\Eloquent\Model $record) use ($configKey) {
+                $dbName = $record ? $record->getConnectionName() : config('database.default');
+                $configPath = config()->has("p.{$dbName}.{$configKey}") 
+                    ? "p.{$dbName}.{$configKey}" 
+                    : "p.default.{$configKey}";
+                return config($configPath, []);
+            });
         });
 
         // Force all numbers formatted by Laravel/Filament to use English digits (0-9)
@@ -43,6 +101,7 @@ class AppServiceProvider extends ServiceProvider
         $this->autoTranslateLabels();
         $this->configureToggleableComponents();
         $this->configureGlobalTableSettings();
+        $this->configureExportActions();
 
         // Configure common formatting for TextColumns globally
         TextColumn::configureUsing(function (TextColumn $column): void {
@@ -102,5 +161,18 @@ class AppServiceProvider extends ServiceProvider
                 ->columnManagerTriggerAction(fn (Action $action) => $action->slideover())
                 ->paginationPageOptions([10, 25, 50, 100]);
         });
+    }
+
+    private function configureExportActions(): void
+    {
+        $configure = function ($action): void {
+            $action->label('تصدير إكسل')
+                ->icon('heroicon-o-arrow-down-tray')
+                ->color('info');
+        };
+
+        if (class_exists(ExportAction::class)) {
+            ExportAction::configureUsing($configure);
+        }
     }
 }

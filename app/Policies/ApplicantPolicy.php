@@ -37,39 +37,4 @@ class ApplicantPolicy
         return $authUser->can('Delete:Applicant');
     }
 
-    public function deleteAny(AuthUser $authUser): bool
-    {
-        return $authUser->can('DeleteAny:Applicant');
-    }
-
-    public function restore(AuthUser $authUser, Applicant $applicant): bool
-    {
-        return $authUser->can('Restore:Applicant');
-    }
-
-    public function forceDelete(AuthUser $authUser, Applicant $applicant): bool
-    {
-        return $authUser->can('ForceDelete:Applicant');
-    }
-
-    public function forceDeleteAny(AuthUser $authUser): bool
-    {
-        return $authUser->can('ForceDeleteAny:Applicant');
-    }
-
-    public function restoreAny(AuthUser $authUser): bool
-    {
-        return $authUser->can('RestoreAny:Applicant');
-    }
-
-    public function replicate(AuthUser $authUser, Applicant $applicant): bool
-    {
-        return $authUser->can('Replicate:Applicant');
-    }
-
-    public function reorder(AuthUser $authUser): bool
-    {
-        return $authUser->can('Reorder:Applicant');
-    }
-
 }

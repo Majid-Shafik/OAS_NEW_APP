@@ -37,39 +37,4 @@ class OfferingPolicy
         return $authUser->can('Delete:Offering');
     }
 
-    public function deleteAny(AuthUser $authUser): bool
-    {
-        return $authUser->can('DeleteAny:Offering');
-    }
-
-    public function restore(AuthUser $authUser, Offering $offering): bool
-    {
-        return $authUser->can('Restore:Offering');
-    }
-
-    public function forceDelete(AuthUser $authUser, Offering $offering): bool
-    {
-        return $authUser->can('ForceDelete:Offering');
-    }
-
-    public function forceDeleteAny(AuthUser $authUser): bool
-    {
-        return $authUser->can('ForceDeleteAny:Offering');
-    }
-
-    public function restoreAny(AuthUser $authUser): bool
-    {
-        return $authUser->can('RestoreAny:Offering');
-    }
-
-    public function replicate(AuthUser $authUser, Offering $offering): bool
-    {
-        return $authUser->can('Replicate:Offering');
-    }
-
-    public function reorder(AuthUser $authUser): bool
-    {
-        return $authUser->can('Reorder:Offering');
-    }
-
 }

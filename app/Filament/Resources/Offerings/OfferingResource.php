@@ -87,17 +87,8 @@ class OfferingResource extends Resource
                             ->searchable()
                             ->required(),
                         Select::make('SEC_SCHOOL_TYPE')
-                            ->translateLabel()
-                            ->options([
-                                'علمي' => 'علمي',
-                                'أدبي' => 'أدبي',
-                                'علمي وأدبي' => 'علمي وأدبي',
-                                'تجاري' => 'تجاري',
-                                'صناعي' => 'صناعي',
-                                'مهني' => 'مهني',
-                                'حاسوب' => 'حاسوب',
-                                'دبلوم' => 'دبلوم',
-                            ])
+                            ->label('نوع الثانوية')
+                            ->options(\App\Models\ComboValue::getOptionsByCode(1))
                             ->searchable()
                             ->required(),
                     ])->columns(2),
@@ -201,7 +192,8 @@ class OfferingResource extends Resource
                         TextEntry::make('faculty.FACULTY_NAME')->label('الكلية'),
                         TextEntry::make('program.PROGRAM_NAME')->label('التخصص'),
                         TextEntry::make('studyType.STUDYTYPE_NAME')->label('النوع الدراسي'),
-                        TextEntry::make('SEC_SCHOOL_TYPE')->label('نوع الثانوية'),
+                        TextEntry::make('SEC_SCHOOL_TYPE')->label('نوع الثانوية')
+                            ->formatStateUsing(fn ($state) => \App\Models\ComboValue::getLabel(1, $state)),
                     ])->columns(2),
                 Section::make('معلومات مجموعة التنسيق')
                     ->collapsible()
@@ -257,6 +249,7 @@ class OfferingResource extends Resource
                     ->sortable(),
                 TextColumn::make('faculty.FACULTY_NAME')
                     ->label('الكلية')
+                    ->words(4)
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('program.PROGRAM_NAME')
@@ -269,6 +262,7 @@ class OfferingResource extends Resource
                     ->sortable(),
                 TextColumn::make('SEC_SCHOOL_TYPE')
                     ->label('نوع الثانوية')
+                    ->formatStateUsing(fn ($state) => \App\Models\ComboValue::getLabel(1, $state))
                     ->searchable(),
                 TextColumn::make('offeringGroup.DESCRIPTION')
                     ->label('مجموعة التنسيق')

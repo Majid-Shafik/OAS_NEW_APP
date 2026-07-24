@@ -37,39 +37,19 @@ class ApplicationPolicy
         return $authUser->can('Delete:Application');
     }
 
-    public function deleteAny(AuthUser $authUser): bool
+    public function accept(AuthUser $authUser, Application $application): bool
     {
-        return $authUser->can('DeleteAny:Application');
+        return $authUser->can('Accept:Application');
     }
 
-    public function restore(AuthUser $authUser, Application $application): bool
+    public function pay(AuthUser $authUser, Application $application): bool
     {
-        return $authUser->can('Restore:Application');
+        return $authUser->can('Pay:Application');
     }
 
-    public function forceDelete(AuthUser $authUser, Application $application): bool
+    public function confirm(AuthUser $authUser, Application $application): bool
     {
-        return $authUser->can('ForceDelete:Application');
-    }
-
-    public function forceDeleteAny(AuthUser $authUser): bool
-    {
-        return $authUser->can('ForceDeleteAny:Application');
-    }
-
-    public function restoreAny(AuthUser $authUser): bool
-    {
-        return $authUser->can('RestoreAny:Application');
-    }
-
-    public function replicate(AuthUser $authUser, Application $application): bool
-    {
-        return $authUser->can('Replicate:Application');
-    }
-
-    public function reorder(AuthUser $authUser): bool
-    {
-        return $authUser->can('Reorder:Application');
+        return $authUser->can('Confirm:Application');
     }
 
 }

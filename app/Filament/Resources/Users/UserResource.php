@@ -2,31 +2,16 @@
 
 namespace App\Filament\Resources\Users;
 
-use App\Enums\Gender;
-use App\Filament\Filters\AcademicFilter;
-use App\Filament\Resources\Users\Pages\ManageUsers;
-use App\Models\Faculty;
-use App\Models\Program;
+use App\Filament\Resources\Users\Pages;
+use App\Filament\Resources\Users\Schemas\UserForm;
+use App\Filament\Resources\Users\Tables\UsersTable;
+use App\Filament\Resources\Users\Schemas\UserInfolist;
 use App\Models\Scopes\UniversityScope;
-use App\Models\University;
 use App\Models\User;
-use App\Models\UserGroup;
 use BackedEnum;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
-use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
-use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use UnitEnum;
@@ -49,138 +34,26 @@ class UserResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        return $schema
-            ->components([
-                Select::make('UNID')
-                    ->label('الجامعة')
-                    ->options(University::pluck('U_NAME', 'UNID')->prepend('غير محدد', 0))
-                    ->live()
-                    ->searchable()
-                    ->default(0),
-                Select::make('GROUP_IDENT')
-                    ->label('المجموعة (الدور)')
-                    ->options(UserGroup::pluck('GROUP_NAME', 'GROUP_IDENT'))
-                    ->searchable(),
-                TextInput::make('USER_NAME')
-                    ->required(),
-                TextInput::make('LOGON_ID')
-                    ->required(),
-                TextInput::make('LOGON_PASS')
-                    ->required(),
-                TextInput::make('GENDER')
-                    ->required(),
-                TextInput::make('MOBILE_PHONE')
-                    ->required(),
-                TextInput::make('IDENT_TYPE')
-                    ->required(),
-                TextInput::make('IDENT_NO')
-                    ->required(),
-                TextInput::make('EMAIL'),
-                Toggle::make('FIRST_TIME')
-                    ->required(),
-                DateTimePicker::make('RECORDDATE'),
-                TextInput::make('INSERTED_BY')
-                    ->numeric(),
-                TextInput::make('IS_IT_ENABLE')
-                    ->required()
-                    ->numeric()
-                    ->default(1),
-                Select::make('FACULTY_IDENT')
-                    ->label('الكلية')
-                    ->options(fn (Get $get) => Faculty::where('UNID', $get('UNID'))->pluck('FACULTY_NAME', 'FACULTY_IDENT')->prepend('غير محدد', 0))
-                    ->live()
-                    ->searchable()
-                    ->default(0),
-                Select::make('PROGRAM_IDENT')
-                    ->label('التخصص')
-                    ->options(fn (Get $get) => Program::where('UNID', $get('UNID'))
-                        ->where('FACULTY_IDENT', $get('FACULTY_IDENT'))
-                        ->pluck('PROGRAM_NAME', 'PROGRAM_IDENT')->prepend('غير محدد', 0))
-                    ->searchable()
-                    ->required()
-                    ->default(0),
-            ]);
+        return UserForm::configure($schema);
     }
 
     public static function table(Table $table): Table
     {
-        return $table
-            ->recordTitleAttribute('name')
-            ->columns([
-                TextColumn::make('UNID')
-                    ->label('الجامعة')
-                    ->formatStateUsing(fn ($state) => $state == 0 ? 'غير محدد' : University::find($state)?->U_NAME ?? $state)
-                    ->sortable(),
-                TextColumn::make('GROUP_IDENT')
-                    ->label('المجموعة')
-                    ->formatStateUsing(fn ($state) => UserGroup::find($state)?->GROUP_NAME ?? $state)
-                    ->sortable(),
-                TextColumn::make('USER_NAME')
-                    ->searchable(),
-                TextColumn::make('LOGON_ID')
-                    ->searchable(),
-                TextColumn::make('GENDER')
-                    ->searchable(),
-                TextColumn::make('MOBILE_PHONE')
-                    ->searchable(),
-                TextColumn::make('IDENT_TYPE')
-                    ->searchable(),
-                TextColumn::make('IDENT_NO')
-                    ->searchable(),
-                TextColumn::make('EMAIL')
-                    ->searchable(),
-                IconColumn::make('IS_IT_ENABLE')
-                    ->boolean()
-                    ->sortable(),
-                IconColumn::make('FIRST_TIME')
-                    ->boolean(),
-                TextColumn::make('RECORDDATE')
-                    ->dateTime()
-                    ->sortable(),
-                TextColumn::make('INSERTED_BY')
-                    ->numeric()
-                    ->sortable(),
+        return UsersTable::configure($table);
+    }
 
-                TextColumn::make('FACULTY_IDENT')
-                    ->label('الكلية')
-                    ->formatStateUsing(fn ($state) => $state == 0 ? 'غير محدد' : Faculty::find($state)?->FACULTY_NAME ?? $state)
-                    ->sortable(),
-                TextColumn::make('PROGRAM_IDENT')
-                    ->label('التخصص')
-                    ->formatStateUsing(fn ($state) => $state == 0 ? 'غير محدد' : Program::find($state)?->PROGRAM_NAME ?? $state)
-                    ->sortable(),
-            ])
-            ->filters([
-                AcademicFilter::make(),
-                SelectFilter::make('GENDER')
-                    ->label('النوع (الجنس)')
-                    ->options(Gender::class),
-                SelectFilter::make('GROUP_IDENT')
-                    ->label('المجموعة (الدور)')
-                    ->options(UserGroup::pluck('GROUP_NAME', 'GROUP_IDENT'))
-                    ->searchable(),
-                SelectFilter::make('IS_IT_ENABLE')
-                    ->label('حالة الحساب')
-                    ->options([
-                        1 => 'مفعل',
-                        0 => 'معطل',
-                    ]),
-            ])
-            ->recordActions([
-                EditAction::make(),
-                DeleteAction::make(),
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
-            ]);
+     public static function infolist(Schema $schema): Schema
+    {
+        return UserInfolist::configure($schema);
     }
 
     public static function getPages(): array
     {
         return [
-            'index' => ManageUsers::route('/'),
+            'index' => Pages\ListUsers::route('/'),
+            'create' => Pages\CreateUser::route('/create'),
+            'view' => Pages\ViewUser::route('/{record}'),
+            'edit' => Pages\EditUser::route('/{record}/edit'),
         ];
     }
 

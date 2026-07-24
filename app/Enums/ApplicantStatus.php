@@ -18,7 +18,7 @@ enum ApplicantStatus: string implements HasColor, HasIcon, HasLabel
         return match ($this) {
             self::New => 'جديد',
             self::Ready => 'جاهز للاعتماد',
-            self::Updated => 'محدث',
+            self::Updated => 'تحت التعديل',
             self::Canceled => 'ملغي',
         };
     }

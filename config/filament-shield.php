@@ -2,6 +2,10 @@
 
 declare(strict_types=1);
 
+use App\Filament\Resources\Applicants\ApplicantResource;
+use App\Filament\Resources\Applications\ApplicationResource;
+use App\Filament\Resources\Users\UserResource;
+use App\Models\Application;
 use BezhanSalleh\FilamentShield\Resources\Roles\RoleResource;
 use Filament\Pages\Dashboard;
 use Filament\Widgets\AccountWidget;
@@ -186,6 +190,35 @@ return [
                 'create',
                 'update',
                 'delete',
+            ],
+            ApplicantResource::class => [
+                'viewAny',
+                'view',
+                'create',
+                'update',
+                'delete',
+                'deleteAny',
+                'updateFromMinistryApplicant',
+            ],
+            ApplicationResource::class => [
+                'viewAny',
+                'view',
+                'create',
+                'update',
+                'delete',
+                'deleteAny',
+                'accept',
+                'pay',
+                'confirm',
+            ],
+            UserResource::class => [
+                'viewAny',
+                'view',
+                'create',
+                'update',
+                'delete',
+                'deleteAny',
+                'resetPassword',
             ],
         ],
         'exclude' => [

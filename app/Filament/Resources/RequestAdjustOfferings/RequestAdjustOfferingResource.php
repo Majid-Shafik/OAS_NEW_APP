@@ -132,6 +132,7 @@ class RequestAdjustOfferingResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('faculty.FACULTY_NAME')
                     ->label('الكلية')
+                    ->words(4)
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('program.PROGRAM_NAME')

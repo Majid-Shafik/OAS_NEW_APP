@@ -37,39 +37,4 @@ class ProgramPolicy
         return $authUser->can('Delete:Program');
     }
 
-    public function deleteAny(AuthUser $authUser): bool
-    {
-        return $authUser->can('DeleteAny:Program');
-    }
-
-    public function restore(AuthUser $authUser, Program $program): bool
-    {
-        return $authUser->can('Restore:Program');
-    }
-
-    public function forceDelete(AuthUser $authUser, Program $program): bool
-    {
-        return $authUser->can('ForceDelete:Program');
-    }
-
-    public function forceDeleteAny(AuthUser $authUser): bool
-    {
-        return $authUser->can('ForceDeleteAny:Program');
-    }
-
-    public function restoreAny(AuthUser $authUser): bool
-    {
-        return $authUser->can('RestoreAny:Program');
-    }
-
-    public function replicate(AuthUser $authUser, Program $program): bool
-    {
-        return $authUser->can('Replicate:Program');
-    }
-
-    public function reorder(AuthUser $authUser): bool
-    {
-        return $authUser->can('Reorder:Program');
-    }
-
 }

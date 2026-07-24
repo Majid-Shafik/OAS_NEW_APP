@@ -36,6 +36,8 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Unique;
+use UnitEnum;
+use Override;
 
 class RoleResource extends Resource
 {
@@ -53,6 +55,12 @@ class RoleResource extends Resource
         return false;
     }
 
+
+    #[Override]
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return 'المستخدمين والصلاحيات';
+    }
     public static function getEloquentQuery(): Builder
     {
         $query = parent::getEloquentQuery();
