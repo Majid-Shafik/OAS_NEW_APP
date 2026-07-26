@@ -126,12 +126,9 @@ class ApplicantsTable
                 TextColumn::make('STATUS')
                     ->badge()
                     ->searchable(),
-                IconColumn::make('FREEZE')
-                    ->boolean()
-                    ->trueIcon('heroicon-o-check-circle')
-                    ->falseIcon('heroicon-o-minus')
-                    ->trueColor('danger')
-                    ->falseColor('gray')
+                TextColumn::make('FREEZE')
+                    ->label('التجميد')
+                    ->badge()
                     ->sortable(),
                 TextColumn::make('INSERTED_BY')
                     ->numeric()
@@ -157,9 +154,8 @@ class ApplicantsTable
                     ->translateFromConfig('applicant_type')
                     ->sortable(),
                 TextColumn::make('IS_CLEARING')
-                    ->label('نظام المقاصة')
-                    ->translateFromConfig('is_clearing')
-                    ->sortable(),
+                    ->label('المقاصة')
+                    ->badge(),
                 IconColumn::make('REVIEWED')
                     ->boolean()
                     ->sortable(),
@@ -194,21 +190,16 @@ class ApplicantsTable
                 SelectFilter::make('STATUS')
                     ->label('حالة الملف')
                     ->options(ApplicantStatus::class),
-                TernaryFilter::make('FREEZE')
+                SelectFilter::make('FREEZE')
                     ->label('حالة التجميد')
-                    ->placeholder('الكل')
-                    ->trueLabel('مجمد')
-                    ->falseLabel('غير مجمد'),
+                    ->options(\App\Enums\FreezeStatus::class),
                 SelectFilter::make('SEC_SCHOOL_TYPE')
                     ->label('نوع الثانوية')
                     ->options(\App\Models\ComboValue::where('CODE', 1)->pluck('VALUE', 'VALUE'))
                     ->searchable(),
                 SelectFilter::make('IS_CLEARING')
                     ->label('نوع الطالب (مقاصة / اعتيادي)')
-                    ->options([
-                        '0' => 'اعتيادي',
-                        '1' => 'مقاصة',
-                    ]),
+                    ->options(\App\Enums\IsClearingType::class),
                 SelectFilter::make('APPLICANT_TYPE')
                     ->label('نوع المتقدم')
                     ->options(config('p.default.applicant_type', [])),

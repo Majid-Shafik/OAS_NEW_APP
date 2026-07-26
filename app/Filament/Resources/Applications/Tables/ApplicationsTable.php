@@ -219,10 +219,84 @@ class ApplicationsTable
                                 }
                             ])
                     ])
-                    ->action(fn($record, array $data) => $record->update([
-                        'CONFIRMED_BY_APPLICANT' => 1,
-                        'STUDENT_CODE' => $data['STUDENT_CODE'],
-                    ])),
+                    ->action(function ($record, array $data) {
+                        $unid = $record->UNID;
+                        $programIdent = $record->PROGRAM_IDENT;
+                        $studytypeIdent = $record->STUDYTYPE_IDENT;
+
+                        // get capacity
+                        $capacity = \App\Models\ProgramCapacity::where('UNID', $unid)
+                            ->where('PROGRAM_IDENT', $programIdent)
+                            ->where('STUDYTYPE_IDENT', $studytypeIdent)
+                            ->value('ENROLLMENT_CAPACITY') ?? 0;
+
+                        // get current count
+                        $currentCount = \App\Models\Application::where('UNID', $unid)
+                            ->where('PROGRAM_IDENT', $programIdent)
+                            ->where('STUDYTYPE_IDENT', $studytypeIdent)
+                            ->where('PAYMENT_FLAG', '!=', 0)
+                            ->whereNotNull('PAYMENT_FLAG')
+                            ->where('CONFIRMED_BY_APPLICANT', 1)
+                            ->count();
+
+                        if ($currentCount < $capacity) {
+                            $record->update([
+                                'CONFIRMED_BY_APPLICANT' => 1,
+                                'STUDENT_CODE' => $data['STUDENT_CODE'],
+                                'CONFIRMED_ON' => now(),
+                            ]);
+
+                            if ($record->applicant) {
+                                $record->applicant->update([
+                                    'ADMITTED_FACULITY' => $record->FACULTY_IDENT,
+                                    'ADMITTED_PROGRAM' => $record->PROGRAM_IDENT,
+                                    'ADMITTED_OFFERING' => $record->OFFERING_IDENT,
+                                    'ADMITTED_ON' => now(),
+                                ]);
+                            }
+
+                            \Filament\Notifications\Notification::make()
+                                ->title('تم تأكيد الطلب بنجاح')
+                                ->success()
+                                ->send();
+                        } else {
+                            \Filament\Notifications\Notification::make()
+                                ->title('لا يمكن التأكيد')
+                                ->body("الطاقة الاستيعابية في هذا التخصص ممتلئة بعدد {$currentCount} متقدم تم تأكيدهم مسبقاً.")
+                                ->danger()
+                                ->send();
+                            throw new \Filament\Support\Exceptions\Halt();
+                        }
+                    }),
+
+                Action::make('unconfirm')
+                    ->label('إلغاء التأكيد')
+                    ->icon('heroicon-o-x-circle')
+                    ->color('danger')
+                    ->visible(fn($record) => $record->CONFIRMED_BY_APPLICANT == 1)
+                    ->hidden(fn($record) => ! auth()->user()->can('unconfirm', $record))
+                    ->requiresConfirmation()
+                    ->action(function ($record) {
+                        $record->update([
+                            'CONFIRMED_BY_APPLICANT' => 0,
+                            'STUDENT_CODE' => '0',
+                            'CONFIRMED_ON' => now(),
+                        ]);
+
+                        if ($record->applicant) {
+                            $record->applicant->update([
+                                'ADMITTED_FACULITY' => 0,
+                                'ADMITTED_PROGRAM' => 0,
+                                'ADMITTED_OFFERING' => 0,
+                                'ADMITTED_ON' => null,
+                            ]);
+                        }
+
+                        \Filament\Notifications\Notification::make()
+                            ->title('تم إلغاء تأكيد المتقدم')
+                            ->success()
+                            ->send();
+                    }),
 
                 ViewAction::make(),
                 EditAction::make(),

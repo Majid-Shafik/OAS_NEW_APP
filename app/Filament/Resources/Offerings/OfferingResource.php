@@ -41,7 +41,6 @@ class OfferingResource extends Resource
 {
     protected static ?string $model = Offering::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     protected static UnitEnum|string|null $navigationGroup = 'المعايير';
 
@@ -50,6 +49,8 @@ class OfferingResource extends Resource
     protected static ?string $modelLabel = 'معيار';
 
     protected static ?string $pluralModelLabel = 'المعايير';
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedScale;
 
     protected static ?string $recordTitleAttribute = 'OFFERING_IDENT';
 

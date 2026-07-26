@@ -12,12 +12,14 @@
         "php": "^8.3",
         "awobaz/compoships": "^3.0",
         "bezhansalleh/filament-shield": "^4.2",
-        "filament/filament": "v5.7.1",
+        "filament/filament": "v5.7.3",
         "laravel/framework": "^13.8",
         "laravel/tinker": "^3.0"
     },
     "require-dev": {
+        "beyondcode/laravel-query-detector": "^2.3",
         "fakerphp/faker": "^1.23",
+        "laravel/boost": "^2.4",
         "laravel/pail": "^1.2.5",
         "laravel/pao": "^1.0.6",
         "laravel/pint": "^1.29",

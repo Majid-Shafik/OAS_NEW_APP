@@ -25,6 +25,8 @@ class ApplicantStatisticsDashboard extends BaseDashboard
         );
     }
 
+
+
     public function getWidgets(): array
     {
         return [

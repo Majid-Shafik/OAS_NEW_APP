@@ -12,9 +12,11 @@ class ClearingStatisticsDashboard extends BaseDashboard
     use HasFiltersForm;
     use HasDashboardFilters;
 
-    protected static \UnitEnum|string|null $navigationGroup = 'الإحصائيات';
+    protected static \UnitEnum|string|null $navigationGroup = 'المقاصاة';
     protected static ?string $navigationLabel = 'إحصائيات طلاب المقاصاة';
     protected static ?string $title = 'إحصائيات طلاب المقاصاة';
+
+    protected static ?int $navigationSort = 100;
     protected static string $routePath = 'clearing-statistics';
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-academic-cap';
 

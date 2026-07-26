@@ -110,6 +110,8 @@ class AppServiceProvider extends ServiceProvider
                 ->alignCenter()
                 ->toggleable(true);
         });
+
+        \App\Models\ProgramCapacity::observe(\App\Observers\ProgramCapacityObserver::class);
     }
 
     private function autoTranslateLabels()

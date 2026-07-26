@@ -50,7 +50,7 @@ class DeletedApplicationResource extends Resource
         return $table
             ->columns($columns)
             ->filters($baseTable->getFilters())
-            ->actions([
+            ->recordActions([
                 Action::make('view')
                     ->label('استعراض')
                     ->icon('heroicon-o-eye')

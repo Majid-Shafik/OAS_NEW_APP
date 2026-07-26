@@ -25,28 +25,28 @@ class ApplicantInfolist
                                     ->icon('heroicon-o-user')
                                     ->schema([
                                         TextEntry::make('FULL_NAME')->label('الاسم الكامل')->placeholder('-'),
-                                        TextEntry::make('NATIONAL_NUMBER')->label('الرقم الوطني')->placeholder('-'),
                                         TextEntry::make('FIRST_NAME')->label('الاسم الأول'),
                                         TextEntry::make('LAST_NAME')->label('اللقب')->placeholder('-'),
-                                        TextEntry::make('GENDER')->label('الجنس')->formatStateUsing(fn ($state) => \App\Models\ComboValue::getLabel(6, $state))->badge()->placeholder('-'),
+                                        TextEntry::make('NATIONAL_NUMBER')->label('الرقم الوطني')->placeholder('-'),
+                                        TextEntry::make('GENDER')->label('الجنس')->formatStateUsing(fn($state) => \App\Models\ComboValue::getLabel(6, $state))->badge()->placeholder('-'),
                                         TextEntry::make('DATE_OF_BIRTH')->label('تاريخ الميلاد')->date()->placeholder('-'),
                                         TextEntry::make('PLACE_OF_BIRTH')->label('محل الميلاد')->placeholder('-'),
                                         TextEntry::make('PROVINCE')->label('المحافظة')->placeholder('-'),
                                         TextEntry::make('TERRITORY')->label('المديرية')->placeholder('-'),
                                         TextEntry::make('COUNTRY_NAME')->label('الدولة'),
-                                        TextEntry::make('IDENT_TYPE')->label('نوع الهوية')->formatStateUsing(fn ($state) => \App\Models\ComboValue::getLabel(7, $state))->placeholder('-'),
+                                        TextEntry::make('IDENT_TYPE')->label('نوع الهوية')->formatStateUsing(fn($state) => \App\Models\ComboValue::getLabel(7, $state))->placeholder('-'),
                                         TextEntry::make('IDENT_NO')->label('رقم الهوية')->placeholder('-'),
                                         IconEntry::make('YEMEN_NATIONAL')->label('جنسية يمنية')->boolean(),
                                         TextEntry::make('EMAIL')->label('البريد الإلكتروني')->placeholder('-'),
                                         TextEntry::make('MOBILE_PHONE')->label('رقم الهاتف')->placeholder('-'),
-                                        TextEntry::make('BLOOD_GROUP')->label('فصيلة الدم')->formatStateUsing(fn ($state) => \App\Models\ComboValue::getLabel(8, $state))->placeholder('-'),
+                                        TextEntry::make('BLOOD_GROUP')->label('فصيلة الدم')->formatStateUsing(fn($state) => \App\Models\ComboValue::getLabel(8, $state))->placeholder('-'),
                                     ])->columns(3),
 
                                 Tab::make('بيانات الثانوية')
                                     ->icon('heroicon-o-academic-cap')
                                     ->schema([
                                         TextEntry::make('SEC_SCHOOL_YEAR')->label('سنة التخرج')->placeholder('-'),
-                                        TextEntry::make('SEC_SCHOOL_TYPE')->label('نوع الثانوية')->formatStateUsing(fn ($state) => \App\Models\ComboValue::getLabel(1, $state))->placeholder('-'),
+                                        TextEntry::make('SEC_SCHOOL_TYPE')->label('نوع الثانوية')->formatStateUsing(fn($state) => \App\Models\ComboValue::getLabel(1, $state))->placeholder('-'),
                                         TextEntry::make('SEC_SCHOOL_NAME')->label('اسم المدرسة')->placeholder('-'),
                                         TextEntry::make('SEC_SCHOOL_SEATNO')->label('رقم الجلوس')->placeholder('-'),
                                         TextEntry::make('SEC_SCHOOL_RATE')->label('المعدل')->placeholder('-')->suffix('%'),
@@ -67,7 +67,7 @@ class ApplicantInfolist
                                         TextEntry::make('ADMITTED_OFFERING')->label('رقم العرض')->placeholder('-'),
                                     ])
                                     ->columns(2)
-                                    ->visible(fn ($record) => $record?->IS_CLEARING),
+                                    ->visible(fn($record) => $record?->IS_CLEARING),
 
                                 Tab::make('بيانات النظام')
                                     ->icon('heroicon-o-server')
@@ -109,20 +109,15 @@ class ApplicantInfolist
                                     ->placeholder('-'),
                                 TextEntry::make('applications_count')
                                     ->label('عدد التقديمات')
-                                    ->state(fn ($record) => $record->applications()->count())
+                                    ->state(fn($record) => $record->applications()->count())
                                     ->badge()
                                     ->color('info'),
-                                        TextEntry::make('IS_CLEARING')
-                                            ->label('نظام المقاصة')
-                                            ->translateFromConfig('is_clearing')
-                                            ->placeholder('-'),
-                                \Filament\Infolists\Components\IconEntry::make('FREEZE')
+                                TextEntry::make('IS_CLEARING')
+                                    ->label('نظام المقاصة')
+                                    ->badge(),
+                                TextEntry::make('FREEZE')
                                     ->label('حالة التجميد')
-                                    ->boolean()
-                                    ->trueIcon('heroicon-o-check-circle')
-                                    ->falseIcon('heroicon-o-minus')
-                                    ->trueColor('danger')
-                                    ->falseColor('gray'),
+                                    ->badge(),
                             ]),
                     ])->columnSpan(3),
                 ])->columnSpan('full'),

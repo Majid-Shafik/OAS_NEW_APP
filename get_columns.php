@@ -1,10 +1,20 @@
 <?php
+require __DIR__.'/vendor/autoload.php';
+$app = require_once __DIR__.'/bootstrap/app.php';
+$kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
+$kernel->bootstrap();
 
-$schema = json_decode(file_get_contents(__DIR__.'/schema_2022.json'), true);
-$tables = ['applicant', 'faculty', 'programs'];
-$result = [];
-foreach ($tables as $table) {
-    $result[$table] = array_column($schema[$table], 'Field');
+try {
+    $columns = Illuminate\Support\Facades\Schema::getColumnListing('general_standards');
+    if (empty($columns)) {
+        // Fallback for some DB drivers
+        $first = Illuminate\Support\Facades\DB::table('general_standards')->first();
+        if ($first) {
+            $columns = array_keys((array) $first);
+        }
+    }
+    echo "COLUMNS:\n";
+    print_r($columns);
+} catch (\Exception $e) {
+    echo "ERROR: " . $e->getMessage();
 }
-file_put_contents(__DIR__.'/columns.json', json_encode($result, JSON_PRETTY_PRINT));
-echo 'Columns extracted.';

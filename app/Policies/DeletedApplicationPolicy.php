@@ -1,44 +1,40 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Policies;
 
+use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\DeletedApplication;
-use App\Models\User;
+use Illuminate\Auth\Access\HandlesAuthorization;
 
 class DeletedApplicationPolicy
 {
-    public function viewAny(User $user): bool
+    use HandlesAuthorization;
+    
+    public function viewAny(AuthUser $authUser): bool
     {
-        return $user->can('view_any_deleted::application');
+        return $authUser->can('ViewAny:DeletedApplication');
     }
 
-    public function view(User $user, DeletedApplication $deletedApplication): bool
+    public function view(AuthUser $authUser, DeletedApplication $deletedApplication): bool
     {
-        return $user->can('view_deleted::application');
+        return $authUser->can('View:DeletedApplication');
     }
 
-    public function create(User $user): bool
+    public function create(AuthUser $authUser): bool
     {
-        return false;
+        return $authUser->can('Create:DeletedApplication');
     }
 
-    public function update(User $user, DeletedApplication $deletedApplication): bool
+    public function update(AuthUser $authUser, DeletedApplication $deletedApplication): bool
     {
-        return false;
+        return $authUser->can('Update:DeletedApplication');
     }
 
-    public function delete(User $user, DeletedApplication $deletedApplication): bool
+    public function delete(AuthUser $authUser, DeletedApplication $deletedApplication): bool
     {
-        return false;
+        return $authUser->can('Delete:DeletedApplication');
     }
 
-    public function restore(User $user, DeletedApplication $deletedApplication): bool
-    {
-        return $user->can('restore_deleted::application');
-    }
-
-    public function forceDelete(User $user, DeletedApplication $deletedApplication): bool
-    {
-        return false;
-    }
 }

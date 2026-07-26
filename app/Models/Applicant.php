@@ -32,6 +32,8 @@ class Applicant extends Model
 
     protected $casts = [
         'STATUS' => ApplicantStatus::class,
+        'IS_CLEARING' => \App\Enums\IsClearingType::class,
+        'FREEZE' => \App\Enums\FreezeStatus::class,
     ];
 
     public function university()
@@ -52,6 +54,21 @@ class Applicant extends Model
     public function applications()
     {
         return $this->hasMany(Application::class, ['UNID', 'APPLICANT_IDENT'], ['UNID', 'APPLICANT_IDENT']);
+    }
+
+    public function applicationGroups()
+    {
+        return $this->hasMany(ApplicationGroup::class, ['UNID', 'APPLICANT_IDENT'], ['UNID', 'APPLICANT_IDENT']);
+    }
+
+    public function applicationsClearing()
+    {
+        return $this->hasOne(ApplicationsClearing::class, ['UNID', 'APPLICANT_IDENT'], ['UNID', 'APPLICANT_IDENT']);
+    }
+
+    public function monitorClearingReviewing()
+    {
+        return $this->hasMany(MonitorClearingReviewing::class, ['UNID', 'APPLICANT_IDENT'], ['UNID', 'APPLICANT_IDENT']);
     }
 
     public function insertedBy()
@@ -77,5 +94,18 @@ class Applicant extends Model
     public function secondReviewedBy()
     {
         return $this->belongsTo(User::class, 'SECOND_REVIEWED_BY', 'USER_IDENT');
+    }
+
+    protected static function booted()
+    {
+        static::creating(function ($applicant) {
+            $applicant->INSERTED_BY = $applicant->INSERTED_BY ?? (auth()->id() ?? -1);
+            $applicant->RECORDDATE = $applicant->RECORDDATE ?? now();
+        });
+
+        static::updating(function ($applicant) {
+            $applicant->LAST_UPDATED_BY = auth()->id() ?? -1;
+            $applicant->LAST_UPDATED_ON = now();
+        });
     }
 }

@@ -22,7 +22,8 @@ class AcademicFilter
     public static function make(
         string $name = 'university_faculty_program',
         string $facultyColumn = 'FACULTY_IDENT',
-        string $programColumn = 'PROGRAM_IDENT'
+        string $programColumn = 'PROGRAM_IDENT',
+        ?string $relation = null
     ): Filter {
         return Filter::make($name)
             ->form([
@@ -43,20 +44,28 @@ class AcademicFilter
                         ->pluck('PROGRAM_NAME', 'PROGRAM_IDENT')->prepend('غير محدد', 0))
                     ->searchable(),
             ])
-            ->query(function (Builder $query, array $data) use ($facultyColumn, $programColumn): Builder {
-                return $query
-                    ->when(
-                        isset($data['UNID']) && $data['UNID'] !== '',
-                        fn (Builder $query): Builder => $query->where('UNID', $data['UNID'])
-                    )
-                    ->when(
-                        isset($data[$facultyColumn]) && $data[$facultyColumn] !== '',
-                        fn (Builder $query): Builder => $query->where($facultyColumn, $data[$facultyColumn])
-                    )
-                    ->when(
-                        isset($data[$programColumn]) && $data[$programColumn] !== '',
-                        fn (Builder $query): Builder => $query->where($programColumn, $data[$programColumn])
-                    );
+            ->query(function (Builder $query, array $data) use ($facultyColumn, $programColumn, $relation): Builder {
+                $applyFilters = function (Builder $query) use ($data, $facultyColumn, $programColumn) {
+                    return $query
+                        ->when(
+                            isset($data['UNID']) && $data['UNID'] !== '' && $data['UNID'] != '0',
+                            fn (Builder $query): Builder => $query->where('UNID', $data['UNID'])
+                        )
+                        ->when(
+                            isset($data[$facultyColumn]) && $data[$facultyColumn] !== '' && $data[$facultyColumn] != '0',
+                            fn (Builder $query): Builder => $query->where($facultyColumn, $data[$facultyColumn])
+                        )
+                        ->when(
+                            isset($data[$programColumn]) && $data[$programColumn] !== '' && $data[$programColumn] != '0',
+                            fn (Builder $query): Builder => $query->where($programColumn, $data[$programColumn])
+                        );
+                };
+
+                if ($relation) {
+                    return $query->whereHas($relation, $applyFilters);
+                }
+
+                return $applyFilters($query);
             })
             ->columns(3)
             ->columnSpan('full');

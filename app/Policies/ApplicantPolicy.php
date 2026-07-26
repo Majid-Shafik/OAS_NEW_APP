@@ -37,4 +37,14 @@ class ApplicantPolicy
         return $authUser->can('Delete:Applicant');
     }
 
+    public function deleteAny(AuthUser $authUser): bool
+    {
+        return $authUser->can('DeleteAny:Applicant');
+    }
+
+    public function updateFromMinistryApplicant(AuthUser $authUser, Applicant $applicant): bool
+    {
+        return $authUser->can('UpdateFromMinistryApplicant:Applicant');
+    }
+
 }

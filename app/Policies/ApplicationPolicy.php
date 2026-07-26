@@ -37,6 +37,11 @@ class ApplicationPolicy
         return $authUser->can('Delete:Application');
     }
 
+    public function deleteAny(AuthUser $authUser): bool
+    {
+        return $authUser->can('DeleteAny:Application');
+    }
+
     public function accept(AuthUser $authUser, Application $application): bool
     {
         return $authUser->can('Accept:Application');

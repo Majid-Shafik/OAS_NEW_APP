@@ -34,7 +34,12 @@ class UserPolicy
         return $authUser->can('Delete:User');
     }
 
-       public function resetPassword(AuthUser $authUser): bool
+    public function deleteAny(AuthUser $authUser): bool
+    {
+        return $authUser->can('DeleteAny:User');
+    }
+
+    public function resetPassword(AuthUser $authUser): bool
     {
         return $authUser->can('ResetPassword:User');
     }

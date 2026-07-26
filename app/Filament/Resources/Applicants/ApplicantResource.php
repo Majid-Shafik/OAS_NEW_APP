@@ -58,6 +58,11 @@ class ApplicantResource extends Resource
         ];
     }
 
+    // public static function canCreate(): bool
+    // {
+    //     return session('selected_unid', 0) != 0;
+    // }
+
     public static function form(Schema $schema): Schema
     {
         return ApplicantForm::configure($schema);

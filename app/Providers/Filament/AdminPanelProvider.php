@@ -57,6 +57,7 @@ class AdminPanelProvider extends PanelProvider
                 'الكليات والبرامج',
                 'المعايير',
                 'إدارة المتقدمين',
+                'المقاصاة',
                 'المستخدمين والصلاحيات',
             ])
             ->middleware([
