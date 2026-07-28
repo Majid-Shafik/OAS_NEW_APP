@@ -83,5 +83,7 @@ return [
         'pay' => 'تسديد',
         'confirm' => 'تأكيد',
         'update_from_ministry_applicant' => 'تحديث من الوزارة',
+        'approve' => 'اعتماد',
+        'show_with_certificate' => 'استعراض الشهادة الثانوية',
     ],
 ];

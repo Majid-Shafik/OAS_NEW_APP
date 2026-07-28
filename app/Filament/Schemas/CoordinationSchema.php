@@ -112,6 +112,8 @@ class CoordinationSchema
                         ->optionsFromConfig('applicant_type')
                         ->live()
                         ->default(1)
+                        ->disabled()
+                        ->dehydrated()
                         ->required(),
                     DatePicker::make('ADMITTED_ON')->label('تاريخ القبول')->dehydrated(false),
                     Grid::make(3)->schema([

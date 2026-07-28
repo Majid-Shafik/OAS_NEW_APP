@@ -61,6 +61,11 @@ class Applicant extends Model
         return $this->hasMany(ApplicationGroup::class, ['UNID', 'APPLICANT_IDENT'], ['UNID', 'APPLICANT_IDENT']);
     }
 
+    public function applicantAttachments()
+    {
+        return $this->hasMany(ApplicantAttachment::class, ['UNID', 'APPLICANT_IDENT'], ['UNID', 'APPLICANT_IDENT']);
+    }
+
     public function applicationsClearing()
     {
         return $this->hasOne(ApplicationsClearing::class, ['UNID', 'APPLICANT_IDENT'], ['UNID', 'APPLICANT_IDENT']);

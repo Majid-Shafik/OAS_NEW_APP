@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Filament\Resources\Applicants\ApplicantResource;
 use App\Filament\Resources\Applications\ApplicationResource;
+use App\Filament\Resources\HighSchoolDegreeBTypes\HighSchoolDegreeBTypeResource;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\Application;
 use BezhanSalleh\FilamentShield\Resources\Roles\RoleResource;
@@ -211,6 +212,17 @@ return [
                 'pay',
                 'confirm',
             ],
+            HighSchoolDegreeBTypeResource::class => [
+                'viewAny',
+                'view',
+                'create',
+                'update',
+                'delete',
+                'deleteAny',
+                'showWithCertificate',
+                'approve',
+            ],
+
             UserResource::class => [
                 'viewAny',
                 'view',

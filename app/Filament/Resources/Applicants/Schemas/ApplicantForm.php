@@ -19,6 +19,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\FileUpload;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Callout;
@@ -46,6 +47,9 @@ class ApplicantForm
                         Hidden::make('applicant_id')->dehydrated(false),
                         Hidden::make('is_searched')->dehydrated(false),
                         Hidden::make('is_not_found')->dehydrated(false),
+                        Hidden::make('hs_degree_not_approved')->dehydrated(false),
+                        Hidden::make('hs_degree_id')->dehydrated(false),
+                        Hidden::make('is_hs_degree_b')->dehydrated(false),
                         Hidden::make('IMPORTED'),
                         Hidden::make('APPLICANT_TYPE'),
                         // القسم الأيمن الأكبر (عرض 9)
@@ -64,13 +68,28 @@ class ApplicantForm
                                             ->description('يرجى إدخال رقم الجلوس وعام التخرج للثانوية العامة ثم النقر على زر "التالي". سيقوم النظام بالبحث عن بياناتك تلقائياً.')
                                             ->info()
                                             ->columnSpanFull(),
+                                        Callout::make('تنبيه هام')
+                                            ->description(function (Get $get) {
+                                                $id = $get('hs_degree_id');
+                                                if ($id) {
+                                                    $url = \App\Filament\Resources\HighSchoolDegreeBTypes\HighSchoolDegreeBTypeResource::getUrl('view', ['record' => $id]);
+                                                    return new \Illuminate\Support\HtmlString("الطالب موجود ضمن بيانات الثانوية من النوع B ولكنه غير مراجع. <a href='{$url}' target='_blank' class='font-bold underline'>انقر هنا لفتح ملفه</a>");
+                                                }
+                                                return '';
+                                            })
+                                            ->danger()
+                                            ->visible(fn(Get $get) => $get('hs_degree_not_approved') === true)
+                                            ->columnSpanFull(),
+
                                         Select::make('UNID')
                                             ->label('الجامعة')
                                             ->options(University::Coordination()->pluck('U_NAME', 'UNID'))
                                             ->searchable()
                                             ->live(),
                                         TextInput::make('search_seatno')->label('رقم الجلوس')->numeric()->dehydrated(false)->required(),
-                                        TextInput::make('search_year')->label('عام التخرج')->numeric()->rule('digits:4')->dehydrated(false)->required(),
+                                        TextInput::make('search_year')->label('عام التخرج')
+                                            ->hint('*سنة الشهادة لعام 2012/2011 هي: 2012')
+                                            ->numeric()->rule('digits:4')->dehydrated(false)->required(),
                                     ])
                                     ->columns(3)
                                     ->visible(fn($livewire) => $livewire instanceof \Filament\Resources\Pages\CreateRecord)
@@ -98,28 +117,32 @@ class ApplicantForm
                                             $set('SEC_SCHOOL_RATE', $existing->SEC_SCHOOL_RATE);
                                             $set('SEC_SCHOOL_TYPE', $existing->SEC_SCHOOL_TYPE);
                                             $set('SEC_SCHOOL_NAME', $existing->SEC_SCHOOL_NAME);
+                                            $set('SEC_SCHOOL_PLACE', $existing->SEC_SCHOOL_PLACE);
                                             $set('SEC_SCHOOL_PROVINCE', $existing->SEC_SCHOOL_PROVINCE);
                                             $set('SEC_SCHOOL_TERRITORY', $existing->SEC_SCHOOL_TERRITORY);
-                                            $set('SEC_SCHOOL_PLACE', $existing->SEC_SCHOOL_PLACE);
 
+                                            $set('FULL_NAME', $existing->FULL_NAME);
                                             $set('FIRST_NAME', $existing->FIRST_NAME);
                                             $set('LAST_NAME', $existing->LAST_NAME);
-                                            $set('FULL_NAME', $existing->FULL_NAME);
-                                            $set('NATIONAL_NUMBER', $existing->NATIONAL_NUMBER);
+
                                             $set('GENDER', $existing->GENDER);
-                                            $set('DATE_OF_BIRTH', $existing->DATE_OF_BIRTH);
+                                            $set('DATE_OF_BIRTH', $existing->DATE_OF_BIRTH ? (\Carbon\Carbon::parse($existing->DATE_OF_BIRTH)->format('Y-m-d')) : null);
                                             $set('PLACE_OF_BIRTH', $existing->PLACE_OF_BIRTH);
                                             $set('PROVINCE', $existing->PROVINCE);
                                             $set('TERRITORY', $existing->TERRITORY);
                                             $set('COUNTRY_NAME', $existing->COUNTRY_NAME);
-                                            $set('IDENT_TYPE', $existing->IDENT_TYPE);
-                                            $set('IDENT_NO', $existing->IDENT_NO);
+                                            $set('YEMEN_NATIONAL', $existing->YEMEN_NATIONAL);
+                                            $set('COUNTRY_NAME', $existing->COUNTRY_NAME);
                                             $set('YEMEN_NATIONAL', $existing->YEMEN_NATIONAL);
                                             $set('EMAIL', $existing->EMAIL);
                                             $set('MOBILE_PHONE', $existing->MOBILE_PHONE);
+                                            
+                                            $set('NATIONAL_NUMBER', $existing->NATIONAL_NUMBER);
+                                            $set('IDENT_NO', $existing->IDENT_NO);
+                                            $set('IDENT_TYPE', $existing->IDENT_TYPE);
                                             $set('BLOOD_GROUP', $existing->BLOOD_GROUP);
+                                            $set('APPLICANT_TYPE', $existing->APPLICANT_TYPE);
 
-                                            \Filament\Notifications\Notification::make()->success()->title('المتقدم موجود مسبقاً، تم جلب بياناته')->send();
                                             return;
                                         }
 
@@ -146,6 +169,7 @@ class ApplicantForm
                                                         $set('is_searched', true);
                                                         $set('is_not_found', false);
                                                         $set('applicant_exists', false);
+                                                        $set('APPLICANT_TYPE', 1);
 
                                                         $set('SEC_SCHOOL_SEATNO', $student['seat_number'] ?? $seat);
                                                         $set('SEC_SCHOOL_YEAR', $student['year'] ?? $year);
@@ -205,9 +229,77 @@ class ApplicantForm
                                         }
 
                                         if (!$found) {
+                                            // 3. البحث في جدول الشهائد ب
+                                            $hsDegree = \App\Models\HighSchoolDegreeBType::where('SEC_SCHOOL_SEATNO', $seat)
+                                                ->where('SEC_SCHOOL_YEAR', $year)
+                                                ->where('UNID', $unid)
+                                                ->first();
+
+                                            if ($hsDegree) {
+                                                if ($hsDegree->APPROVED == 1) {
+                                                    $found = true;
+
+                                                    $set('is_searched', true);
+                                                    $set('is_not_found', false);
+                                                    $set('applicant_exists', false);
+                                                    $set('hs_degree_not_approved', false);
+                                                    $set('is_hs_degree_b', true);
+
+                                                    $set('SEC_SCHOOL_SEATNO', $hsDegree->SEC_SCHOOL_SEATNO);
+                                                    $set('SEC_SCHOOL_YEAR', $hsDegree->SEC_SCHOOL_YEAR);
+                                                    $set('SEC_SCHOOL_MARK', $hsDegree->SEC_SCHOOL_MARK);
+                                                    $set('SEC_SCHOOL_OVERALLMARK', $hsDegree->SEC_SCHOOL_OVERALLMARK);
+                                                    $set('SEC_SCHOOL_RATE', $hsDegree->SEC_SCHOOL_RATE);
+                                                    $set('SEC_SCHOOL_TYPE', $hsDegree->SEC_SCHOOL_TYPE);
+                                                    $set('SEC_SCHOOL_NAME', $hsDegree->SEC_SCHOOL_NAME);
+                                                    $set('SEC_SCHOOL_PLACE', $hsDegree->SEC_SCHOOL_PLACE);
+                                                    $set('SEC_SCHOOL_PROVINCE', $hsDegree->SEC_SCHOOL_PROVINCE);
+                                                    $set('SEC_SCHOOL_TERRITORY', $hsDegree->SEC_SCHOOL_TERRITORY);
+
+                                                    $set('FULL_NAME', $hsDegree->STUDENT_NAME);
+                                                    $nameParts = explode(' ', trim($hsDegree->STUDENT_NAME ?? ''));
+                                                    $set('FIRST_NAME', $nameParts[0] ?? '');
+                                                    $set('LAST_NAME', end($nameParts) ?? '');
+
+                                                    if ($hsDegree->GENDER == 'ذكر') {
+                                                        $set('GENDER', \App\Enums\Gender::Male->value);
+                                                    } elseif ($hsDegree->GENDER == 'انثى' || $hsDegree->GENDER == 'أنثى') {
+                                                        $set('GENDER', \App\Enums\Gender::Female->value);
+                                                    } else {
+                                                        $set('GENDER', $hsDegree->GENDER);
+                                                    }
+
+                                                    if ($hsDegree->DATE_OF_BIRTH) {
+                                                        $set('DATE_OF_BIRTH', $hsDegree->DATE_OF_BIRTH->format('Y-m-d'));
+                                                    }
+                                                    $set('PLACE_OF_BIRTH', $hsDegree->PLACE_OF_BIRTH);
+                                                    $set('PROVINCE', $hsDegree->PROVINCE);
+                                                    $set('TERRITORY', $hsDegree->TERRITORY);
+                                                    $set('COUNTRY_NAME', $hsDegree->COUNTRY_NAME);
+                                                    $set('YEMEN_NATIONAL', $hsDegree->YEMEN_NATIONAL ? 1 : 0);
+                                                    $set('EMAIL', $hsDegree->EMAIL);
+                                                    $set('MOBILE_PHONE', $hsDegree->MOBILE_PHONE);
+
+                                                    $set('IMPORTED', 2);
+                                                    $set('APPLICANT_TYPE', 2);
+
+                                                    \Filament\Notifications\Notification::make()->success()->title('تم جلب البيانات من المعتمدة بنجاح')->send();
+                                                } else {
+                                                    // غير معتمد
+                                                    $set('hs_degree_not_approved', true);
+                                                    $set('hs_degree_id', $hsDegree->SS_IDENT);
+                                                    $set('is_not_found', false);
+                                                    $set('is_searched', true);
+                                                    $found = true; // prevent the !$found fallback from overwriting this
+                                                }
+                                            }
+                                        }
+
+                                        if (!$found) {
                                             $set('is_searched', true);
                                             $set('is_not_found', true);
                                             $set('applicant_exists', false);
+                                            $set('hs_degree_not_approved', false);
                                             $set('IMPORTED', 2);
                                             $set('APPLICANT_TYPE', 2); // النوع B
                                             $set('SEC_SCHOOL_SEATNO', $seat);
@@ -220,43 +312,72 @@ class ApplicantForm
                                     ->description('بيانات المؤهل الثانوي والمعلومات الشخصية')
                                     ->icon('heroicon-o-user')
                                     ->schema([
-                                        TextEntry::make('applicant_exists_warning')
-                                            ->label('')
-                                            ->hiddenLabel()
-                                            ->content(function (Get $get) {
+                                        Callout::make('ملاحظة هامة!')
+                                            ->description(function (Get $get) {
                                                 $id = $get('applicant_id');
                                                 if ($id) {
                                                     $existing = \App\Models\Applicant::find($id);
                                                     if ($existing) {
                                                         $url = \App\Filament\Resources\Applicants\ApplicantResource::getUrl('view', ['record' => $existing]);
-                                                        return new \Illuminate\Support\HtmlString("<div class='p-4 mb-4 text-sm text-yellow-800 rounded-lg bg-yellow-50 dark:bg-gray-800 dark:text-yellow-300' role='alert'><span class='font-medium'>تنبيه:</span> المتقدم موجود مسبقاً في النظام. <a href='{$url}' target='_blank' class='font-bold underline'>انقر هنا لفتح ملفه</a></div>");
+                                                        return new \Illuminate\Support\HtmlString('
+                                                            <div class="mb-4 text-base font-bold">
+                                                                المتقدم موجود مسبقاً في النظام ببيانات معتمدة. يمكنك الاستمرار للتنسيق له في تخصص آخر.
+                                                            </div>
+                                                            <a href="'.$url.'" target="_blank" style="text-decoration: none;" class="fi-btn fi-btn-size-md fi-btn-color-success fi-btn-style-solid shadow-sm inline-flex items-center justify-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold outline-none transition duration-75 bg-success-600 text-white hover:bg-success-500">
+                                                                فتح ملف الطالب في تبويب جديد
+                                                            </a>
+                                                        ');
                                                     }
                                                 }
                                                 return '';
                                             })
+                                            ->success()
                                             ->visible(fn(Get $get) => $get('applicant_exists') === true)
                                             ->columnSpanFull(),
+
+                                        Callout::make('يجب مراجعة واعتماد بيانات الطالب أولاً!')
+                                            ->description(function (Get $get) {
+                                                $id = $get('hs_degree_id');
+                                                $url = $id ? \App\Filament\Resources\HighSchoolDegreeBTypes\HighSchoolDegreeBTypeResource::getUrl('view', ['record' => $id]) : '#';
+                                                
+                                                return new \Illuminate\Support\HtmlString('
+                                                    <div class="mb-4 text-base">
+                                                        هذا الطالب تم إدخال بياناته مسبقاً كشهادة ثانوية من النوع B، ولكنه لا يزال قيد المراجعة ولم يتم اعتماده بعد.<br>
+                                                        لا يمكنك إكمال التنسيق له حتى يتم الاعتماد.
+                                                    </div>
+                                                    <a href="'.$url.'" style="text-decoration: none;" class="fi-btn fi-btn-size-md fi-btn-color-primary fi-btn-style-solid shadow-sm inline-flex items-center justify-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold outline-none transition duration-75 bg-primary-600 text-white hover:bg-primary-500">
+                                                        الذهاب إلى ملف الطالب للمراجعة والاعتماد
+                                                    </a>
+                                                ');
+                                            })
+                                            ->warning()
+                                            ->visible(fn(Get $get) => $get('hs_degree_not_approved') === true)
+                                            ->columnSpanFull(),
+
                                         Fieldset::make('بيانات الثانوية')
+                                            ->hidden(fn(Get $get) => $get('hs_degree_not_approved') === true)
                                             ->columnSpanFull()
                                             ->schema(
                                                 [
-                                                    TextInput::make('SEC_SCHOOL_YEAR')->label('سنة التخرج')->numeric()->rule('digits:4')->live(onBlur: true)
-                                                        ->readOnly(fn(Get $get) => $get('is_searched') && !$get('is_not_found')),
+                                                    TextInput::make('SEC_SCHOOL_YEAR')->label('سنة التخرج')
+                                                        ->hint('*سنة الشهادة لعام 2012/2011 هي: 2012')
+                                                        ->numeric()->rule('digits:4')->live(onBlur: true)
+                                                        ->readOnly(fn(Get $get) => ($get('is_searched') && !$get('is_not_found')) || $get('is_hs_degree_b')),
                                                     Select::make('SEC_SCHOOL_TYPE')->label('نوع الثانوية')
                                                         ->options(\App\Models\ComboValue::getOptionsValuesByCode(1))
                                                         ->live()
                                                         ->searchable()
-                                                        ->disabled(fn(Get $get) => $get('is_searched') && !$get('is_not_found'))->dehydrated(),
+                                                        ->disabled(fn(Get $get) => ($get('is_searched') && !$get('is_not_found')) || $get('is_hs_degree_b'))->dehydrated(),
                                                     TextInput::make('SEC_SCHOOL_NAME')->label('اسم المدرسة')
-                                                        ->readOnly(fn(Get $get) => $get('is_searched') && !$get('is_not_found')),
+                                                        ->readOnly(fn(Get $get) => ($get('is_searched') && !$get('is_not_found')) || $get('is_hs_degree_b')),
                                                     TextInput::make('SEC_SCHOOL_SEATNO')->label('رقم الجلوس')->live(onBlur: true)
-                                                        ->readOnly(fn(Get $get) => $get('is_searched') && !$get('is_not_found')),
+                                                        ->readOnly(fn(Get $get) => ($get('is_searched') && !$get('is_not_found')) || $get('is_hs_degree_b')),
                                                     TextInput::make('SEC_SCHOOL_MARK')
                                                         ->label('المجموع')
                                                         ->numeric()
                                                         ->lte('SEC_SCHOOL_OVERALLMARK')
                                                         ->live(onBlur: true)
-                                                        ->readOnly(fn(Get $get) => $get('is_searched') && !$get('is_not_found'))
+                                                        ->readOnly(fn(Get $get) => ($get('is_searched') && !$get('is_not_found')) || $get('is_hs_degree_b'))
                                                         ->afterStateUpdated(function (Set $set, Get $get, $state) {
                                                             $overall = floatval($get('SEC_SCHOOL_OVERALLMARK'));
                                                             $mark = floatval($state);
@@ -268,7 +389,7 @@ class ApplicantForm
                                                         ->label('المجموع الكلي')
                                                         ->numeric()
                                                         ->live(onBlur: true)
-                                                        ->readOnly(fn(Get $get) => $get('is_searched') && !$get('is_not_found'))
+                                                        ->readOnly(fn(Get $get) => ($get('is_searched') && !$get('is_not_found')) || $get('is_hs_degree_b'))
                                                         ->afterStateUpdated(function (Set $set, Get $get, $state) {
                                                             $overall = floatval($state);
                                                             $mark = floatval($get('SEC_SCHOOL_MARK'));
@@ -280,7 +401,7 @@ class ApplicantForm
                                                         ->label('المعدل')
                                                         ->numeric()
                                                         ->suffix('%')
-                                                        ->readOnly(fn(Get $get) => $get('is_searched') && !$get('is_not_found'))
+                                                        ->readOnly(fn(Get $get) => ($get('is_searched') && !$get('is_not_found')) || $get('is_hs_degree_b'))
                                                         ->rules([
                                                             fn(Get $get): \Closure => function (string $attribute, $value, \Closure $fail) use ($get) {
                                                                 $mark = floatval($get('SEC_SCHOOL_MARK'));
@@ -300,7 +421,8 @@ class ApplicantForm
                                                         ->options(fn() => Province::pluck('NAME', 'NAME')->filter(fn($v) => ! empty($v))->toArray())
                                                         ->live()
                                                         ->required()
-                                                        ->searchable(),
+                                                        ->searchable()
+                                                        ->disabled(fn(Get $get) => ($get('is_searched') && !$get('is_not_found')) || $get('is_hs_degree_b'))->dehydrated(),
                                                     Select::make('SEC_SCHOOL_TERRITORY')->label('مديرية الثانوية')
                                                         ->options(function (Get $get) {
                                                             $province = $get('SEC_SCHOOL_PROVINCE');
@@ -311,11 +433,56 @@ class ApplicantForm
 
                                                             return $query->pluck('SEC_SCHOOL_TERRITORY', 'SEC_SCHOOL_TERRITORY')->filter(fn($v) => ! empty($v))->toArray();
                                                         })
-                                                        ->searchable(),
-                                                    TextInput::make('SEC_SCHOOL_PLACE')->label('مكان الثانوية'),
+                                                        ->searchable()
+                                                        ->disabled(fn(Get $get) => ($get('is_searched') && !$get('is_not_found')) || $get('is_hs_degree_b'))->dehydrated(),
+                                                    TextInput::make('SEC_SCHOOL_PLACE')->label('مكان الثانوية')
+                                                        ->readOnly(fn(Get $get) => ($get('is_searched') && !$get('is_not_found')) || $get('is_hs_degree_b')),
+                                                    FileUpload::make('secondary_certificate')
+                                                        ->label('صورة شهادة الثانوية')
+                                                        ->columnSpanFull()
+                                                        ->disk(config('legacy_attachments.disk', 'public'))
+                                                        ->acceptedFileTypes(['image/jpeg', 'image/jpg', 'image/png'])
+                                                        ->maxSize(1500)
+                                                        ->openable()
+                                                        ->imageEditor()
+                                                        ->downloadable()
+                                                        ->formatStateUsing(function ($record) {
+                                                            if (!$record) return null;
+                                                            $activeConnection = $record->getConnectionName() ?? config('database.default');
+                                                            $baseDir = config("legacy_attachments.systems.{$activeConnection}", "uploads/{$activeConnection}");
+                                                            
+                                                            // Check for JPG first, then PDF
+                                                            $filePathJpg = rtrim($baseDir, '/') . '/images/attachments/secondary/' . $record->UNID . '-' . $record->APPLICANT_IDENT . '.jpg';
+                                                            $filePathPdf = rtrim($baseDir, '/') . '/images/attachments/secondary/' . $record->UNID . '-' . $record->APPLICANT_IDENT . '.pdf';
+                                                            
+                                                            if (\Illuminate\Support\Facades\Storage::disk(config('legacy_attachments.disk', 'public'))->exists($filePathJpg)) {
+                                                                return $filePathJpg;
+                                                            }
+                                                            return \Illuminate\Support\Facades\Storage::disk(config('legacy_attachments.disk', 'public'))->exists($filePathPdf) ? $filePathPdf : null;
+                                                        })
+                                                        ->dehydrated(false)
+                                                        ->saveRelationshipsUsing(function (\Illuminate\Database\Eloquent\Model $record, $state) {
+                                                            if (!$state) return;
+                                                            $file = is_array($state) ? reset($state) : $state;
+                                                            if ($file instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile) {
+                                                                $activeConnection = $record->getConnectionName() ?? config('database.default');
+                                                                $baseDir = config("legacy_attachments.systems.{$activeConnection}", "uploads/{$activeConnection}");
+                                                                $path = rtrim($baseDir, '/') . '/images/attachments/secondary';
+                                                                $extension = $file->getClientOriginalExtension();
+                                                                $filename = "{$record->UNID}-{$record->APPLICANT_IDENT}.{$extension}";
+                                                                $file->storeAs($path, $filename, config('legacy_attachments.disk', 'public'));
+                                                                \App\Models\ApplicantAttachment::updateOrCreate(
+                                                                    ['UNID' => $record->UNID, 'APPLICANT_IDENT' => $record->APPLICANT_IDENT, 'ATTACH_IDENT' => 2],
+                                                                    []
+                                                                );
+                                                            }
+                                                        })
+                                                        ->visible(fn(Get $get) => $get('APPLICANT_TYPE') == 2 || $get('IS_CLEARING') == 1)
+                                                        ->required(fn(Get $get) => $get('APPLICANT_TYPE') == 2),
                                                 ]
                                             )->columns(4),
                                         Fieldset::make('بيانات المتقدم')
+                                            ->hidden(fn(Get $get) => $get('hs_degree_not_approved') === true)
                                             ->columnSpanFull()
                                             ->columns(4)
                                             ->schema(
@@ -324,12 +491,14 @@ class ApplicantForm
                                                         ->label('الاسم الأول')
                                                         ->required()
                                                         ->live(onBlur: true)
+                                                        ->readOnly(fn(Get $get) => ($get('is_searched') && !$get('is_not_found')) || $get('is_hs_degree_b'))
                                                         ->afterStateUpdated(function (Get $get, Set $set, ?string $state) {
                                                             $set('FULL_NAME', trim($state . ' ' . $get('LAST_NAME')));
                                                         }),
                                                     TextInput::make('LAST_NAME')
                                                         ->label('اللقب')
                                                         ->live(onBlur: true)
+                                                        ->readOnly(fn(Get $get) => ($get('is_searched') && !$get('is_not_found')) || $get('is_hs_degree_b'))
                                                         ->afterStateUpdated(function (Get $get, Set $set, ?string $state) {
                                                             $set('FULL_NAME', trim($get('FIRST_NAME') . ' ' . $state));
                                                         }),
@@ -338,16 +507,20 @@ class ApplicantForm
                                                         ->readOnly()
                                                         ->required(),
                                                     TextInput::make('NATIONAL_NUMBER')->label('الرقم الوطني')->numeric(),
-                                                    Select::make('GENDER')->label('الجنس')->options(\App\Models\ComboValue::getOptionsValuesByCode(6))->searchable(),
+                                                    Select::make('GENDER')->label('الجنس')->options(\App\Models\ComboValue::getOptionsValuesByCode(6))->searchable()
+                                                        ->disabled(fn(Get $get) => ($get('is_searched') && !$get('is_not_found')) || $get('is_hs_degree_b'))->dehydrated(),
                                                     DatePicker::make('DATE_OF_BIRTH')
                                                         ->label('تاريخ الميلاد')
                                                         ->default(now()->subYears(18)->format('Y-m-d'))
-                                                        ->maxDate(now()->subYears(14)),
-                                                    TextInput::make('PLACE_OF_BIRTH')->label('محل الميلاد'),
+                                                        ->maxDate(now()->subYears(14))
+                                                        ->disabled(fn(Get $get) => ($get('is_searched') && !$get('is_not_found')) || $get('is_hs_degree_b'))->dehydrated(),
+                                                    TextInput::make('PLACE_OF_BIRTH')->label('محل الميلاد')
+                                                        ->readOnly(fn(Get $get) => ($get('is_searched') && !$get('is_not_found')) || $get('is_hs_degree_b')),
                                                     Select::make('PROVINCE')->label('المحافظة')
                                                         ->options(fn() => Province::pluck('NAME', 'NAME')->filter(fn($v) => ! empty($v))->toArray())
                                                         ->live()
                                                         ->required()
+                                                        ->disabled(fn(Get $get) => ($get('is_searched') && !$get('is_not_found')) || $get('is_hs_degree_b'))->dehydrated()
                                                         ->searchable(),
                                                     Select::make('TERRITORY')->label('المديرية')
                                                         ->options(function (Get $get) {
@@ -360,24 +533,122 @@ class ApplicantForm
                                                             return $query->pluck('TERRITORY', 'TERRITORY')->filter(fn($v) => ! empty($v))->toArray();
                                                         })
                                                         ->required()
+                                                        ->disabled(fn(Get $get) => ($get('is_searched') && !$get('is_not_found')) || $get('is_hs_degree_b'))->dehydrated()
                                                         ->searchable(),
                                                     Select::make('COUNTRY_NAME')->label('الدولة')
                                                         ->options(fn() => Country::pluck('COUNTRY_NAME', 'COUNTRY_NAME')->filter(fn($v) => ! empty($v))->toArray())
                                                         ->default('اليمن')
-                                                        ->required()->searchable(),
+                                                        ->required()->searchable()
+                                                        ->disabled(fn(Get $get) => ($get('is_searched') && !$get('is_not_found')) || $get('is_hs_degree_b'))->dehydrated(),
                                                     Select::make('IDENT_TYPE')
                                                         ->label('نوع الهوية')
                                                         ->options(\App\Models\ComboValue::getOptionsValuesByCode(7))
                                                         ->default(fn() => \App\Models\ComboValue::where('CODE', 7)->where('VALUE', 'like', '%بطاقة%')->value('VALUE') ?? \App\Models\ComboValue::where('CODE', 7)->first()?->VALUE)
-                                                        ->searchable(),
+                                                        ->searchable()
+                                                        ->disabled(fn(Get $get) => ($get('is_searched') && !$get('is_not_found')) || $get('is_hs_degree_b'))->dehydrated(),
                                                     TextInput::make('IDENT_NO')->label('رقم الهوية'),
-                                                    Toggle::make('YEMEN_NATIONAL')->label('جنسية يمنية')->default(true)->required(),
+                                                    Toggle::make('YEMEN_NATIONAL')->label('جنسية يمنية')->default(true)->required()
+                                                        ->disabled(fn(Get $get) => ($get('is_searched') && !$get('is_not_found')) || $get('is_hs_degree_b'))->dehydrated(),
                                                     TextInput::make('EMAIL')->label('البريد الإلكتروني'),
                                                     TextInput::make('MOBILE_PHONE')->label('رقم الهاتف'),
                                                     Select::make('BLOOD_GROUP')->label('فصيلة الدم')->options(\App\Models\ComboValue::getOptionsValuesByCode(8))->searchable(),
 
                                                 ]
                                             ),
+
+                                        Section::make('مرفقات المقاصة')
+                                            ->description('المرفقات الخاصة بطلاب المقاصة')
+                                            ->visible(fn(Get $get) => $get('IS_CLEARING') == 1)
+                                            ->schema([
+                                                FileUpload::make('clearing_attachment_3')
+                                                    ->label('كشف درجات الطالب')
+                                                    ->disk(config('legacy_attachments.disk', 'public'))
+                                                    ->acceptedFileTypes(['application/pdf'])
+                                                    ->maxSize(7500)
+                                                    ->formatStateUsing(function ($record) {
+                                                        if (!$record) return null;
+                                                        $activeConnection = $record->getConnectionName() ?? config('database.default');
+                                                        $baseDir = config("legacy_attachments.systems.{$activeConnection}", "uploads/{$activeConnection}");
+                                                        $filePath = rtrim($baseDir, '/') . '/images/attachments/grades/' . $record->UNID . '-' . $record->APPLICANT_IDENT . '.pdf';
+                                                        return \Illuminate\Support\Facades\Storage::disk(config('legacy_attachments.disk', 'public'))->exists($filePath) ? $filePath : null;
+                                                    })
+                                                    ->dehydrated(false)
+                                                    ->saveRelationshipsUsing(function (\Illuminate\Database\Eloquent\Model $record, $state) {
+                                                        if (!$state) return;
+                                                        $file = is_array($state) ? reset($state) : $state;
+                                                        if ($file instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile) {
+                                                            $activeConnection = $record->getConnectionName() ?? config('database.default');
+                                                            $baseDir = config("legacy_attachments.systems.{$activeConnection}", "uploads/{$activeConnection}");
+                                                            $path = rtrim($baseDir, '/') . '/images/attachments/grades';
+                                                            $filename = "{$record->UNID}-{$record->APPLICANT_IDENT}.pdf";
+                                                            $file->storeAs($path, $filename, config('legacy_attachments.disk', 'public'));
+                                                            \App\Models\ApplicantAttachment::updateOrCreate(
+                                                                ['UNID' => $record->UNID, 'APPLICANT_IDENT' => $record->APPLICANT_IDENT, 'ATTACH_IDENT' => 3],
+                                                                []
+                                                            );
+                                                        }
+                                                    })
+                                                    ->required(),
+
+                                                FileUpload::make('clearing_attachment_4')
+                                                    ->label('استمارة المقاصة')
+                                                    ->disk(config('legacy_attachments.disk', 'public'))
+                                                    ->acceptedFileTypes(['application/pdf'])
+                                                    ->maxSize(7500)
+                                                    ->formatStateUsing(function ($record) {
+                                                        if (!$record) return null;
+                                                        $activeConnection = $record->getConnectionName() ?? config('database.default');
+                                                        $baseDir = config("legacy_attachments.systems.{$activeConnection}", "uploads/{$activeConnection}");
+                                                        $filePath = rtrim($baseDir, '/') . '/images/attachments/clearing/' . $record->UNID . '-' . $record->APPLICANT_IDENT . '.pdf';
+                                                        return \Illuminate\Support\Facades\Storage::disk(config('legacy_attachments.disk', 'public'))->exists($filePath) ? $filePath : null;
+                                                    })
+                                                    ->dehydrated(false)
+                                                    ->saveRelationshipsUsing(function (\Illuminate\Database\Eloquent\Model $record, $state) {
+                                                        if (!$state) return;
+                                                        $file = is_array($state) ? reset($state) : $state;
+                                                        if ($file instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile) {
+                                                            $activeConnection = $record->getConnectionName() ?? config('database.default');
+                                                            $baseDir = config("legacy_attachments.systems.{$activeConnection}", "uploads/{$activeConnection}");
+                                                            $path = rtrim($baseDir, '/') . '/images/attachments/clearing';
+                                                            $filename = "{$record->UNID}-{$record->APPLICANT_IDENT}.pdf";
+                                                            $file->storeAs($path, $filename, config('legacy_attachments.disk', 'public'));
+                                                            \App\Models\ApplicantAttachment::updateOrCreate(
+                                                                ['UNID' => $record->UNID, 'APPLICANT_IDENT' => $record->APPLICANT_IDENT, 'ATTACH_IDENT' => 4],
+                                                                []
+                                                            );
+                                                        }
+                                                    })
+                                                    ->required(),
+
+                                                FileUpload::make('clearing_attachment_5')
+                                                    ->label('صورة الاستثناء ان وجد')
+                                                    ->disk(config('legacy_attachments.disk', 'public'))
+                                                    ->acceptedFileTypes(['application/pdf'])
+                                                    ->maxSize(7500)
+                                                    ->formatStateUsing(function ($record) {
+                                                        if (!$record) return null;
+                                                        $activeConnection = $record->getConnectionName() ?? config('database.default');
+                                                        $baseDir = config("legacy_attachments.systems.{$activeConnection}", "uploads/{$activeConnection}");
+                                                        $filePath = rtrim($baseDir, '/') . '/images/attachments/exceptions/' . $record->UNID . '-' . $record->APPLICANT_IDENT . '.pdf';
+                                                        return \Illuminate\Support\Facades\Storage::disk(config('legacy_attachments.disk', 'public'))->exists($filePath) ? $filePath : null;
+                                                    })
+                                                    ->dehydrated(false)
+                                                    ->saveRelationshipsUsing(function (\Illuminate\Database\Eloquent\Model $record, $state) {
+                                                        if (!$state) return;
+                                                        $file = is_array($state) ? reset($state) : $state;
+                                                        if ($file instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile) {
+                                                            $activeConnection = $record->getConnectionName() ?? config('database.default');
+                                                            $baseDir = config("legacy_attachments.systems.{$activeConnection}", "uploads/{$activeConnection}");
+                                                            $path = rtrim($baseDir, '/') . '/images/attachments/exceptions';
+                                                            $filename = "{$record->UNID}-{$record->APPLICANT_IDENT}.pdf";
+                                                            $file->storeAs($path, $filename, config('legacy_attachments.disk', 'public'));
+                                                            \App\Models\ApplicantAttachment::updateOrCreate(
+                                                                ['UNID' => $record->UNID, 'APPLICANT_IDENT' => $record->APPLICANT_IDENT, 'ATTACH_IDENT' => 5],
+                                                                []
+                                                            );
+                                                        }
+                                                    }),
+                                            ])->columns(3),
 
 
 
@@ -386,7 +657,30 @@ class ApplicantForm
                                 Step::make('بيانات المقاصة والقبول')
                                     ->description('تحديد نوع المتقدم والقبول في الكلية والتخصص')
                                     ->icon('heroicon-o-document-check')
-                                    ->schema(\App\Filament\Schemas\CoordinationSchema::getSchema())
+                                    ->hidden(fn(Get $get) => $get('hs_degree_not_approved') === true)
+                                    ->schema(function (Get $get) {
+                                        if ($get('is_not_found')) {
+                                            return [
+                                                Placeholder::make('type_b_notice')
+                                                    ->label('')
+                                                    ->content(new \Illuminate\Support\HtmlString('
+                                                        <div class="p-6 bg-blue-50 border-r-4 border-blue-500 rounded-lg shadow-sm" style="direction: rtl;">
+                                                            <div class="flex items-center mb-4">
+                                                                <svg class="w-8 h-8 text-blue-600 ml-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                                                <h3 class="text-xl font-bold text-blue-800">حفظ كشهادة (نوع B)</h3>
+                                                            </div>
+                                                            <p class="text-blue-700 text-lg mb-2">
+                                                                نظراً لعدم وجود بيانات هذا الطالب في النظام أو في بيانات الوزارة، سيتم حفظ هذه البيانات كشهادة ثانوية من النوع B.
+                                                            </p>
+                                                            <p class="text-blue-700 text-lg font-bold">
+                                                                يرجى النقر على زر <span class="bg-primary-600 text-white px-2 py-1 rounded text-sm mx-1">تأكيد / إنشاء</span> بالأسفل لحفظ البيانات. سيتم بعد ذلك نقلك تلقائياً إلى شاشة عرض ملف الطالب لمراجعة بياناته واعتمادها حتى تستطيع تسجيله في تخصص.
+                                                            </p>
+                                                        </div>
+                                                    ')),
+                                            ];
+                                        }
+                                        return \App\Filament\Schemas\CoordinationSchema::getSchema();
+                                    })
                                     ->columns(2),
                             ])
                                 ->columnSpan('full'),

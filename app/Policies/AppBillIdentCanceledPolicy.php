@@ -24,19 +24,16 @@ class AppBillIdentCanceledPolicy
 
     public function create(AuthUser $authUser): bool
     {
-        return false;
         return $authUser->can('Create:AppBillIdentCanceled');
     }
-    
+
     public function update(AuthUser $authUser, AppBillIdentCanceled $appBillIdentCanceled): bool
     {
-        return false;
         return $authUser->can('Update:AppBillIdentCanceled');
     }
-    
+
     public function delete(AuthUser $authUser, AppBillIdentCanceled $appBillIdentCanceled): bool
     {
-        return false;
         return $authUser->can('Delete:AppBillIdentCanceled');
     }
 
