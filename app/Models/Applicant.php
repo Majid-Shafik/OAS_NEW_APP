@@ -106,6 +106,14 @@ class Applicant extends Model
         static::creating(function ($applicant) {
             $applicant->INSERTED_BY = $applicant->INSERTED_BY ?? (auth()->id() ?? -1);
             $applicant->RECORDDATE = $applicant->RECORDDATE ?? now();
+            
+            if (empty($applicant->APPLICANT_IDENT)) {
+                // قفل سجل الجامعة لمنع التداخل (Race Condition) أثناء توليد المعرف
+                \App\Models\University::where('UNID', $applicant->UNID)->lockForUpdate()->first();
+                
+                $maxIdent = static::where('UNID', $applicant->UNID)->max('APPLICANT_IDENT');
+                $applicant->APPLICANT_IDENT = $maxIdent ? $maxIdent + 1 : 1;
+            }
         });
 
         static::updating(function ($applicant) {

@@ -18,7 +18,7 @@ class ClearingStatisticsDashboard extends BaseDashboard
 
     protected static ?int $navigationSort = 100;
     protected static string $routePath = 'clearing-statistics';
-    protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-academic-cap';
+    protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-chart-bar-square';
 
     public function filtersForm(Schema $schema): Schema
     {

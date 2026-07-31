@@ -6,6 +6,8 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -43,6 +45,41 @@ class UniversitiesTable
                     ]),
             ])
             ->recordActions([
+                \Filament\Actions\Action::make('paymentSettings')
+                    ->label('إعدادات السداد')
+                    ->icon('heroicon-o-currency-dollar')
+                    ->color('warning')
+                    ->visible(fn() => auth()->user()->can('UpdatePaymentSettings:University') || auth()->user()->isAdmin())
+                    ->schema([
+                        Toggle::make('PAY_METHOD_POST')
+                            ->label('تفعيل السداد عبر البريد'),
+                        Toggle::make('PAY_METHOD_CAC')
+                            ->label('تفعيل السداد عبر كاك بنك'),
+                        Toggle::make('PAY_METHOD_UN')
+                            ->label('تفعيل السداد عبر الجامعة'),
+                        TextInput::make('GS_TITLE_PAYMENT')
+                            ->label('عنوان حافظة السداد')
+                            ->maxLength(255)
+                            ->hint('مثل: حافظة توريد رسوم التسجيل لحساب جامعة سبأ'),
+                    ])
+                    ->action(function ($record, array $data) {
+                        $record->update([
+                            'PAY_METHOD_POST' => $data['PAY_METHOD_POST'] ? 1 : 0,
+                            'PAY_METHOD_CAC' => $data['PAY_METHOD_CAC'] ? 1 : 0,
+                            'PAY_METHOD_UN' => $data['PAY_METHOD_UN'] ? 1 : 0,
+                            'GS_TITLE_PAYMENT' => $data['GS_TITLE_PAYMENT'],
+                        ]);
+                        \Filament\Notifications\Notification::make()
+                            ->title('تم حفظ إعدادات السداد بنجاح')
+                            ->success()
+                            ->send();
+                    })
+                    ->fillForm(fn ($record) => [
+                        'PAY_METHOD_POST' => (bool) $record->PAY_METHOD_POST,
+                        'PAY_METHOD_CAC' => (bool) $record->PAY_METHOD_CAC,
+                        'PAY_METHOD_UN' => (bool) $record->PAY_METHOD_UN,
+                        'GS_TITLE_PAYMENT' => $record->GS_TITLE_PAYMENT,
+                    ]),
                 ViewAction::make(),
                 EditAction::make(),
             ])

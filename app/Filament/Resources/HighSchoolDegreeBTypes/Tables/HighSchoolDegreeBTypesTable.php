@@ -29,6 +29,10 @@ class HighSchoolDegreeBTypesTable
                     ->label('رقم الجلوس')
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('SEC_SCHOOL_TYPE')
+                    ->label('نوع الثانوية')
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('SEC_SCHOOL_YEAR')
                     ->label('سنة التخرج')
                     ->sortable(),

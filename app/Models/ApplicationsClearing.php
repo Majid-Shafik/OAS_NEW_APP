@@ -44,4 +44,28 @@ class ApplicationsClearing extends Model
     {
         return $this->belongsTo(Applicant::class, ['UNID', 'APPLICANT_IDENT'], ['UNID', 'APPLICANT_IDENT']);
     }
+
+    public function clearingAttachments()
+    {
+        return $this->hasMany(ApplicantAttachment::class, ['UNID', 'APPLICANT_IDENT'], ['UNID', 'APPLICANT_IDENT'])
+                    ->whereIn('ATTACH_IDENT', [3, 4, 5]);
+    }
+
+    public function gradesAttachment()
+    {
+        return $this->hasOne(ApplicantAttachment::class, ['UNID', 'APPLICANT_IDENT'], ['UNID', 'APPLICANT_IDENT'])
+                    ->where('ATTACH_IDENT', 3);
+    }
+
+    public function clearingFormAttachment()
+    {
+        return $this->hasOne(ApplicantAttachment::class, ['UNID', 'APPLICANT_IDENT'], ['UNID', 'APPLICANT_IDENT'])
+                    ->where('ATTACH_IDENT', 4);
+    }
+
+    public function exceptionAttachment()
+    {
+        return $this->hasOne(ApplicantAttachment::class, ['UNID', 'APPLICANT_IDENT'], ['UNID', 'APPLICANT_IDENT'])
+                    ->where('ATTACH_IDENT', 5);
+    }
 }

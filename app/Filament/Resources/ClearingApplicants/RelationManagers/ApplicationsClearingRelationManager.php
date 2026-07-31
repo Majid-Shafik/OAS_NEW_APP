@@ -64,22 +64,8 @@ class ApplicationsClearingRelationManager extends RelationManager
             ->filters([
                 //
             ])
-            ->headerActions([
-                CreateAction::make()
-                    ->mutateFormDataUsing(function (array $data): array {
-                        $data['UNID'] = $this->ownerRecord->UNID;
-                        $data['APPLICANT_IDENT'] = $this->ownerRecord->APPLICANT_IDENT;
-                        return $data;
-                    }),
-            ])
-            ->recordActions([
-                EditAction::make(),
-                DeleteAction::make(),
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
-            ]);
+            ->headerActions([])
+            ->recordActions([])
+            ->bulkActions([]);
     }
 }

@@ -29,6 +29,10 @@ class ApplicantPolicy
 
     public function update(AuthUser $authUser, Applicant $applicant): bool
     {
+        if ($applicant->STATUS === \App\Enums\ApplicantStatus::Ready && !$authUser->hasRole(['super_admin', 'admin'])) {
+            return false;
+        }
+        
         return $authUser->can('Update:Applicant');
     }
 

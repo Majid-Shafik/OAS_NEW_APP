@@ -34,3 +34,35 @@ Route::get('/admin/high-school-certificates/{record}', function (\App\Models\Hig
     // 4. Return the file
     return $disk->response($path);
 })->middleware(['auth', 'web'])->name('high-school.certificate.download');
+
+Route::get('/admin/applicant/{unid}/{applicant_ident}/receipt', [\App\Http\Controllers\ApplicantReceiptController::class, 'show'])
+    ->middleware(['auth', 'web'])
+    ->name('applicant.receipt');
+
+Route::get('/admin/clearing-attachments/{unid}/{applicant_ident}/{type}', function ($unid, $applicant_ident, $type) {
+    $record = \App\Models\ClearingApplicant::where('UNID', $unid)->where('APPLICANT_IDENT', $applicant_ident)->firstOrFail();
+
+    // Check authorization
+    if (!auth()->user()->can('showClearingAttachments', $record) && !auth()->user()->can('approve', $record)) {
+        abort(403, 'عذراً، ليس لديك صلاحية لاستعراض هذا المرفق.');
+    }
+
+    $allowedTypes = ['grades', 'clearing', 'exceptions'];
+    if (!in_array($type, $allowedTypes)) {
+        abort(404);
+    }
+
+    $activeConnection = $record->getConnectionName() ?? config('database.default');
+    $dbName = config("database.connections.{$activeConnection}.database");
+    $baseDir = config("legacy_attachments.systems.{$dbName}", config("legacy_attachments.systems.{$activeConnection}", "uploads/{$activeConnection}"));
+
+    $path = rtrim($baseDir, '/') . "/images/attachments/{$type}/{$record->UNID}-{$record->APPLICANT_IDENT}.pdf";
+
+    $disk = \Illuminate\Support\Facades\Storage::disk(config('legacy_attachments.disk', 'public'));
+
+    if (!$disk->exists($path)) {
+        abort(404, 'الملف غير موجود');
+    }
+
+    return $disk->response($path);
+})->middleware(['auth', 'web'])->name('clearing.attachment.download');

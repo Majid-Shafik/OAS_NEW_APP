@@ -13,7 +13,7 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use App\Models\University;
-use App\Filament\Schemas\CoordinationSchema;
+
 
 class ApplicationForm
 {
@@ -30,7 +30,7 @@ class ApplicationForm
                         $applicant = Applicant::find($applicantId);
                         if (!$applicant) return [];
 
-                        $offerings = CoordinationSchema::getFilteredOfferings(
+                        $offerings = self::getFilteredOfferings(
                             $applicant->SEC_SCHOOL_TYPE,
                             $applicant->SEC_SCHOOL_RATE,
                             $applicant->SEC_SCHOOL_YEAR,
@@ -67,7 +67,7 @@ class ApplicationForm
                         if (!$applicantId) return Faculty::where('UNID', $unid)->pluck('FACULTY_NAME', 'FACULTY_IDENT');
 
                         $applicant = Applicant::find($applicantId);
-                        $offerings = CoordinationSchema::getFilteredOfferings(
+                        $offerings = self::getFilteredOfferings(
                             $applicant->SEC_SCHOOL_TYPE,
                             $applicant->SEC_SCHOOL_RATE,
                             $applicant->SEC_SCHOOL_YEAR,
@@ -88,7 +88,7 @@ class ApplicationForm
                         if (!$applicantId) return Program::where('UNID', $unid)->where('FACULTY_IDENT', $facultyId)->pluck('PROGRAM_NAME', 'PROGRAM_IDENT');
 
                         $applicant = Applicant::find($applicantId);
-                        $offerings = CoordinationSchema::getFilteredOfferings(
+                        $offerings = self::getFilteredOfferings(
                             $applicant->SEC_SCHOOL_TYPE,
                             $applicant->SEC_SCHOOL_RATE,
                             $applicant->SEC_SCHOOL_YEAR,
@@ -110,7 +110,7 @@ class ApplicationForm
                         if (!$applicantId) return StudyType::pluck('STUDYTYPE_NAME', 'STUDYTYPE_IDENT');
 
                         $applicant = Applicant::find($applicantId);
-                        $offerings = CoordinationSchema::getFilteredOfferings(
+                        $offerings = self::getFilteredOfferings(
                             $applicant->SEC_SCHOOL_TYPE,
                             $applicant->SEC_SCHOOL_RATE,
                             $applicant->SEC_SCHOOL_YEAR,
@@ -150,5 +150,52 @@ class ApplicationForm
                     ->options(ApplicationStatus::class)
                     ->required(),
             ]);
+    }
+
+    public static function getFilteredOfferings($secType, $secRate, $secYear, $isYemeni): \Illuminate\Database\Eloquent\Builder
+    {
+        $query = \App\Models\Offering::query()->where('APPROVAL', 1);
+
+        $dbName = \Illuminate\Support\Facades\DB::connection()->getDatabaseName();
+        $sessionDb = session('tenant_database', '');
+        $isArchive = str_contains($dbName, 'p_oas_db_20') || str_contains($sessionDb, 'p_oas_db_20');
+
+        if (!$isArchive) {
+            $query->whereDate('FROM_DATE', '<=', now())
+                  ->whereDate('TO_DATE', '>=', now());
+        }
+
+        if ($secType) {
+            $query->where('SEC_SCHOOL_TYPE', $secType);
+        }
+
+        if ($secRate) {
+            $query->where('SEC_SCHOOL_ACCEPT_RATE', '<=', $secRate);
+        }
+
+        if ($secYear) {
+            $currentYear = (int) date('Y');
+            if (preg_match('/(20\d{2})/', $sessionDb, $matches)) {
+                $currentYear = (int)$matches[1];
+            } elseif (preg_match('/(20\d{2})/', $dbName, $matches)) {
+                $currentYear = (int)$matches[1];
+            }
+
+            $age = max(0, $currentYear - (int)$secYear);
+
+            if ($isYemeni) {
+                $query->where(function ($q) use ($age) {
+                    $q->whereNull('Y_SEC_SCHOOL_MAX_AGE')
+                        ->orWhere('Y_SEC_SCHOOL_MAX_AGE', '>=', $age);
+                });
+            } else {
+                $query->where(function ($q) use ($age) {
+                    $q->whereNull('NY_SEC_SCHOOL_MAX_AGE')
+                        ->orWhere('NY_SEC_SCHOOL_MAX_AGE', '>=', $age);
+                });
+            }
+        }
+
+        return $query;
     }
 }

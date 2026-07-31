@@ -60,7 +60,27 @@ return [
             'strict' => true,
             'engine' => null,
             'options' => extension_loaded('pdo_mysql') ? array_filter([
-                Mysql::ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+            ]) : [],
+        ],
+
+        'ministry_db' => [
+            'driver' => 'mysql',
+            'url' => env('MINISTRY_DB_URL'),
+            'host' => env('MINISTRY_DB_HOST', '127.0.0.1'),
+            'port' => env('MINISTRY_DB_PORT', '3306'),
+            'database' => env('MINISTRY_DB_DATABASE', 'oas_results'),
+            'username' => env('MINISTRY_DB_USERNAME', 'root'),
+            'password' => env('MINISTRY_DB_PASSWORD', ''),
+            'unix_socket' => env('MINISTRY_DB_SOCKET', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => true,
+            'engine' => null,
+            'options' => extension_loaded('pdo_mysql') ? array_filter([
+                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
             ]) : [],
         ],
 

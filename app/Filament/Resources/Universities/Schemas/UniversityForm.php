@@ -15,6 +15,8 @@ class UniversityForm
                 TextInput::make('UNID')
                     ->label(__('UNID'))
                     ->required()
+                    ->dehydrated(false)
+                    ->disabled()
                     ->numeric(),
                 TextInput::make('U_NAME')
                     ->label(__('U_NAME'))

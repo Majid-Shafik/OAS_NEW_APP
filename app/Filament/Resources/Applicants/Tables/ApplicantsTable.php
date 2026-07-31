@@ -22,6 +22,8 @@ class ApplicantsTable
 {
     public static function configure(Table $table): Table
     {
+        $isClearing = str_contains(get_class($table->getLivewire()), 'Clearing');
+
         return $table
             ->columns([
                 TextColumn::make('index')
@@ -155,28 +157,57 @@ class ApplicantsTable
                     ->sortable(),
                 TextColumn::make('IS_CLEARING')
                     ->label('المقاصة')
-                    ->badge(),
+                    ->badge()
+                    ->visible($isClearing),
                 IconColumn::make('REVIEWED')
-                    ->boolean()
+                    ->label('المراجعة الأولى')
+                    ->icon(fn ($state): string => match ((string) $state) {
+                        '1' => 'heroicon-o-check-circle',
+                        '2' => 'heroicon-o-x-circle',
+                        default => 'heroicon-o-clock',
+                    })
+                    ->color(fn ($state): string => match ((string) $state) {
+                        '1' => 'success',
+                        '2' => 'danger',
+                        default => 'warning',
+                    })
+                    ->visible($isClearing)
                     ->sortable(),
                 TextColumn::make('REVIEW_BY')
                     ->numeric()
+                    ->visible($isClearing)
                     ->sortable(),
                 TextColumn::make('REVIEW_ON')
                     ->dateTime()
+                    ->visible($isClearing)
                     ->sortable(),
                 TextColumn::make('REJECT_REASON')
+                    ->visible($isClearing)
                     ->searchable(),
                 IconColumn::make('SECOND_REVIEWED')
-                    ->boolean()
+                    ->label('المراجعة الثانية')
+                    ->icon(fn ($state): string => match ((string) $state) {
+                        '1' => 'heroicon-o-check-circle',
+                        '2' => 'heroicon-o-x-circle',
+                        default => 'heroicon-o-clock',
+                    })
+                    ->color(fn ($state): string => match ((string) $state) {
+                        '1' => 'success',
+                        '2' => 'danger',
+                        default => 'warning',
+                    })
+                    ->visible($isClearing)
                     ->sortable(),
                 TextColumn::make('SECOND_REVIEWED_BY')
                     ->numeric()
+                    ->visible($isClearing)
                     ->sortable(),
                 TextColumn::make('SECOND_REVIEWED_ON')
                     ->dateTime()
+                    ->visible($isClearing)
                     ->sortable(),
                 TextColumn::make('SECOND_REJECT_REASON')
+                    ->visible($isClearing)
                     ->searchable(),
                 IconColumn::make('EXPORTED')
                     ->boolean()
@@ -199,7 +230,8 @@ class ApplicantsTable
                     ->searchable(),
                 SelectFilter::make('IS_CLEARING')
                     ->label('نوع الطالب (مقاصة / اعتيادي)')
-                    ->options(\App\Enums\IsClearingType::class),
+                    ->options(\App\Enums\IsClearingType::class)
+                    ->visible($isClearing),
                 SelectFilter::make('APPLICANT_TYPE')
                     ->label('نوع المتقدم')
                     ->options(config('p.default.applicant_type', [])),
@@ -215,6 +247,40 @@ class ApplicantsTable
                     ->label('الدولة')
                     ->options(fn() => Country::pluck('COUNTRY_NAME', 'COUNTRY_NAME')->filter(fn($v) => ! empty($v))->toArray())
                     ->searchable(),
+                \Filament\Tables\Filters\SelectFilter::make('FirstReviewResult')
+                    ->label('نتيجة المراجعة الأولى')
+                    ->visible($isClearing)
+                    ->options([
+                        '0' => 'لم تتم المراجعة',
+                        '1' => 'مقبول (معتمد)',
+                        '2' => 'مرفوض',
+                    ])
+                    ->query(function (\Illuminate\Database\Eloquent\Builder $query, array $data) {
+                        if ($data['value'] === '0') {
+                            $query->where(fn ($q) => $q->whereNull('REVIEWED')->orWhere('REVIEWED', 0));
+                        } elseif ($data['value'] === '1') {
+                            $query->where('REVIEWED', 1);
+                        } elseif ($data['value'] === '2') {
+                            $query->where('REVIEWED', 2);
+                        }
+                    }),
+                \Filament\Tables\Filters\SelectFilter::make('SecondReviewResult')
+                    ->label('نتيجة المراجعة الثانية')
+                    ->visible($isClearing)
+                    ->options([
+                        '0' => 'لم تتم المراجعة',
+                        '1' => 'مقبول (معتمد)',
+                        '2' => 'مرفوض',
+                    ])
+                    ->query(function (\Illuminate\Database\Eloquent\Builder $query, array $data) {
+                        if ($data['value'] === '0') {
+                            $query->where(fn ($q) => $q->whereNull('SECOND_REVIEWED')->orWhere('SECOND_REVIEWED', 0));
+                        } elseif ($data['value'] === '1') {
+                            $query->where('SECOND_REVIEWED', 1);
+                        } elseif ($data['value'] === '2') {
+                            $query->where('SECOND_REVIEWED', 2);
+                        }
+                    }),
             ])
             ->recordActions([
                 ViewAction::make(),

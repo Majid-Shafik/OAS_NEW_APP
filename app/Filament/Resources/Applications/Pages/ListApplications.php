@@ -13,7 +13,14 @@ class ListApplications extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            // Actions\CreateAction::make(),
+        ];
+    }
+
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            \App\Filament\Resources\Applications\Widgets\ApplicationStats::class,
         ];
     }
 }

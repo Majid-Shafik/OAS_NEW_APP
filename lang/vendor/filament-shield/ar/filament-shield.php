@@ -83,7 +83,11 @@ return [
         'pay' => 'تسديد',
         'confirm' => 'تأكيد',
         'update_from_ministry_applicant' => 'تحديث من الوزارة',
-        'approve' => 'اعتماد',
+        'show_clearing_attachments' => 'عرض ملفات المقاصاة',
+        "complete_file" => "إكمال الملف وإصدار الحافظة",
+        'approve' => 'مراجعة',
+        'first_review' => 'المراجعة الأولى',
+        'second_review' => 'المراجعة الثانية',
         'show_with_certificate' => 'استعراض الشهادة الثانوية',
     ],
 ];

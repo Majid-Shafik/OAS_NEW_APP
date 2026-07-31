@@ -53,6 +53,7 @@ class ApplicantResource extends Resource
         return [
             'رقم التنسيق' => $record->APPLICANT_IDENT,
             'رقم الجلوس' => $record->SEC_SCHOOL_SEATNO,
+            'عام التخرج' => $record->SEC_SCHOOL_YEAR,
             'الهاتف' => $record->MOBILE_PHONE,
             'المحافظة/المديرية' => $record->PROVINCE . ' - ' . $record->TERRITORY,
         ];
@@ -65,6 +66,9 @@ class ApplicantResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
+        if ($schema->getLivewire() instanceof \Filament\Resources\Pages\EditRecord) {
+            return \App\Filament\Resources\Applicants\Schemas\ApplicantEditForm::configure($schema);
+        }
         return ApplicantForm::configure($schema);
     }
 
@@ -76,6 +80,17 @@ class ApplicantResource extends Resource
     public static function table(Table $table): Table
     {
         return ApplicantsTable::configure($table);
+    }
+
+    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        $query = parent::getEloquentQuery();
+        if (static::class === self::class) {
+            $query->where(function ($q) {
+                $q->where('IS_CLEARING', '!=', 1)->orWhereNull('IS_CLEARING');
+            });
+        }
+        return $query;
     }
 
     public static function getRelations(): array

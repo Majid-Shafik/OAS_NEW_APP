@@ -14,6 +14,7 @@ class HighSchoolDegreeBType extends Model
 
     protected $primaryKey = 'SS_IDENT';
 
+
     public $timestamps = false;
 
     protected $fillable = [

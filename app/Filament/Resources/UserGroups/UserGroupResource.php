@@ -27,7 +27,7 @@ class UserGroupResource extends Resource
 
     protected static ?string $pluralModelLabel = 'مجموعات المستخدمين';
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedShieldCheck;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUserGroup;
 
     protected static UnitEnum|string|null $navigationGroup = 'المستخدمين والصلاحيات';
     protected static ?int $navigationSort = 1;
@@ -59,6 +59,7 @@ class UserGroupResource extends Resource
         return $table
             ->recordTitleAttribute('GROUP_NAME')
             ->columns([
+                TextColumn::make('GROUP_IDENT'),
                 TextColumn::make('GROUP_NAME')
                     ->label('اسم المجموعة')
                     ->searchable(),

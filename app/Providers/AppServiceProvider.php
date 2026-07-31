@@ -37,6 +37,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Gate::policy(Export::class, ExportPolicy::class);
+        Gate::policy(\Spatie\Activitylog\Models\Activity::class, \App\Policies\ActivityPolicy::class);
 
         Auth::provider('legacy', function ($app, array $config) {
             return new LegacyUserProvider($app['hash'], $config['model']);

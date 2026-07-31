@@ -46,6 +46,12 @@ class User extends Authenticatable implements FilamentUser, HasName
         'remember_token',
     ];
 
+
+    public function isAdmin(): bool
+    {
+        return $this->hasRole('admin') || $this->id == 1;
+    }
+
     public function getAuthIdentifierName()
     {
         return 'USER_IDENT';

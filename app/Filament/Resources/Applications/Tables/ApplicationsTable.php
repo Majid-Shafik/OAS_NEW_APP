@@ -10,6 +10,9 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\ColumnGroup;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -42,7 +45,7 @@ class ApplicationsTable
                 //     ->searchable(),
                 TextColumn::make('applicant.FULL_NAME')
                     ->label('المتقدم')
-                    ->searchable()
+                    ->searchable(['FULL_NAME', 'MOBILE_PHONE', 'APPLICANT_IDENT', 'SEC_SCHOOL_SEATNO'])
                     ->url(fn($record) => $record->applicant ? \App\Filament\Resources\Applicants\ApplicantResource::getUrl('view', ['record' => $record->applicant]) : null)
                     ->tooltip('انقر هنا للانتقال إلى ملف المتقدم')
                     ->openUrlInNewTab()
@@ -170,21 +173,41 @@ class ApplicationsTable
                         'STATUS' => ApplicationStatus::Accept,
                     ])),
 
+                Action::make('printReceipt')
+                    ->label('طباعة الحافظة')
+                    ->icon('heroicon-o-printer')
+                    ->color('success')
+                    ->visible(fn($record) => $record->applicant && $record->applicant->FREEZE === \App\Enums\FreezeStatus::FROZEN)
+                    ->url(fn($record) => route('applicant.receipt', ['unid' => $record->UNID, 'applicant_ident' => $record->APPLICANT_IDENT]))
+                    ->openUrlInNewTab(),
+
                 Action::make('pay')
                     ->label('تسديد')
                     ->icon('heroicon-o-currency-dollar')
                     ->color('warning')
                     ->visible(fn($record) => (empty($record->PAYMENT_FLAG) || $record->PAYMENT_FLAG === \App\Enums\PaymentMethodEnum::NONE))
                     ->hidden(fn($record) => ! auth()->user()->can('pay', $record))
-                    ->form([
-                        \Filament\Forms\Components\Select::make('PAYMENT_FLAG')
+                    ->schema([
+                        Select::make('PAYMENT_FLAG')
                             ->label('طريقة الدفع')
-                            ->relationship('paymentMethod', 'PAY_METHOD', fn($query) => $query->where('IS_ENABLED', 1))
+                            ->options(function (\App\Models\Application $record) {
+                                $uni = $record->university;
+                                $allowedIds = [];
+                                if ($uni) {
+                                    // 1: البريد, 2: كاك بنك, 3: مسؤل التحصيل في الجامعة
+                                    if ($uni->PAY_METHOD_POST == 1) $allowedIds[] = 1;
+                                    if ($uni->PAY_METHOD_CAC == 1) $allowedIds[] = 2;
+                                    if ($uni->PAY_METHOD_UN == 1) $allowedIds[] = 3;
+                                }
+                                return \App\Models\PaymentMethod::whereIn('PAY_METHOD_ID', $allowedIds)
+                                    ->where('IS_ENABLED', 1)
+                                    ->pluck('PAY_METHOD', 'PAY_METHOD_ID');
+                            })
                             ->required(),
-                        \Filament\Forms\Components\TextInput::make('APP_BILL_IDENT')
+                        TextInput::make('APP_BILL_IDENT')
                             ->label('رقم السند')
                             ->required(),
-                        \Filament\Forms\Components\DatePicker::make('RECORDDATE')
+                        DatePicker::make('RECORDDATE')
                             ->label('تاريخ التسديد')
                             ->default(now())
                             ->required(),
@@ -203,8 +226,8 @@ class ApplicationsTable
                     ->visible(fn($record) => !empty($record->PAYMENT_FLAG) && $record->PAYMENT_FLAG !== \App\Enums\PaymentMethodEnum::NONE && ! $record->CONFIRMED_BY_APPLICANT)
                     ->hidden(fn($record) => ! auth()->user()->can('confirm', $record))
                     ->requiresConfirmation()
-                    ->form([
-                        \Filament\Forms\Components\TextInput::make('STUDENT_CODE')
+                    ->schema([
+                         TextInput::make('STUDENT_CODE')
                             ->label('رقم القيد الجامعي')
                             ->required()
                             ->rules([

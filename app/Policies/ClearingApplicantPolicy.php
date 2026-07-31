@@ -29,6 +29,10 @@ class ClearingApplicantPolicy
 
     public function update(AuthUser $authUser, ClearingApplicant $clearingApplicant): bool
     {
+        if ($clearingApplicant->STATUS === \App\Enums\ApplicantStatus::Ready && !$authUser->hasRole(['super_admin', 'admin'])) {
+            return false;
+        }
+        
         return $authUser->can('Update:ClearingApplicant');
     }
 
@@ -37,4 +41,23 @@ class ClearingApplicantPolicy
         return $authUser->can('Delete:ClearingApplicant');
     }
 
+    public function deleteAny(AuthUser $authUser): bool
+    {
+        return $authUser->can('DeleteAny:ClearingApplicant');
+    }
+
+    public function firstReview(AuthUser $authUser, ClearingApplicant $clearingApplicant): bool
+    {
+        return $authUser->can('FirstReview:ClearingApplicant');
+    }
+
+    public function secondReview(AuthUser $authUser, ClearingApplicant $clearingApplicant): bool
+    {
+        return $authUser->can('SecondReview:ClearingApplicant');
+    }
+
+    public function showClearingAttachments(AuthUser $authUser, ClearingApplicant $clearingApplicant): bool
+    {
+        return $authUser->can('ShowClearingAttachments:ClearingApplicant');
+    }
 }

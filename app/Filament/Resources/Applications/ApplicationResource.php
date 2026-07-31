@@ -39,6 +39,27 @@ class ApplicationResource extends Resource
         return 'طلبات التقديم';
     }
 
+    public static function getGloballySearchableAttributes(): array
+    {
+        return [
+            'APPLICATION_IDENT',
+            'applicant.FULL_NAME',
+            'applicant.MOBILE_PHONE',
+            'applicant.SEC_SCHOOL_SEATNO',
+            'applicant.APPLICANT_IDENT',
+        ];
+    }
+
+    public static function getGlobalSearchResultDetails(\Illuminate\Database\Eloquent\Model $record): array
+    {
+        return [
+            'رقم الطلب' => $record->APPLICATION_IDENT,
+            'اسم المتقدم' => $record->applicant?->FULL_NAME,
+            'رقم التنسيق' => $record->applicant?->APPLICANT_IDENT,
+            'الهاتف' => $record->applicant?->MOBILE_PHONE,
+        ];
+    }
+
     public static function form(Schema $schema): Schema
     {
         return ApplicationForm::configure($schema);

@@ -74,7 +74,33 @@ class Application extends Model
 
     protected static function booted()
     {
+        static::creating(function ($application) {
+            if (empty($application->APPLICATION_IDENT)) {
+                // قفل سجل الجامعة لمنع التداخل (Race Condition) أثناء توليد المعرف
+                \App\Models\University::where('UNID', $application->UNID)->lockForUpdate()->first();
+                
+                $maxIdent = static::where('UNID', $application->UNID)->max('APPLICATION_IDENT');
+                $application->APPLICATION_IDENT = $maxIdent ? $maxIdent + 1 : 1;
+            }
+        });
+
+        static::created(function ($application) {
+            if ($application->applicant) {
+                $application->applicant->update([
+                    'STATUS' => \App\Enums\ApplicantStatus::Updated,
+                    'FREEZE' => \App\Enums\FreezeStatus::UNFROZEN,
+                ]);
+            }
+        });
+
         static::deleted(function ($application) {
+            if ($application->applicant) {
+                $application->applicant->update([
+                    'STATUS' => \App\Enums\ApplicantStatus::Updated,
+                    'FREEZE' => \App\Enums\FreezeStatus::UNFROZEN,
+                ]);
+            }
+
             $data = $application->toArray();
             $data['deleted_at'] = now();
             $data['deleted_by'] = auth()->id();

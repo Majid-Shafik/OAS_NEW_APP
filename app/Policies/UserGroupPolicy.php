@@ -11,7 +11,7 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 class UserGroupPolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:UserGroup');
@@ -24,17 +24,25 @@ class UserGroupPolicy
 
     public function create(AuthUser $authUser): bool
     {
+        return false;
         return $authUser->can('Create:UserGroup');
     }
 
     public function update(AuthUser $authUser, UserGroup $userGroup): bool
     {
+        return false;
         return $authUser->can('Update:UserGroup');
     }
 
     public function delete(AuthUser $authUser, UserGroup $userGroup): bool
     {
+        return false;
         return $authUser->can('Delete:UserGroup');
     }
 
+    public function deleteAny(AuthUser $authUser): bool
+    {
+        return false;
+        return $authUser->can('DeleteAny:UserGroup');
+    }
 }

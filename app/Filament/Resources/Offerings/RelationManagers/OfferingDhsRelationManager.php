@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\Offerings\OfferingResource\RelationManagers;
+namespace App\Filament\Resources\Offerings\RelationManagers;
 
 use App\Filament\Resources\OfferingDhs\OfferingDhResource;
 use Filament\Actions\ViewAction;

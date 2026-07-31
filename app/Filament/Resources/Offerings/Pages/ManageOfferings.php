@@ -7,12 +7,25 @@ use App\Models\OfferingGroup;
 use App\Models\Program;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ManageRecords;
+use Filament\Schemas\Components\Tabs\Tab;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
 class ManageOfferings extends ManageRecords
 {
     protected static string $resource = OfferingResource::class;
+
+    public function getTabs(): array
+    {
+        return [
+            'all' =>  Tab::make('المعايير')
+                ->badge(\App\Models\Offering::count()),
+            'available' =>  Tab::make('معايير مفتوحة للتنسيق')
+                ->modifyQueryUsing(fn(\Illuminate\Database\Eloquent\Builder $query) => $query->whereDate('FROM_DATE', '<=', now())->whereDate('TO_DATE', '>=', now()))
+                ->badge(\App\Models\Offering::whereDate('FROM_DATE', '<=', now())->whereDate('TO_DATE', '>=', now())->count())
+                ->badgeColor('success'),
+        ];
+    }
 
     protected function getHeaderActions(): array
     {
@@ -26,7 +39,7 @@ class ManageOfferings extends ManageRecords
                             'UNID' => $data['UNID'],
                             'FACULTY_IDENT' => $data['FACULTY_IDENT'],
                             'STUDYTYPE_IDENT' => $data['STUDYTYPE_IDENT'],
-                            'DESCRIPTION' => 'مجموعة تنسيق - '.$programName,
+                            'DESCRIPTION' => 'مجموعة تنسيق - ' . $programName,
                             'MIN_CHOICE' => 1,
                             'MAX_CHOICE' => 1,
                             'APPLYING_COST' => $data['STUDY_FEES'] ?? 0,

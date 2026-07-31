@@ -20,6 +20,7 @@ class University extends Model
 
     protected $fillable = [
         'UNID', 'NEW_ID', 'U_NAME', 'NEW_NAME', 'EN_U_NAME', 'IS_IT_ENABLE', 'CLEARING_UN',
+        'PAY_METHOD_POST', 'PAY_METHOD_CAC', 'PAY_METHOD_UN', 'GS_TITLE_PAYMENT'
     ];
 
     public function scopeClearing(Builder $query): Builder

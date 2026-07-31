@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Applicants\Schemas;
 
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
@@ -57,17 +58,32 @@ class ApplicantInfolist
                                         TextEntry::make('SEC_SCHOOL_PLACE')->label('مكان الثانوية')->placeholder('-'),
                                     ])->columns(3),
 
-                                Tab::make('بيانات المقاصة والقبول')
+                                Tab::make('بيانات المقاصة')
                                     ->icon('heroicon-o-document-check')
+                                    ->visible(fn(\Illuminate\Database\Eloquent\Model $record, $livewire) => ($record->IS_CLEARING instanceof \App\Enums\IsClearingType ? $record->IS_CLEARING->value == 1 : in_array($record->IS_CLEARING, [1, '1'])) || str_contains(class_basename($livewire), 'Clearing'))
+                                    ->schema([
+                                        Fieldset::make('بيانات الجامعة والتخصص التي جاء منها (المقاصاة)')
+                                            ->schema([
+                                                TextEntry::make('applicationsClearing.FROM_COUNTRY_NAME')->label('الدولة القادم منها')->placeholder('-'),
+                                                TextEntry::make('applicationsClearing.FROM_UNIV_NAME')->label('الجامعة القادم منها')->placeholder('-'),
+                                                TextEntry::make('applicationsClearing.FROM_FACULTY_NAME')->label('الكلية القادم منها')->placeholder('-'),
+                                                TextEntry::make('applicationsClearing.FROM_PROGRAM_NAME')->label('التخصص القادم منه')->placeholder('-'),
+                                                TextEntry::make('applicationsClearing.FROM_YEAR')->label('عام الانضمام')->placeholder('-'),
+                                                TextEntry::make('applicationsClearing.STUDY_LEVEL')->label('مستوى الدراسة')->placeholder('-'),
+                                                TextEntry::make('applicationsClearing.NO_STUDY_YEARS')->label('عدد سنوات الدراسة')->placeholder('-'),
+                                                TextEntry::make('applicationsClearing.MOVING_REASON')->label('سبب الانتقال')->placeholder('-')->columnSpanFull(),
+                                            ])->columns(4)->columnSpanFull(),
+                                    ]),
+                                Tab::make('التخصص المقبول')
+                                    ->icon('heroicon-o-academic-cap')
                                     ->schema([
                                         TextEntry::make('APPLICANT_TYPE')->label('نوع المتقدم')->translateFromConfig('applicant_type')->placeholder('-'),
                                         TextEntry::make('ADMITTED_ON')->label('تاريخ القبول')->date()->placeholder('-'),
                                         TextEntry::make('faculty.FACULTY_NAME')->label('الكلية المقبول بها')->placeholder('-'),
                                         TextEntry::make('program.PROGRAM_NAME')->label('التخصص المقبول به')->placeholder('-'),
                                         TextEntry::make('ADMITTED_OFFERING')->label('رقم العرض')->placeholder('-'),
-                                    ])
-                                    ->columns(2)
-                                    ->visible(fn($record) => $record?->IS_CLEARING),
+                                    ])->columns(2),
+
 
                                 Tab::make('بيانات النظام')
                                     ->icon('heroicon-o-server')
@@ -89,6 +105,105 @@ class ApplicantInfolist
                                         TextEntry::make('SECOND_REVIEWED_ON')->label('تاريخ المراجعة الثانية')->dateTime()->placeholder('-'),
                                         TextEntry::make('SECOND_REJECT_REASON')->label('سبب الرفض الثاني')->placeholder('-'),
                                     ])->columns(3),
+
+                                Tab::make('المرفقات')
+                                    ->icon('heroicon-o-paper-clip')
+                                    ->visible(fn($record) => $record?->APPLICANT_TYPE == 2 || $record?->IS_CLEARING?->value === 1)
+                                    ->schema([
+                                        \Filament\Infolists\Components\RepeatableEntry::make('applicant_attachments')
+                                            ->label('')
+                                            ->getStateUsing(function ($record) {
+                                                if (!$record) return [];
+                                                $activeConnection = $record->getConnectionName() ?? config('database.default');
+                                                $dbName = config("database.connections.{$activeConnection}.database");
+                                                $baseDir = config("legacy_attachments.systems.{$dbName}", config("legacy_attachments.systems.{$activeConnection}", "uploads/{$activeConnection}"));
+                                                $disk = \Illuminate\Support\Facades\Storage::disk(config('legacy_attachments.disk', 'public'));
+
+                                                $attachments = [];
+
+                                                if ($record->APPLICANT_TYPE == 2) {
+                                                    $jpgPath = rtrim($baseDir, '/') . '/images/attachments/secondary/' . $record->UNID . '-' . $record->APPLICANT_IDENT . '.jpg';
+                                                    $pdfPath = rtrim($baseDir, '/') . '/images/attachments/secondary/' . $record->UNID . '-' . $record->APPLICANT_IDENT . '.pdf';
+
+                                                    $degreeB = \App\Models\HighSchoolDegreeBType::where('UNID', $record->UNID)
+                                                        ->where('SEC_SCHOOL_SEATNO', $record->SEC_SCHOOL_SEATNO)
+                                                        ->where('SEC_SCHOOL_YEAR', $record->SEC_SCHOOL_YEAR)
+                                                        ->first();
+
+                                                    $typeB_jpgPath = null;
+                                                    if ($degreeB && $degreeB->SEC_SCHOOL_CERTIFICATE) {
+                                                        $typeB_jpgPath = rtrim($baseDir, '/') . '/images/attachments/secondary/' . $degreeB->SEC_SCHOOL_CERTIFICATE . '.jpg';
+                                                    }
+
+                                                    if ($disk->exists($jpgPath)) {
+                                                        $attachments[] = [
+                                                            'title' => 'الشهادة الثانوية',
+                                                            'url' => $disk->url($jpgPath),
+                                                            'is_pdf' => false,
+                                                        ];
+                                                    } elseif ($disk->exists($pdfPath)) {
+                                                        $attachments[] = [
+                                                            'title' => 'الشهادة الثانوية',
+                                                            'url' => $disk->url($pdfPath),
+                                                            'is_pdf' => true,
+                                                        ];
+                                                    } elseif ($typeB_jpgPath && $disk->exists($typeB_jpgPath)) {
+                                                        $attachments[] = [
+                                                            'title' => 'الشهادة الثانوية (أساسي)',
+                                                            'url' => route('high-school.certificate.download', $degreeB->SS_IDENT),
+                                                            'is_pdf' => false,
+                                                        ];
+                                                    }
+                                                }
+
+                                                if ($record->IS_CLEARING?->value === 1) {
+                                                    $clearingPaths = [
+                                                        'كشف درجات الطالب' => '/images/attachments/grades/',
+                                                        'استمارة المقاصة' => '/images/attachments/clearing/',
+                                                        'صورة الاستثناء ان وجد' => '/images/attachments/exceptions/',
+                                                    ];
+
+                                                    foreach ($clearingPaths as $title => $path) {
+                                                        $filePath = rtrim($baseDir, '/') . $path . $record->UNID . '-' . $record->APPLICANT_IDENT . '.pdf';
+                                                        if ($disk->exists($filePath)) {
+                                                            $type = trim($path, '/');
+                                                            $type = basename($type);
+                                                            $attachments[] = [
+                                                                'title' => $title,
+                                                                'url' => route('clearing.attachment.download', ['unid' => $record->UNID, 'applicant_ident' => $record->APPLICANT_IDENT, 'type' => $type]),
+                                                                'is_pdf' => true,
+                                                            ];
+                                                        }
+                                                    }
+                                                }
+
+                                                // Pre-render HTML for RepeatableEntry
+                                                foreach ($attachments as &$att) {
+                                                    if ($att['is_pdf']) {
+                                                        $att['html'] = '<a href="' . $att['url'] . '" target="_blank" class="flex flex-col items-center justify-center p-3 border border-gray-100 rounded-lg hover:bg-gray-50 transition text-center group">
+                                                                            <img src="' . asset('storage/images/pdf.png') . '" class="w-12 h-12 group-hover:scale-110 transition-transform duration-200" alt="PDF" />
+                                                                            <span class="mt-2 text-sm font-semibold text-primary-600">عرض ملف PDF</span>
+                                                                        </a>';
+                                                    } else {
+                                                        $att['html'] = '<a href="' . $att['url'] . '" target="_blank" class="block border p-1 rounded hover:shadow-md transition bg-gray-50 text-center">
+                                                                            <img src="' . $att['url'] . '" style="height: 120px; width: auto; margin: 0 auto; object-fit: contain;" />
+                                                                        </a>';
+                                                    }
+                                                }
+
+                                                return $attachments;
+                                            })
+                                            ->schema([
+                                                \Filament\Infolists\Components\TextEntry::make('title')
+                                                    ->label('نوع المرفق')
+                                                    ->weight('bold'),
+                                                \Filament\Infolists\Components\TextEntry::make('html')
+                                                    ->label('')
+                                                    ->html(),
+                                            ])
+                                            ->grid(3)
+                                            ->columnSpanFull()
+                                    ])
                             ])
                             ->columnSpan('full'),
                     ])->columnSpan(9),
@@ -97,16 +212,21 @@ class ApplicantInfolist
                     Grid::make(1)->schema([
                         Section::make('معلومات أساسية')
                             ->schema([
-                                TextEntry::make('STATUS')
-                                    ->label('حالة الملف')
-                                    ->badge()
+                                TextEntry::make('APPLICANT_IDENT')
+                                    ->label('رقم التنسيق (المتقدم)')
                                     ->placeholder('-'),
                                 TextEntry::make('university.U_NAME')
                                     ->label('الجامعة')
                                     ->placeholder('-'),
-                                TextEntry::make('APPLICANT_IDENT')
-                                    ->label('رقم التنسيق (المتقدم)')
+                                TextEntry::make('STATUS')
+                                    ->label('حالة الملف')
+                                    ->badge()
                                     ->placeholder('-'),
+                                TextEntry::make('APPLICANT_TYPE')
+                                    ->label('نوع الطالب')
+                                    ->formatStateUsing(fn($state) => $state == 1 ? '(A)' : ($state == 2 ? '(B)' : $state))
+                                    ->badge()
+                                    ->color('warning'),
                                 TextEntry::make('applications_count')
                                     ->label('عدد التقديمات')
                                     ->state(fn($record) => $record->applications()->count())
@@ -118,6 +238,13 @@ class ApplicantInfolist
                                 TextEntry::make('FREEZE')
                                     ->label('حالة التجميد')
                                     ->badge(),
+                            ])
+                            ->inlineLabel()
+                            // يمكنك التحكم بعرض العمود للعنوان والقيمة هنا:
+                            // افتراضياً في فيلامنت تكون النسبة الثلث (1/3) للعنوان والثلثين (2/3) للقيمة
+                            // هنا استخدمنا !grid-cols-2 لنجعلها نصف بالنصف 50% للعنوان و 50% للقيمة
+                            ->extraAttributes([
+                                'class' => '[&_.fi-in-entry-has-inline-label]:!grid-cols-2 [&_.fi-in-entry-content-col]:!col-span-1'
                             ]),
                     ])->columnSpan(3),
                 ])->columnSpan('full'),

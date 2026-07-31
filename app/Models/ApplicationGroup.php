@@ -59,6 +59,11 @@ class ApplicationGroup extends Model
         return $this->belongsTo(OfferingGroup::class, 'OFFER_GROUP_IDENT', 'OFFER_GROUP_IDENT');
     }
 
+    public function studyType()
+    {
+        return $this->belongsTo(StudyType::class, 'STUDYTYPE_IDENT', 'STUDYTYPE_IDENT');
+    }
+
     public function applications()
     {
         return $this->hasMany(Application::class, 'APP_BILL_IDENT', 'APP_BILL_IDENT');

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Filament\Resources\Applicants\ApplicantResource;
 use App\Filament\Resources\Applications\ApplicationResource;
+use App\Filament\Resources\ClearingApplicants\ClearingApplicantResource;
 use App\Filament\Resources\HighSchoolDegreeBTypes\HighSchoolDegreeBTypeResource;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\Application;
@@ -200,6 +201,18 @@ return [
                 'delete',
                 'deleteAny',
                 'updateFromMinistryApplicant',
+                'completeFile',
+            ],
+            ClearingApplicantResource::class => [
+                'viewAny',
+                'view',
+                'create',
+                'update',
+                'delete',
+                'deleteAny',
+                'firstReview',
+                'secondReview',
+                'showClearingAttachments',
             ],
             ApplicationResource::class => [
                 'viewAny',

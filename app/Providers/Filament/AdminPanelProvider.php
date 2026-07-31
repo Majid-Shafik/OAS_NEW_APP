@@ -53,12 +53,17 @@ class AdminPanelProvider extends PanelProvider
                 AccountWidget::class,
                 FilamentInfoWidget::class,
             ])
+            ->resources([
+                config('filament-logger.activity_resource'),
+            ])
             ->navigationGroups([
                 'الكليات والبرامج',
                 'المعايير',
                 'إدارة المتقدمين',
                 'المقاصاة',
                 'المستخدمين والصلاحيات',
+                'الإحصائيات',
+                'إعدادات النظام',
             ])
             ->middleware([
                 EncryptCookies::class,
