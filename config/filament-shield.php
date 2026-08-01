@@ -225,7 +225,9 @@ return [
                 'pay',
                 'cancelPayment',
                 'accept',
+                'cancelAccept',
                 'confirm',
+                'cancelConfirm',
             ],
             HighSchoolDegreeBTypeResource::class => [
                 'viewAny',

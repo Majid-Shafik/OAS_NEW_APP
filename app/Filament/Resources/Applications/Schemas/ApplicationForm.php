@@ -13,6 +13,7 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use App\Models\University;
+use Filament\Support\Enums\Operation;
 
 
 class ApplicationForm
@@ -23,6 +24,7 @@ class ApplicationForm
             ->components([
                 Select::make('UNID')
                     ->label(__('University'))
+                    ->disabledOn(Operation::Edit)
                     ->options(function (Get $get) {
                         $applicantId = $get('APPLICANT_IDENT');
                         if (!$applicantId) return University::pluck('U_NAME', 'UNID');
@@ -43,7 +45,7 @@ class ApplicationForm
                     ->required(),
                 TextInput::make('APPLICATION_IDENT')
                     ->label(__('APPLICATION_IDENT'))
-                    ->required()
+                    ->readOnly()
                     ->numeric(),
                 Select::make('APPLICANT_IDENT')
                     ->label(__('APPLICANT_IDENT'))
@@ -56,6 +58,7 @@ class ApplicationForm
                         $set('PROGRAM_IDENT', null);
                         $set('STUDYTYPE_IDENT', null);
                     })
+                    ->disabledOn(Operation::Edit)
                     ->required(),
                 Select::make('FACULTY_IDENT')
                     ->label(__('Faculty'))
@@ -146,7 +149,7 @@ class ApplicationForm
                     ->label(__('PAYMENT_FLAG'))
                     ->relationship('paymentMethod', 'PAY_METHOD'),
                 Select::make('STATUS')
-                    ->label(__('STATUS'))
+                    ->label(__('STATUS'))->disabledOn(Operation::Edit)
                     ->options(ApplicationStatus::class)
                     ->required(),
             ]);

@@ -4,19 +4,24 @@ namespace App\Filament\Resources\Applications\Tables;
 
 use App\Enums\ApplicationStatus;
 use App\Filament\Filters\AcademicFilter;
-use App\Models\StudyType;
-use Filament\Actions\Action;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
+use App\Filament\Resources\Applications\Pages\ListApplications;
 use App\Models\AppBillIdentCanceled;
 use App\Models\ApplicationGroup;
+use App\Models\OfferingGroup;
+use App\Models\StudyType;
+use Carbon\Carbon;
+use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Callout;
 use Filament\Tables\Columns\ColumnGroup;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -25,6 +30,7 @@ use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\HtmlString;
 
 class ApplicationsTable
 {
@@ -55,7 +61,8 @@ class ApplicationsTable
                     ->tooltip('انقر هنا للانتقال إلى ملف المتقدم')
                     ->openUrlInNewTab()
                     ->color('primary')
-                    ->extraAttributes(['class' => 'underline font-bold']),
+                    ->extraAttributes(['class' => 'underline font-bold'])
+                    ->visibleOn(ListApplications::class),
                 TextColumn::make('faculty.FACULTY_NAME')
                     ->label('الكلية')
                     ->words(4)
@@ -121,12 +128,103 @@ class ApplicationsTable
                             ->boolean()
                             ->trueColor('info')
                             ->falseColor('gray')
-                            ->sortable(),
+                            ->sortable()
+                            ->action(
+                                Action::make('toggleAcceptColumn')
+                                    ->disabled(fn($record) => (bool)$record->ACCEPTED
+                                        ? (! auth()->user()->can('cancelAccept', $record) || (bool)$record->CONFIRMED_BY_APPLICANT)
+                                        : (! auth()->user()->can('accept', $record) || empty($record->PAYMENT_FLAG) || $record->PAYMENT_FLAG === \App\Enums\PaymentMethodEnum::NONE)
+                                    )
+                                    ->requiresConfirmation(fn($record) => (bool)$record->ACCEPTED && ! (bool)$record->CONFIRMED_BY_APPLICANT)
+                                    ->modalHeading('إلغاء قبول الرغبة')
+                                    ->modalDescription('هل أنت متأكد من إلغاء قبول هذه الرغبة؟ سيتم إعادة حالة الطلب إلى غير مقبول.')
+                                    ->modalSubmitActionLabel('نعم، إلغاء القبول')
+                                    ->action(function ($record) {
+                                        if ((bool)$record->ACCEPTED) {
+                                            if (! auth()->user()->can('cancelAccept', $record)) {
+                                                \Filament\Notifications\Notification::make()
+                                                    ->title('ليس لديك صلاحية لإلغاء القبول')
+                                                    ->danger()
+                                                    ->send();
+                                                return;
+                                            }
+
+                                            if ((bool)$record->CONFIRMED_BY_APPLICANT) {
+                                                \Filament\Notifications\Notification::make()
+                                                    ->title('لا يمكن إلغاء القبول')
+                                                    ->body('لا يمكن إلغاء قبول هذه الرغبة لأنها مؤكدة حالياً برقم قيد جامعي. يجب إلغاء التأكيد أولاً!')
+                                                    ->warning()
+                                                    ->send();
+                                                return;
+                                            }
+
+                                            $record->cancelAccept();
+
+                                            \Filament\Notifications\Notification::make()
+                                                ->title('تم إلغاء القبول بنجاح')
+                                                ->body('تم تحويل حالة الرغبة إلى غير مقبولة.')
+                                                ->success()
+                                                ->send();
+                                        } else {
+                                            if (! auth()->user()->can('accept', $record)) {
+                                                \Filament\Notifications\Notification::make()
+                                                    ->title('ليس لديك صلاحية')
+                                                    ->danger()
+                                                    ->send();
+                                                return;
+                                            }
+
+                                            if (empty($record->PAYMENT_FLAG) || $record->PAYMENT_FLAG === \App\Enums\PaymentMethodEnum::NONE) {
+                                                \Filament\Notifications\Notification::make()
+                                                    ->title('تنبيه')
+                                                    ->body('لا يمكن قبول الرغبة قبل تسديد الرسوم.')
+                                                    ->warning()
+                                                    ->send();
+                                                return;
+                                            }
+
+                                            $record->accept();
+
+                                            \Filament\Notifications\Notification::make()
+                                                ->title('تم قبول الرغبة بنجاح')
+                                                ->success()
+                                                ->send();
+                                        }
+                                    })
+                            ),
                         IconColumn::make('CONFIRMED_BY_APPLICANT')
                             ->label('مؤكد')
                             ->boolean()
+                            ->trueColor('success')
+                            ->falseColor('gray')
+                            ->sortable()
+                            ->action(
+                                Action::make('toggleConfirmColumn')
+                                    ->disabled(fn($record) => ! (bool)$record->CONFIRMED_BY_APPLICANT || ! auth()->user()->can('cancelConfirm', $record))
+                                    ->requiresConfirmation(fn($record) => (bool)$record->CONFIRMED_BY_APPLICANT)
+                                    ->modalHeading('إلغاء تأكيد الرغبة')
+                                    ->modalDescription('هل أنت متأكد من إلغاء تأكيد هذه الرغبة وتصفير رقم القيد والمقعد المحجوز؟')
+                                    ->modalSubmitActionLabel('نعم، إلغاء التأكيد')
+                                    ->action(function ($record) {
+                                        if ((bool)$record->CONFIRMED_BY_APPLICANT) {
+                                            if (! auth()->user()->can('cancelConfirm', $record)) {
+                                                \Filament\Notifications\Notification::make()
+                                                    ->title('ليس لديك صلاحية لإلغاء التأكيد')
+                                                    ->danger()
+                                                    ->send();
+                                                return;
+                                            }
 
-                            ->sortable(),
+                                            $record->cancelConfirm();
+
+                                            \Filament\Notifications\Notification::make()
+                                                ->title('تم إلغاء التأكيد بنجاح')
+                                                ->body('تم إلغاء تأكيد الرغبة وتصفير رقم القيد والمقعد المحجوز.')
+                                                ->success()
+                                                ->send();
+                                        }
+                                    })
+                            ),
                     ]),
                 TextColumn::make('STATUS')
                     ->label('الحالة')
@@ -166,23 +264,51 @@ class ApplicationsTable
                     ),
             ])
             ->recordActions([
-                Action::make('accept')
+                ActionGroup::make([
+                    Action::make('accept')
                     ->label('قبول')
                     ->icon('heroicon-o-check-circle')
                     ->color('warning')
-                    ->visible(fn($record) => !empty($record->PAYMENT_FLAG) && $record->PAYMENT_FLAG !== \App\Enums\PaymentMethodEnum::NONE && ! $record->ACCEPTED)
+                    ->visible(fn($record) => !empty($record->PAYMENT_FLAG) && $record->PAYMENT_FLAG !== \App\Enums\PaymentMethodEnum::NONE && ! (bool)$record->ACCEPTED)
                     ->hidden(fn($record) => ! auth()->user()->can('accept', $record))
                     ->requiresConfirmation()
-                    ->action(fn($record) => $record->update([
-                        'ACCEPTED' => 1,
-                        'STATUS' => ApplicationStatus::Accept,
-                    ])),
+                    ->modalHeading('قبول الرغبة')
+                    ->modalDescription('هل أنت متأكد من قبول وترشيح هذه الرغبة؟')
+                    ->modalSubmitActionLabel('قبول')
+                    ->action(function ($record) {
+                        $record->accept();
+
+                        \Filament\Notifications\Notification::make()
+                            ->title('تم قبول الرغبة بنجاح')
+                            ->success()
+                            ->send();
+                    }),
+
+                Action::make('cancelAccept')
+                    ->label('إلغاء القبول')
+                    ->icon('heroicon-o-x-mark')
+                    ->color('danger')
+                    ->visible(fn($record) => (bool)$record->ACCEPTED && ! (bool)$record->CONFIRMED_BY_APPLICANT)
+                    ->hidden(fn($record) => ! auth()->user()->can('cancelAccept', $record))
+                    ->requiresConfirmation()
+                    ->modalHeading('إلغاء قبول الرغبة')
+                    ->modalDescription('هل أنت متأكد من إلغاء قبول هذه الرغبة؟')
+                    ->modalSubmitActionLabel('إلغاء القبول')
+                    ->action(function ($record) {
+                        $record->cancelAccept();
+
+                        \Filament\Notifications\Notification::make()
+                            ->title('تم إلغاء القبول بنجاح')
+                            ->body('تم تحويل حالة الرغبة إلى غير مقبولة.')
+                            ->success()
+                            ->send();
+                    }),
 
                 Action::make('printReceipt')
                     ->label('طباعة الحافظة')
                     ->icon('heroicon-o-printer')
                     ->color('success')
-                    ->visible(fn($record) => $record->applicant && $record->applicant->FREEZE === \App\Enums\FreezeStatus::FROZEN)
+                    ->visible(fn($record) => (empty($record->PAYMENT_FLAG) || $record->PAYMENT_FLAG === \App\Enums\PaymentMethodEnum::NONE) && $record->applicant && $record->applicant->FREEZE === \App\Enums\FreezeStatus::FROZEN)
                     ->hidden(fn($record) => ! auth()->user()->can('printReceipt', $record))
                     ->url(fn($record) => route('applicant.receipt', ['unid' => $record->UNID, 'applicant_ident' => $record->APPLICANT_IDENT]))
                     ->openUrlInNewTab(),
@@ -193,43 +319,106 @@ class ApplicationsTable
                     ->color('warning')
                     ->visible(fn($record) => (empty($record->PAYMENT_FLAG) || $record->PAYMENT_FLAG === \App\Enums\PaymentMethodEnum::NONE))
                     ->hidden(fn($record) => ! auth()->user()->can('pay', $record))
-                    ->schema([
-                        Select::make('PAYMENT_FLAG')
-                            ->label('طريقة الدفع')
-                            ->options(function (\App\Models\Application $record) {
-                                $uni = $record->university;
-                                $allowedIds = [];
-                                if ($uni) {
-                                    // 1: البريد, 2: كاك بنك, 3: مسؤل التحصيل في الجامعة
-                                    if ($uni->PAY_METHOD_POST == 1) $allowedIds[] = 1;
-                                    if ($uni->PAY_METHOD_CAC == 1) $allowedIds[] = 2;
-                                    if ($uni->PAY_METHOD_UN == 1) $allowedIds[] = 3;
-                                }
-                                return \App\Models\PaymentMethod::whereIn('PAY_METHOD_ID', $allowedIds)
-                                    ->where('IS_ENABLED', 1)
-                                    ->pluck('PAY_METHOD', 'PAY_METHOD_ID');
-                            })
-                            ->required(),
-                        TextInput::make('APP_BILL_IDENT')
-                            ->label('رقم السند')
-                            ->required(),
-                        DatePicker::make('RECORDDATE')
-                            ->label('تاريخ التسديد')
-                            ->default(now())
-                            ->required(),
-                    ])
-                    ->action(fn($record, array $data) => $record->update([
-                        'PAYMENT_FLAG' => $data['PAYMENT_FLAG'],
-                        'APP_BILL_IDENT' => $data['APP_BILL_IDENT'],
-                        'RECORDDATE' => $data['RECORDDATE'],
-                        'INSERTED_BY' => auth()->id(),
-                    ])),
+                    ->modalHeading(function ($record) {
+                        $program = $record->program?->PROGRAM_NAME ?? $record->APPLICATION_IDENT;
+                        $studyType = $record->studyType?->STUDYTYPE_NAME;
+                        $applicantName = $record->applicant?->FULL_NAME;
+
+                        $parts = array_filter([$program, $studyType]);
+                        $heading = "تسديد رسوم الرغبة [ " . implode(' - ', $parts) . " ]";
+
+                        if ($applicantName) {
+                            $heading .= " - " . $applicantName;
+                        }
+
+                        return $heading;
+                    })
+                    ->modalSubmitAction(function ($action, $record) {
+                        $status = static::getPaymentPeriodStatus($record);
+                        return $status['isOpen'] ? $action->label('حفظ التسديد')->color('warning') : false;
+                    })
+                    ->schema(function ($record) {
+                        $status = static::getPaymentPeriodStatus($record);
+
+                        if (! $status['isOpen']) {
+                            $startedHtml = $status['started'] ? "<span><strong>تاريخ بداية السداد:</strong> {$status['started']}</span>" : "";
+                            $finishedHtml = $status['finished'] ? "<span><strong>تاريخ نهاية السداد:</strong> {$status['finished']}</span>" : "";
+
+                            return [
+                              Callout::make('حالة التسديد مقفلة')
+                                    // ->visible(fn(Get $get) => (bool) $get('has_answered_project_survey'))
+                                    ->description($status['message'])
+                                    ->danger()
+                                    ->icon('heroicon-o-check-badge')
+                                    ->columnSpan(6),
+                                
+                            ];
+                        }
+
+                        return [
+                              Callout::make('حالة التسديد متاحة')
+                                    // ->visible(fn(Get $get) => (bool) $get('has_answered_project_survey'))
+                                    ->description($status['message'])
+                                    ->success()
+                                    ->icon('heroicon-o-check-badge')
+                                    ->columnSpan(6),
+                                
+                           
+                            
+                            Select::make('PAYMENT_FLAG')
+                                ->label('طريقة الدفع')
+                                ->options(function (\App\Models\Application $record) {
+                                    $uni = $record->university;
+                                    $allowedIds = [];
+                                    if ($uni) {
+                                        // 1: البريد, 2: كاك بنك, 3: مسؤل التحصيل في الجامعة
+                                        if ($uni->PAY_METHOD_POST == 1) $allowedIds[] = 1;
+                                        if ($uni->PAY_METHOD_CAC == 1) $allowedIds[] = 2;
+                                        if ($uni->PAY_METHOD_UN == 1) $allowedIds[] = 3;
+                                    }
+                                    return \App\Models\PaymentMethod::whereIn('PAY_METHOD_ID', $allowedIds)
+                                        ->where('IS_ENABLED', 1)
+                                        ->pluck('PAY_METHOD', 'PAY_METHOD_ID');
+                                })
+                                ->required(),
+                            TextInput::make('APP_BILL_IDENT')
+                                ->label('رقم السند')
+                                ->required(),
+                            DatePicker::make('RECORDDATE')
+                                ->label('تاريخ التسديد')
+                                ->default(now())
+                                ->required(),
+                        ];
+                    })
+                    ->action(function ($record, array $data) {
+                        $status = static::getPaymentPeriodStatus($record);
+                        if (! $status['isOpen']) {
+                            \Filament\Notifications\Notification::make()
+                                ->title('فشل التسديد')
+                                ->body($status['message'])
+                                ->danger()
+                                ->send();
+                            throw new \Filament\Support\Exceptions\Halt();
+                        }
+
+                        $record->update([
+                            'PAYMENT_FLAG' => $data['PAYMENT_FLAG'],
+                            'APP_BILL_IDENT' => $data['APP_BILL_IDENT'],
+                            'RECORDDATE' => $data['RECORDDATE'],
+                            'INSERTED_BY' => auth()->id(),
+                        ]);
+
+                        \Filament\Notifications\Notification::make()
+                            ->title('تم تسجيل التسديد بنجاح')
+                            ->success()
+                            ->send();
+                    }),
 
                 Action::make('cancelPayment')
                     ->label('إلغاء السداد')
                     ->icon('heroicon-o-x-circle')
                     ->color('danger')
-                    ->visible(fn($record) => !empty($record->PAYMENT_FLAG) && $record->PAYMENT_FLAG !== \App\Enums\PaymentMethodEnum::NONE)
+                    ->visible(fn($record) => !empty($record->PAYMENT_FLAG) && $record->PAYMENT_FLAG !== \App\Enums\PaymentMethodEnum::NONE && ! (bool)$record->ACCEPTED && ! (bool)$record->CONFIRMED_BY_APPLICANT)
                     ->hidden(fn($record) => ! auth()->user()->can('cancelPayment', $record))
                     ->modalHeading('إلغاء الحافظة المالية المسددة')
                     ->modalDescription(fn($record) => "رقم الحافظة: [ {$record->APP_BILL_IDENT} ] - رقم الطلب: [ {$record->APPLICATION_IDENT} ]")
@@ -311,7 +500,7 @@ class ApplicationsTable
                     ->label('تأكيد')
                     ->icon('heroicon-o-check-badge')
                     ->color('info')
-                    ->visible(fn($record) => !empty($record->PAYMENT_FLAG) && $record->PAYMENT_FLAG !== \App\Enums\PaymentMethodEnum::NONE && ! $record->CONFIRMED_BY_APPLICANT)
+                    ->visible(fn($record) => !empty($record->PAYMENT_FLAG) && $record->PAYMENT_FLAG !== \App\Enums\PaymentMethodEnum::NONE && (bool)$record->ACCEPTED && ! (bool)$record->CONFIRMED_BY_APPLICANT)
                     ->hidden(fn($record) => ! auth()->user()->can('confirm', $record))
                     ->requiresConfirmation()
                     ->schema([
@@ -351,20 +540,7 @@ class ApplicationsTable
                             ->count();
 
                         if ($currentCount < $capacity) {
-                            $record->update([
-                                'CONFIRMED_BY_APPLICANT' => 1,
-                                'STUDENT_CODE' => $data['STUDENT_CODE'],
-                                'CONFIRMED_ON' => now(),
-                            ]);
-
-                            if ($record->applicant) {
-                                $record->applicant->update([
-                                    'ADMITTED_FACULITY' => $record->FACULTY_IDENT,
-                                    'ADMITTED_PROGRAM' => $record->PROGRAM_IDENT,
-                                    'ADMITTED_OFFERING' => $record->OFFERING_IDENT,
-                                    'ADMITTED_ON' => now(),
-                                ]);
-                            }
+                            $record->confirmApplication($data['STUDENT_CODE']);
 
                             \Filament\Notifications\Notification::make()
                                 ->title('تم تأكيد الطلب بنجاح')
@@ -380,43 +556,97 @@ class ApplicationsTable
                         }
                     }),
 
-                Action::make('unconfirm')
+                Action::make('cancelConfirm')
                     ->label('إلغاء التأكيد')
                     ->icon('heroicon-o-x-circle')
                     ->color('danger')
-                    ->visible(fn($record) => $record->CONFIRMED_BY_APPLICANT == 1)
-                    ->hidden(fn($record) => ! auth()->user()->can('unconfirm', $record))
+                    ->visible(fn($record) => (bool)$record->CONFIRMED_BY_APPLICANT)
+                    ->hidden(fn($record) => ! auth()->user()->can('cancelConfirm', $record))
                     ->requiresConfirmation()
+                    ->modalHeading('إلغاء تأكيد الرغبة')
+                    ->modalDescription('هل أنت متأكد من إلغاء تأكيد هذه الرغبة وتصفير رقم القيد والمقعد المحجوز؟')
+                    ->modalSubmitActionLabel('إلغاء التأكيد')
                     ->action(function ($record) {
-                        $record->update([
-                            'CONFIRMED_BY_APPLICANT' => 0,
-                            'STUDENT_CODE' => '0',
-                            'CONFIRMED_ON' => now(),
-                        ]);
-
-                        if ($record->applicant) {
-                            $record->applicant->update([
-                                'ADMITTED_FACULITY' => 0,
-                                'ADMITTED_PROGRAM' => 0,
-                                'ADMITTED_OFFERING' => 0,
-                                'ADMITTED_ON' => null,
-                            ]);
-                        }
+                        $record->cancelConfirm();
 
                         \Filament\Notifications\Notification::make()
                             ->title('تم إلغاء تأكيد المتقدم')
+                            ->body('تم تصفير رقم القيد والمقعد المحجوز بنجاح.')
                             ->success()
                             ->send();
                     }),
 
-                ViewAction::make(),
-                EditAction::make(),
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    ViewAction::make(),
+                    EditAction::make(),
+                    DeleteAction::make()
+                        ->visible(fn($record) => empty($record->PAYMENT_FLAG) || $record->PAYMENT_FLAG === \App\Enums\PaymentMethodEnum::NONE),
                 ]),
             ])
             ->defaultSort('SEC_SCHOOL_RATE', 'desc');
+    }
+
+    public static function getPaymentPeriodStatus($record): array
+    {
+        $offerGroup = $record->offeringGroup ?? OfferingGroup::where('OFFER_GROUP_IDENT', $record->OFFER_GROUP_IDENT)->first();
+
+        if (! $offerGroup && $record->offering) {
+            $offerGroup = $record->offering->offeringGroup;
+        }
+
+        if (! $offerGroup) {
+            return [
+                'isOpen' => false,
+                'title' => 'إعدادات مجموعة التنسيق غير متوفرة',
+                'message' => 'لم يتم العثور على مجموعة معايير التنسيق المرتبطة بهذه الرغبة.',
+                'started' => null,
+                'finished' => null,
+            ];
+        }
+
+        $enablePayment = (bool) ($offerGroup->ENABLE_PAYMENT ?? false);
+        $startedDate = $offerGroup->STARTED_PAYMENT_DATE;
+        $finishedDate = $offerGroup->FINISHED_PAYMENT_DATE;
+        $now = now();
+
+        $formattedStarted = $startedDate ? Carbon::parse($startedDate)->format('Y-m-d') : 'غير محدد';
+        $formattedFinished = $finishedDate ? Carbon::parse($finishedDate)->format('Y-m-d h:i A') : 'غير محدد';
+
+        if (! $enablePayment) {
+            return [
+                'isOpen' => false,
+                'title' => 'التسديد غير مفعل حالياً',
+                'message' => 'تم إيقاف تفعيل التسديد لمجموعة هذا التخصص من قِبل إدارة القبول والتسجيل.',
+                'started' => $formattedStarted,
+                'finished' => $formattedFinished,
+            ];
+        }
+
+        if ($startedDate && $now->lt(Carbon::parse($startedDate)->startOfDay())) {
+            return [
+                'isOpen' => false,
+                'title' => 'فترة التسديد لم تبدأ بعد',
+                'message' => "فترة السداد المعتمدة تبدأ بتاريخ: {$formattedStarted}",
+                'started' => $formattedStarted,
+                'finished' => $formattedFinished,
+            ];
+        }
+
+        if ($finishedDate && $now->gt(Carbon::parse($finishedDate))) {
+            return [
+                'isOpen' => false,
+                'title' => 'فترة التسديد منتهية ومقفلة',
+                'message' => "انتهت فترة السداد المعتمدة بتاريخ: {$formattedFinished}",
+                'started' => $formattedStarted,
+                'finished' => $formattedFinished,
+            ];
+        }
+
+        return [
+            'isOpen' => true,
+            'title' => 'فترة التسديد مفتوحة ومتاحة',
+            'message' => "يمكنك تسديد الرسوم المقرة للرغبة الحالية ولا يزال التسديد متاح حتى : {$formattedFinished}",
+            'started' => $formattedStarted,
+            'finished' => $formattedFinished,
+        ];
     }
 }
