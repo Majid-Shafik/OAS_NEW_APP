@@ -96,7 +96,7 @@ class ApplicantRegistrationService
                         'STUDYTYPE_IDENT' => $offering->STUDYTYPE_IDENT,
                         'OFFER_GROUP_IDENT' => $offerGroupIdent,
                         'ENABLE_PAYMENT' => $offerGroup->ENABLE_PAYMENT ?? 0,
-                        'MOBILE_PHONE' => $applicant->MOBILE_PHONE,
+                        'MOBILE_PHONE' => $applicant->MOBILE_PHONE ?: '000000000',
                         'EMAIL' => $applicant->EMAIL,
                         'APPLYING_COST' => $offerGroup->APPLYING_COST ?? 0,
                         'COST_TYPE' => $offerGroup->COST_TYPE ?? 0,

@@ -11,6 +11,17 @@ class CreateApplicant extends CreateRecord
 
     protected function handleRecordCreation(array $data): \Illuminate\Database\Eloquent\Model
     {
+        if (empty($data['UNID'])) {
+            $data['UNID'] = $this->data['UNID'] ?? session('selected_unid') ?? (auth()->user()->UNID != 0 ? auth()->user()->UNID : 1);
+        }
+
+        if (empty($data['COUNTRY_IDENT']) && !empty($data['COUNTRY_NAME'])) {
+            $data['COUNTRY_IDENT'] = \App\Models\Country::where('COUNTRY_NAME', $data['COUNTRY_NAME'])->value('COUNTRY_IDENT');
+            if (empty($data['COUNTRY_IDENT']) && ($data['YEMEN_NATIONAL'] ?? 0) == 1) {
+                $data['COUNTRY_IDENT'] = 242;
+            }
+        }
+
         if (!empty($data['hs_degree_not_approved'])) {
             \Filament\Notifications\Notification::make()
                 ->warning()

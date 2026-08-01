@@ -36,15 +36,14 @@ class ApplicantResource extends Resource
     public static function getGloballySearchableAttributes(): array
     {
         return [
-            'FULL_NAME',
-            'FIRST_NAME',
-            'LAST_NAME',
+            'FULL_NAME',          
             'APPLICANT_IDENT',
             'SEC_SCHOOL_SEATNO',
             'MOBILE_PHONE',
             'PLACE_OF_BIRTH',
             'PROVINCE',
             'TERRITORY',
+            
         ];
     }
 
@@ -55,7 +54,8 @@ class ApplicantResource extends Resource
             'رقم الجلوس' => $record->SEC_SCHOOL_SEATNO,
             'عام التخرج' => $record->SEC_SCHOOL_YEAR,
             'الهاتف' => $record->MOBILE_PHONE,
-            'المحافظة/المديرية' => $record->PROVINCE . ' - ' . $record->TERRITORY,
+            'الجامعة' => $record->university->U_NAME,
+            // 'المحافظة/المديرية' => $record->PROVINCE . ' - ' . $record->TERRITORY,
         ];
     }
 

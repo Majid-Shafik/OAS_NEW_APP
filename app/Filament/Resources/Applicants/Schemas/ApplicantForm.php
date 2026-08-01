@@ -85,10 +85,13 @@ class ApplicantForm
                                             ->label('الجامعة')
                                             ->options(University::Coordination()->pluck('U_NAME', 'UNID'))
                                             ->default(function () {
+                                                if (session('selected_unid', 0) != 0) return session('selected_unid');
                                                 if (auth()->user()->UNID != 0) return auth()->user()->UNID;
-                                                return session('selected_unid', 0) != 0 ? session('selected_unid') : null;
+                                                return null;
                                             })
                                             ->searchable()
+                                            ->required()
+                                            ->dehydrated()
                                             ->live(),
                                         TextInput::make('search_seatno')->label('رقم الجلوس')->numeric()->dehydrated(false)->required(),
                                         TextInput::make('search_year')->label('عام التخرج')
@@ -159,88 +162,96 @@ class ApplicantForm
                                         // We pass 0 as total since it's not input at this step
                                         $data = $apiService->fetchStudentData($year, $seat, 0);
                                         
-                                        if (!empty($data) && (isset($data['seat_number']) || (is_array($data) && count($data) > 0))) {
+                                        if (!empty($data) && (isset($data['seat_number']) || (is_array($data) && count($data) > 0) || isset($data['rows']))) {
                                             $found = true;
-                                            // Handle if API returns an array or single object
-                                            $student = isset($data[0]) ? $data[0] : $data;
+                                            // Handle if API returns an array or single object or rows structure
+                                            if (isset($data['rows']) && is_array($data['rows']) && count($data['rows']) > 0) {
+                                                $student = $data['rows'][0];
+                                            } else {
+                                                $student = isset($data[0]) ? $data[0] : $data;
+                                            }
 
                                             // التعبئة التلقائية
+                                            $set('is_searched', true);
+                                            $set('is_not_found', false);
+                                            $set('applicant_exists', false);
+                                            $set('APPLICANT_TYPE', 1);
 
-                                                        // التعبئة التلقائية
-                                                        $set('is_searched', true);
-                                                        $set('is_not_found', false);
-                                                        $set('applicant_exists', false);
-                                                        $set('APPLICANT_TYPE', 1);
+                                            $set('SEC_SCHOOL_SEATNO', $student['seat_number'] ?? $student['SEC_SCHOOL_SEATNO'] ?? $seat);
+                                            $set('SEC_SCHOOL_YEAR', $student['year'] ?? $student['SEC_SCHOOL_YEAR'] ?? $year);
+                                            $set('SEC_SCHOOL_MARK', $student['total'] ?? $student['SEC_SCHOOL_MARK'] ?? '');
+                                            $fullName = $student['name'] ?? $student['STUDENT_NAME'] ?? '';
+                                            $set('FULL_NAME', $fullName);
 
-                                                        $set('SEC_SCHOOL_SEATNO', $student['seat_number'] ?? $seat);
-                                                        $set('SEC_SCHOOL_YEAR', $student['year'] ?? $year);
-                                                        $set('SEC_SCHOOL_MARK', $student['total'] ?? '');
-                                                        $set('FULL_NAME', $student['name'] ?? '');
+                                            $nameParts = array_filter(explode(' ', trim($fullName)));
+                                            $lastName = array_pop($nameParts);
+                                            $set('FIRST_NAME', implode(' ', $nameParts));
+                                            $set('LAST_NAME', $lastName ?? '');
 
-                                                        $nameParts = explode(' ', trim($student['name'] ?? ''));
-                                                        $set('FIRST_NAME', $nameParts[0] ?? '');
-                                                        $set('LAST_NAME', end($nameParts) ?? '');
+                                            $set('SEC_SCHOOL_NAME', $student['school_name'] ?? $student['SEC_SCHOOL_NAME'] ?? '');
+                                            $set('SEC_SCHOOL_RATE', $student['rate'] ?? $student['SEC_SCHOOL_RATE'] ?? '');
+                                            $set('SEC_SCHOOL_TERRITORY', $student['school_territory'] ?? $student['SEC_SCHOOL_TERRITORY'] ?? '');
+                                            $set('TERRITORY', $student['territory'] ?? $student['TERRITORY'] ?? '');
+                                            $set('SEC_SCHOOL_PLACE', $student['city_study'] ?? $student['SEC_SCHOOL_PLACE'] ?? '');
 
-                                                        $set('SEC_SCHOOL_NAME', $student['school_name'] ?? '');
-                                                        $set('SEC_SCHOOL_RATE', $student['rate'] ?? '');
+                                            // تحديد نوع الثانوية والمجموع الكلي
+                                            $type = $student['type'] ?? $student['SEC_SCHOOL_TYPE'] ?? $student['SEC_SCHOOL_TYPE_'] ?? '';
+                                            $sec = $student['section_id'] ?? 1; // Default or fallback if needed
+                                            if ($type === 'علمي' || $sec == 1) {
+                                                $set('SEC_SCHOOL_TYPE', 'علمي');
+                                                $set('SEC_SCHOOL_OVERALLMARK', 800);
+                                            } elseif ($type === 'أدبي' || $type === 'ادبي' || $sec == 2) {
+                                                $set('SEC_SCHOOL_TYPE', 'ادبي');
+                                                $set('SEC_SCHOOL_OVERALLMARK', 800);
+                                            } elseif (str_contains($type, 'شرعي') || $sec == 3) {
+                                                $set('SEC_SCHOOL_TYPE', 'علوم شرعي');
+                                                $set('SEC_SCHOOL_OVERALLMARK', 1700);
+                                            }
 
-                                                        // تحديد نوع الثانوية والمجموع الكلي
-                                                        $type = $student['type'] ?? '';
-                                                        $sec = $student['section_id'] ?? 1; // Default or fallback if needed
-                                                        if ($type === 'علمي' || $sec == 1) {
-                                                            $set('SEC_SCHOOL_TYPE', 'علمي');
-                                                            $set('SEC_SCHOOL_OVERALLMARK', 800);
-                                                        } elseif ($type === 'أدبي' || $type === 'ادبي' || $sec == 2) {
-                                                            $set('SEC_SCHOOL_TYPE', 'ادبي');
-                                                            $set('SEC_SCHOOL_OVERALLMARK', 800);
-                                                        } elseif (str_contains($type, 'شرعي') || $sec == 3) {
-                                                            $set('SEC_SCHOOL_TYPE', 'علوم شرعي');
-                                                            $set('SEC_SCHOOL_OVERALLMARK', 1700);
-                                                        }
+                                            $gender = $student['gender'] ?? $student['GENDER'] ?? '';
+                                            if (in_array(trim($gender), ['ذكر', 'M', 'Male', '1'])) {
+                                                $set('GENDER', \App\Enums\Gender::Male->value);
+                                            } elseif (in_array(trim($gender), ['أنثى', 'F', 'Female', '2', 'انثى'])) {
+                                                $set('GENDER', \App\Enums\Gender::Female->value);
+                                            } else {
+                                                $set('GENDER', $gender);
+                                            }
 
-                                                        $gender = $student['gender'] ?? '';
-                                                        if (in_array(trim($gender), ['ذكر', 'M', 'Male', '1'])) {
-                                                            $set('GENDER', \App\Enums\Gender::Male->value);
-                                                        } elseif (in_array(trim($gender), ['أنثى', 'F', 'Female', '2', 'انثى'])) {
-                                                            $set('GENDER', \App\Enums\Gender::Female->value);
-                                                        } else {
-                                                            $set('GENDER', $gender);
-                                                        }
+                                            $set('PLACE_OF_BIRTH', $student['birth_area'] ?? $student['city_birth'] ?? $student['PLACE_OF_BIRTH'] ?? '');
 
-                                                        $set('PLACE_OF_BIRTH', $student['birth_area'] ?? '');
+                                            $dob = $student['date_of_brith'] ?? $student['bod'] ?? $student['DATE_OF_BIRTH'] ?? null;
+                                            if ($dob) {
+                                                $set('DATE_OF_BIRTH', date('Y-m-d', strtotime(str_replace('/', '-', $dob))));
+                                            }
 
-                                                        if (isset($student['date_of_brith'])) {
-                                                            $set('DATE_OF_BIRTH', date('Y-m-d', strtotime(str_replace('/', '-', $student['date_of_brith']))));
-                                                        }
+                                            // Map Governorate to exact DB string
+                                            $gov = trim($student['governorate'] ?? $student['PROVINCE'] ?? '');
+                                            if (in_array($gov, ['الامانة', 'الأمانة', 'امانة العاصمة', 'أمانة العاصمة', 'الامانه', 'الأمانه', 'امانه العاصمه', 'أمانه العاصمه'])) {
+                                                $gov = \App\Models\Province::where('NAME', 'like', '%امانة%')->orWhere('NAME', 'like', '%أمانة%')->value('NAME') ?? $gov;
+                                            } else {
+                                                $gov = \App\Models\Province::where('NAME', 'like', "%{$gov}%")->value('NAME') ?? $gov;
+                                            }
+                                            $set('PROVINCE', $gov);
 
-                                                        // Map Governorate to exact DB string
-                                                        $gov = trim($student['governorate'] ?? '');
-                                                        if (in_array($gov, ['الامانة', 'الأمانة', 'امانة العاصمة', 'أمانة العاصمة'])) {
-                                                            $gov = \App\Models\Province::where('NAME', 'like', '%امانة%')->orWhere('NAME', 'like', '%أمانة%')->value('NAME') ?? $gov;
-                                                        } else {
-                                                            $gov = \App\Models\Province::where('NAME', 'like', "%{$gov}%")->value('NAME') ?? $gov;
-                                                        }
-                                                        $set('PROVINCE', $gov);
+                                            // Map School Governorate to exact DB string
+                                            $secGov = trim($student['school_governorate'] ?? $student['SEC_SCHOOL_PROVINCE'] ?? '');
+                                            if (in_array($secGov, ['الامانة', 'الأمانة', 'امانة العاصمة', 'أمانة العاصمة', 'الامانه', 'الأمانه', 'امانه العاصمه', 'أمانه العاصمه'])) {
+                                                $secGov = \App\Models\Province::where('NAME', 'like', '%امانة%')->orWhere('NAME', 'like', '%أمانة%')->value('NAME') ?? $secGov;
+                                            } else {
+                                                $secGov = \App\Models\Province::where('NAME', 'like', "%{$secGov}%")->value('NAME') ?? $secGov;
+                                            }
+                                            $set('SEC_SCHOOL_PROVINCE', $secGov);
 
-                                                        // Map School Governorate to exact DB string
-                                                        $secGov = trim($student['school_governorate'] ?? '');
-                                                        if (in_array($secGov, ['الامانة', 'الأمانة', 'امانة العاصمة', 'أمانة العاصمة'])) {
-                                                            $secGov = \App\Models\Province::where('NAME', 'like', '%امانة%')->orWhere('NAME', 'like', '%أمانة%')->value('NAME') ?? $secGov;
-                                                        } else {
-                                                            $secGov = \App\Models\Province::where('NAME', 'like', "%{$secGov}%")->value('NAME') ?? $secGov;
-                                                        }
-                                                        $set('SEC_SCHOOL_PROVINCE', $secGov);
-
-                                                        // Map Nationality to exact DB string
-                                                        $nationality = trim($student['nationality'] ?? '');
-                                                        if (in_array($nationality, ['يمني', 'يمنيه', 'يمنية', 'اليمن'])) {
-                                                            $nationality = \App\Models\Country::where('COUNTRY_NAME', 'like', '%يمن%')->value('COUNTRY_NAME') ?? 'اليمن';
-                                                            $set('YEMEN_NATIONAL', 1);
-                                                        } else {
-                                                            $nationality = \App\Models\Country::where('COUNTRY_NAME', 'like', "%{$nationality}%")->value('COUNTRY_NAME') ?? $nationality;
-                                                            $set('YEMEN_NATIONAL', 0);
-                                                        }
-                                                        $set('COUNTRY_NAME', $nationality);
+                                            // Map Nationality to exact DB string
+                                            $nationality = trim($student['nationality'] ?? $student['NATIONALITY'] ?? $student['COUNTRY_NAME'] ?? '');
+                                            if (empty($nationality) || in_array($nationality, ['يمني', 'يمنيه', 'يمنية', 'اليمن'])) {
+                                                $nationality = \App\Models\Country::where('COUNTRY_NAME', 'like', '%يمن%')->value('COUNTRY_NAME') ?? 'اليمن';
+                                                $set('YEMEN_NATIONAL', 1);
+                                            } else {
+                                                $nationality = \App\Models\Country::where('COUNTRY_NAME', 'like', "%{$nationality}%")->value('COUNTRY_NAME') ?? $nationality;
+                                                $set('YEMEN_NATIONAL', 0);
+                                            }
+                                            $set('COUNTRY_NAME', $nationality);
 
 
                                                         // \Filament\Notifications\Notification::make()->success()->title('تم جلب البيانات من الوزارة بنجاح')->send();
@@ -271,13 +282,21 @@ class ApplicantForm
                                                     $set('SEC_SCHOOL_TYPE', $hsDegree->SEC_SCHOOL_TYPE);
                                                     $set('SEC_SCHOOL_NAME', $hsDegree->SEC_SCHOOL_NAME);
                                                     $set('SEC_SCHOOL_PLACE', $hsDegree->SEC_SCHOOL_PLACE);
-                                                    $set('SEC_SCHOOL_PROVINCE', $hsDegree->SEC_SCHOOL_PROVINCE);
+                                                    // Map School Governorate to exact DB string
+                                                    $secGov = trim($hsDegree->SEC_SCHOOL_PROVINCE ?? '');
+                                                    if (in_array($secGov, ['الامانة', 'الأمانة', 'امانة العاصمة', 'أمانة العاصمة', 'الامانه', 'الأمانه', 'امانه العاصمه', 'أمانه العاصمه'])) {
+                                                        $secGov = \App\Models\Province::where('NAME', 'like', '%امانة%')->orWhere('NAME', 'like', '%أمانة%')->value('NAME') ?? $secGov;
+                                                    } else {
+                                                        $secGov = \App\Models\Province::where('NAME', 'like', "%{$secGov}%")->value('NAME') ?? $secGov;
+                                                    }
+                                                    $set('SEC_SCHOOL_PROVINCE', $secGov);
                                                     $set('SEC_SCHOOL_TERRITORY', $hsDegree->SEC_SCHOOL_TERRITORY);
 
                                                     $set('FULL_NAME', $hsDegree->STUDENT_NAME);
-                                                    $nameParts = explode(' ', trim($hsDegree->STUDENT_NAME ?? ''));
-                                                    $set('FIRST_NAME', $nameParts[0] ?? '');
-                                                    $set('LAST_NAME', end($nameParts) ?? '');
+                                                    $nameParts = array_filter(explode(' ', trim($hsDegree->STUDENT_NAME ?? '')));
+                                                    $lastName = array_pop($nameParts);
+                                                    $set('FIRST_NAME', implode(' ', $nameParts));
+                                                    $set('LAST_NAME', $lastName ?? '');
 
                                                     if ($hsDegree->GENDER == 'ذكر') {
                                                         $set('GENDER', \App\Enums\Gender::Male->value);
@@ -291,7 +310,14 @@ class ApplicantForm
                                                         $set('DATE_OF_BIRTH', $hsDegree->DATE_OF_BIRTH->format('Y-m-d'));
                                                     }
                                                     $set('PLACE_OF_BIRTH', $hsDegree->PLACE_OF_BIRTH);
-                                                    $set('PROVINCE', $hsDegree->PROVINCE);
+                                                    // Map Governorate to exact DB string
+                                                    $gov = trim($hsDegree->PROVINCE ?? '');
+                                                    if (in_array($gov, ['الامانة', 'الأمانة', 'امانة العاصمة', 'أمانة العاصمة', 'الامانه', 'الأمانه', 'امانه العاصمه', 'أمانه العاصمه'])) {
+                                                        $gov = \App\Models\Province::where('NAME', 'like', '%امانة%')->orWhere('NAME', 'like', '%أمانة%')->value('NAME') ?? $gov;
+                                                    } else {
+                                                        $gov = \App\Models\Province::where('NAME', 'like', "%{$gov}%")->value('NAME') ?? $gov;
+                                                    }
+                                                    $set('PROVINCE', $gov);
                                                     $set('TERRITORY', $hsDegree->TERRITORY);
                                                     $set('COUNTRY_NAME', $hsDegree->COUNTRY_NAME);
                                                     $set('YEMEN_NATIONAL', $hsDegree->YEMEN_NATIONAL ? 1 : 0);
@@ -524,7 +550,7 @@ class ApplicantForm
                                             ->schema(
                                                 [
                                                     TextInput::make('FIRST_NAME')
-                                                        ->label('الاسم الأول')
+                                                        ->label('الاسم الثلاثي')
                                                         ->required()
                                                         ->live(onBlur: true)
                                                         ->readOnly(fn(Get $get) => ($get('is_searched') && !$get('is_not_found')) || $get('is_hs_degree_b'))
@@ -576,7 +602,7 @@ class ApplicantForm
                                                     Toggle::make('YEMEN_NATIONAL')->label('جنسية يمنية')->default(true)->required()
                                                         ->disabled(fn(Get $get) => ($get('is_searched') && !$get('is_not_found')) || $get('is_hs_degree_b'))->dehydrated(),
                                                     TextInput::make('EMAIL')->label('البريد الإلكتروني'),
-                                                    TextInput::make('MOBILE_PHONE')->label('رقم الهاتف'),
+                                                    TextInput::make('MOBILE_PHONE')->label('رقم الهاتف')->tel()->required(),
                                                     Select::make('BLOOD_GROUP')->label('فصيلة الدم')->options(\App\Models\ComboValue::getOptionsValuesByCode(8))->searchable(),
 
                                                 ]

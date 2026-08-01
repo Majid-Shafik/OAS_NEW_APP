@@ -125,6 +125,8 @@ class MinistryApiService
                     'date_of_brith' => $student->DATE_OF_BIRTH ?? null, // Providing both just in case
                     'governorate' => $student->PROVINCE ?? '',
                     'school_governorate' => $student->SEC_SCHOOL_PROVINCE ?? '',
+                    'territory' => $student->TERRITORY ?? '',
+                    'school_territory' => $student->SEC_SCHOOL_TERRITORY ?? '',
                 ];
             }
         } catch (\Exception $e) {

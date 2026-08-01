@@ -10,8 +10,12 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use App\Models\AppBillIdentCanceled;
+use App\Models\ApplicationGroup;
+use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\ColumnGroup;
 use Filament\Tables\Columns\IconColumn;
@@ -20,6 +24,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 
 class ApplicationsTable
 {
@@ -178,6 +183,7 @@ class ApplicationsTable
                     ->icon('heroicon-o-printer')
                     ->color('success')
                     ->visible(fn($record) => $record->applicant && $record->applicant->FREEZE === \App\Enums\FreezeStatus::FROZEN)
+                    ->hidden(fn($record) => ! auth()->user()->can('printReceipt', $record))
                     ->url(fn($record) => route('applicant.receipt', ['unid' => $record->UNID, 'applicant_ident' => $record->APPLICANT_IDENT]))
                     ->openUrlInNewTab(),
 
@@ -218,6 +224,88 @@ class ApplicationsTable
                         'RECORDDATE' => $data['RECORDDATE'],
                         'INSERTED_BY' => auth()->id(),
                     ])),
+
+                Action::make('cancelPayment')
+                    ->label('إلغاء السداد')
+                    ->icon('heroicon-o-x-circle')
+                    ->color('danger')
+                    ->visible(fn($record) => !empty($record->PAYMENT_FLAG) && $record->PAYMENT_FLAG !== \App\Enums\PaymentMethodEnum::NONE)
+                    ->hidden(fn($record) => ! auth()->user()->can('cancelPayment', $record))
+                    ->modalHeading('إلغاء الحافظة المالية المسددة')
+                    ->modalDescription(fn($record) => "رقم الحافظة: [ {$record->APP_BILL_IDENT} ] - رقم الطلب: [ {$record->APPLICATION_IDENT} ]")
+                    ->schema([
+                        Textarea::make('NOTE')
+                            ->label('سبب وتوجيه الإلغاء')
+                            ->placeholder('يجب كتابة مصدر التوجيه ورقم الوارد وسبب إلغاء الحافظة')
+                            ->rows(4)
+                            ->required(),
+                        Checkbox::make('CONFIRMATION')
+                            ->label(fn($record) => "تأكيد إلغاء الحافظة المالية رقم ({$record->APP_BILL_IDENT}) وتصفير السداد")
+                            ->required(),
+                    ])
+                    ->action(function ($record, array $data) {
+                        DB::beginTransaction();
+                        try {
+                            $billIdent = $record->APP_BILL_IDENT;
+                            $appGroup = ApplicationGroup::where('APP_BILL_IDENT', $billIdent)->first();
+
+                            // 1. Save backup of canceled bill
+                            AppBillIdentCanceled::create([
+                                'APP_BILL_IDENT' => $billIdent,
+                                'PAYMENT' => $appGroup?->PAYMENT ?? $appGroup?->APPLYING_COST ?? 0,
+                                'BONDS_ID' => $appGroup?->BONDS_ID ?? '0',
+                                'BONDS_DATE' => $appGroup?->BONDS_DATE ?? now(),
+                                'PAYMENT_FLAG' => is_object($record->PAYMENT_FLAG) ? $record->PAYMENT_FLAG->value : ($record->PAYMENT_FLAG ?? 1),
+                                'PAY_METHOD_ID' => $appGroup?->PAY_METHOD_ID ?? (is_object($record->PAYMENT_FLAG) ? $record->PAYMENT_FLAG->value : 0),
+                                'PAYMENT_BY' => $appGroup?->PAYMENT_BY ?? auth()->id(),
+                                'ACTUAL_PAYMENT_DATE' => $appGroup?->ACTUAL_PAYMENT_DATE ?? now(),
+                                'NOTE' => $data['NOTE'],
+                                'CANCELED_BY' => auth()->id(),
+                                'CANCELED_ON' => now(),
+                            ]);
+
+                            // 2. Update all Applications attached to this bill
+                            \App\Models\Application::where('APP_BILL_IDENT', $billIdent)->update([
+                                'PAYMENT_FLAG' => 0,
+                                'STATUS' => \App\Enums\ApplicationStatus::New,
+                                'CONFIRMED_BY_APPLICANT' => 0,
+                                'STUDENT_CODE' => '0',
+                            ]);
+
+                            // 3. Update ApplicationGroup
+                            if ($appGroup) {
+                                $appGroup->update([
+                                    'PAYMENT' => 0,
+                                    'ACTUAL_PAYMENT_DATE' => null,
+                                    'PAY_METHOD_ID' => 0,
+                                ]);
+                            }
+
+                            // 4. Update applicant status and freeze
+                            if ($record->applicant) {
+                                $record->applicant->update([
+                                    'STATUS' => \App\Enums\ApplicantStatus::Updated,
+                                    'FREEZE' => \App\Enums\FreezeStatus::UNFROZEN,
+                                ]);
+                            }
+
+                            DB::commit();
+
+                            \Filament\Notifications\Notification::make()
+                                ->title('تم إلغاء السداد بنجاح')
+                                ->body("تم إلغاء بيانات الحافظة رقم ({$billIdent}) وأرشفة العملية بنجاح.")
+                                ->success()
+                                ->send();
+                        } catch (\Throwable $e) {
+                            DB::rollBack();
+                            \Filament\Notifications\Notification::make()
+                                ->title('حدث خطأ أثناء إلغاء السداد')
+                                ->body($e->getMessage())
+                                ->danger()
+                                ->send();
+                            throw new \Filament\Support\Exceptions\Halt();
+                        }
+                    }),
 
                 Action::make('confirm')
                     ->label('تأكيد')

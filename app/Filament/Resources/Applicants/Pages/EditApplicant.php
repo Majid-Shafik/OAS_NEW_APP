@@ -16,6 +16,18 @@ class EditApplicant extends EditRecord
 {
     protected static string $resource = ApplicantResource::class;
 
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        if (empty($data['COUNTRY_IDENT']) && !empty($data['COUNTRY_NAME'])) {
+            $data['COUNTRY_IDENT'] = \App\Models\Country::where('COUNTRY_NAME', $data['COUNTRY_NAME'])->value('COUNTRY_IDENT');
+            if (empty($data['COUNTRY_IDENT']) && ($data['YEMEN_NATIONAL'] ?? 0) == 1) {
+                $data['COUNTRY_IDENT'] = 242;
+            }
+        }
+
+        return $data;
+    }
+
     protected function getHeaderActions(): array
     {
         return [
@@ -62,6 +74,14 @@ class EditApplicant extends EditRecord
                                     'COUNTRY_NAME' => $student['nationality'] ?? '',
                                     'YEMEN_NATIONAL' => ($student['nationality'] ?? '') == 'يمني' ? 1 : 0,
                                 ];
+
+                                $countryName = $student['nationality'] ?? '';
+                                if ($updates['YEMEN_NATIONAL'] == 1 || in_array($countryName, ['يمني', 'يمنيه', 'يمنية', 'اليمن'])) {
+                                    $updates['COUNTRY_IDENT'] = 242;
+                                    $updates['COUNTRY_NAME'] = \App\Models\Country::where('COUNTRY_IDENT', 242)->value('COUNTRY_NAME') ?? 'اليمن';
+                                } else {
+                                    $updates['COUNTRY_IDENT'] = \App\Models\Country::where('COUNTRY_NAME', 'like', "%{$countryName}%")->value('COUNTRY_IDENT') ?? null;
+                                }
 
                                 $sec = $student['section_id'] ?? 1; // Default
                                 if ($sec == 1 || ($student['type'] ?? '') === 'علمي') {

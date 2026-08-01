@@ -81,6 +81,8 @@ return [
         'reset_password' => 'إعادة تعيين كلمة المرور',
         'accept' => 'قبول',
         'pay' => 'تسديد',
+        'cancel_payment'=> 'إلغاء السداد',
+        'print_receipt'=> 'طباعة حافظة',
         'confirm' => 'تأكيد',
         'update_from_ministry_applicant' => 'تحديث من الوزارة',
         'show_clearing_attachments' => 'عرض ملفات المقاصاة',

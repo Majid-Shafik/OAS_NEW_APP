@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Applicants\RelationManagers;
 use App\Filament\Resources\Applications\ApplicationResource;
 use Filament\Actions\CreateAction;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Infolist;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Section;
@@ -35,6 +36,19 @@ class ApplicationsRelationManager extends RelationManager
                         Select::make('UNID')
                             ->label('الجامعة')
                             ->options(\App\Models\University::coordination()->pluck('U_NAME', 'UNID'))
+                            ->default(function ($livewire) {
+                                if (session('selected_unid', 0) != 0) {
+                                    return session('selected_unid');
+                                }
+                                if (auth()->user()->UNID != 0) {
+                                    return auth()->user()->UNID;
+                                }
+                                $owner = $livewire->getOwnerRecord();
+                                if ($owner && $owner->UNID) {
+                                    return $owner->UNID;
+                                }
+                                return null;
+                            })
                             ->live()
                             ->afterStateUpdated(function (Set $set) {
                                 $set('FACULTY_IDENT', null);
@@ -134,10 +148,23 @@ class ApplicationsRelationManager extends RelationManager
                             })
                             ->searchable()
                             ->required(),
+
+                        TextInput::make('MOBILE_PHONE')
+                            ->label('رقم هاتف المتقدم')
+                            ->default(fn ($livewire) => $livewire->getOwnerRecord()?->MOBILE_PHONE)
+                            ->tel()
+                            ->required()
+                            ->columnSpanFull(),
                     ])->columns(2)
                 ])
                 ->using(function (array $data, string $model): \Illuminate\Database\Eloquent\Model {
                     $applicant = $this->getOwnerRecord();
+                    
+                    if (!empty($data['MOBILE_PHONE']) && $applicant->MOBILE_PHONE !== $data['MOBILE_PHONE']) {
+                        $applicant->MOBILE_PHONE = $data['MOBILE_PHONE'];
+                        $applicant->save();
+                    }
+
                     $offeringIdent = $data['OFFERING_IDENT'];
                     $isClearing = $applicant->IS_CLEARING === \App\Enums\IsClearingType::CLEARING;
                     $imported = $applicant->IMPORTED ?? 2;

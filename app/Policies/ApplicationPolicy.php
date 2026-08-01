@@ -57,4 +57,13 @@ class ApplicationPolicy
         return $authUser->can('Confirm:Application');
     }
 
+    public function cancelPayment(AuthUser $authUser, Application $application): bool
+    {
+        return $authUser->can('CancelPayment:Application');
+    }
+
+    public function printReceipt(AuthUser $authUser, Application $application): bool
+    {
+        return $authUser->can('PrintReceipt:Application');
+    }
 }

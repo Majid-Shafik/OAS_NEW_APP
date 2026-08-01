@@ -221,8 +221,10 @@ return [
                 'update',
                 'delete',
                 'deleteAny',
-                'accept',
+                'printReceipt',
                 'pay',
+                'cancelPayment',
+                'accept',
                 'confirm',
             ],
             HighSchoolDegreeBTypeResource::class => [

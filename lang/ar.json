@@ -107,5 +107,6 @@
     "RECORD_ON": "تاريخ الإضافة",
     "RECORD_BY": "أضيف بواسطة",
     "update_from_ministry_applicant": "تحديث بيانات المتقدم من الوزارة",
-    "complete_file": "إكمال الملف وإصدار الحافظة"
+    "complete_file": "إكمال الملف وإصدار الحافظة",
+    "cancel_payment": "إلغاء السداد" 
 }

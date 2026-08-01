@@ -72,7 +72,7 @@ class ApplicantEditForm
                                                 ->schema(
                                                     [
                                                         TextInput::make('FIRST_NAME')
-                                                            ->label('الاسم الأول')
+                                                            ->label('الاسم الثلاثي')
                                                             ->required()
                                                             ->live(onBlur: true)
                                                             ->readOnly(fn(Get $get) => ($get('is_searched') && !$get('is_not_found')) || $get('is_hs_degree_b') || $get('APPLICANT_TYPE') == 1)
@@ -130,7 +130,7 @@ class ApplicantEditForm
                                                         Toggle::make('YEMEN_NATIONAL')->label('جنسية يمنية')->default(true)->required()
                                                             ->disabled(fn(Get $get) => ($get('is_searched') && !$get('is_not_found')) || $get('is_hs_degree_b'))->dehydrated(),
                                                         TextInput::make('EMAIL')->label('البريد الإلكتروني'),
-                                                        TextInput::make('MOBILE_PHONE')->label('رقم الهاتف'),
+                                                        TextInput::make('MOBILE_PHONE')->label('رقم الهاتف')->tel()->required(),
                                                         Select::make('BLOOD_GROUP')->label('فصيلة الدم')->options(\App\Models\ComboValue::getOptionsValuesByCode(8))->searchable(),
 
                                                     ]
@@ -222,7 +222,7 @@ class ApplicantEditForm
                                         ]),
                                     Tab::make('بيانات المقاصة')
                                         ->icon('heroicon-o-document-check')
-                                        ->visible(fn (\Filament\Schemas\Components\Utilities\Get $get, $livewire) => ($get('IS_CLEARING') instanceof \App\Enums\IsClearingType ? $get('IS_CLEARING')->value == 1 : in_array($get('IS_CLEARING'), [1, '1'])) || str_contains(class_basename($livewire), 'Clearing'))
+                                        ->visible(fn(\Filament\Schemas\Components\Utilities\Get $get, $livewire) => ($get('IS_CLEARING') instanceof \App\Enums\IsClearingType ? $get('IS_CLEARING')->value == 1 : in_array($get('IS_CLEARING'), [1, '1'])) || str_contains(class_basename($livewire), 'Clearing'))
                                         ->schema(function (Get $get) {
                                             if ($get('is_not_found')) {
                                                 return [
@@ -248,19 +248,19 @@ class ApplicantEditForm
                                                 \Filament\Schemas\Components\Fieldset::make('applicationsClearing')
                                                     ->relationship('applicationsClearing')
                                                     ->label('بيانات الجامعة والتخصص التي جاء منها (المقاصاة)')
-                                                    ->visible(fn (\Filament\Schemas\Components\Utilities\Get $get, $livewire) => ($get('IS_CLEARING') instanceof \App\Enums\IsClearingType ? $get('IS_CLEARING')->value == 1 : in_array($get('IS_CLEARING'), [1, '1'])) || str_contains(class_basename($livewire), 'Clearing'))
+                                                    ->visible(fn(\Filament\Schemas\Components\Utilities\Get $get, $livewire) => ($get('IS_CLEARING') instanceof \App\Enums\IsClearingType ? $get('IS_CLEARING')->value == 1 : in_array($get('IS_CLEARING'), [1, '1'])) || str_contains(class_basename($livewire), 'Clearing'))
                                                     ->schema([
                                                         \Filament\Forms\Components\Select::make('FROM_COUNTRY_IDENT')
                                                             ->label('الدولة القادم منها')
                                                             ->options(fn() => \App\Models\Country::withoutGlobalScopes()->get()->mapWithKeys(fn($c) => [$c->COUNTRY_IDENT => (string) ($c->COUNTRY_NAME ?? $c->COUNTRY_IDENT)]))
-                                                            ->getOptionLabelUsing(fn ($value) => (string) (\App\Models\Country::withoutGlobalScopes()->find($value)?->COUNTRY_NAME ?? $value))
+                                                            ->getOptionLabelUsing(fn($value) => (string) (\App\Models\Country::withoutGlobalScopes()->find($value)?->COUNTRY_NAME ?? $value))
                                                             ->searchable()
                                                             ->required(),
-                                                        
+
                                                         \Filament\Forms\Components\Select::make('FROM_UNIV_IDENT')
                                                             ->label('الجامعة القادم منها')
                                                             ->options(fn() => \App\Models\University::withoutGlobalScopes()->clearing()->get()->mapWithKeys(fn($u) => [$u->UNID => (string) ($u->U_NAME ?? $u->UNID)]))
-                                                            ->getOptionLabelUsing(fn ($value) => (string) (\App\Models\University::withoutGlobalScopes()->find($value)?->U_NAME ?? $value))
+                                                            ->getOptionLabelUsing(fn($value) => (string) (\App\Models\University::withoutGlobalScopes()->find($value)?->U_NAME ?? $value))
                                                             ->searchable()
                                                             ->live()
                                                             ->afterStateUpdated(function (\Filament\Schemas\Components\Utilities\Set $set, $state) {
@@ -268,7 +268,7 @@ class ApplicantEditForm
                                                                 $set('FROM_PROGRAM_IDENT', null);
                                                             })
                                                             ->required(),
-                                    
+
                                                         \Filament\Forms\Components\Select::make('FROM_FACULTY_IDENT')
                                                             ->label('الكلية القادم منها')
                                                             ->options(function (\Filament\Schemas\Components\Utilities\Get $get) {
@@ -277,14 +277,14 @@ class ApplicantEditForm
                                                                 return \App\Models\Faculty::withoutGlobalScopes()->where('UNID', $unid)->get()
                                                                     ->mapWithKeys(fn($f) => [$f->FACULTY_IDENT => (string) ($f->FACULTY_NAME ?? $f->FACULTY_IDENT)]);
                                                             })
-                                                            ->getOptionLabelUsing(fn ($value, \Filament\Schemas\Components\Utilities\Get $get) => (string) (\App\Models\Faculty::withoutGlobalScopes()->where('UNID', $get('FROM_UNIV_IDENT'))->where('FACULTY_IDENT', $value)->first()?->FACULTY_NAME ?? $value))
+                                                            ->getOptionLabelUsing(fn($value, \Filament\Schemas\Components\Utilities\Get $get) => (string) (\App\Models\Faculty::withoutGlobalScopes()->where('UNID', $get('FROM_UNIV_IDENT'))->where('FACULTY_IDENT', $value)->first()?->FACULTY_NAME ?? $value))
                                                             ->searchable()
                                                             ->live()
                                                             ->afterStateUpdated(function (\Filament\Schemas\Components\Utilities\Set $set, \Filament\Schemas\Components\Utilities\Get $get, $state) {
                                                                 $set('FROM_PROGRAM_IDENT', null);
                                                             })
                                                             ->required(),
-                                    
+
                                                         \Filament\Forms\Components\Select::make('FROM_PROGRAM_IDENT')
                                                             ->label('التخصص القادم منه')
                                                             ->options(function (\Filament\Schemas\Components\Utilities\Get $get) {
@@ -294,7 +294,7 @@ class ApplicantEditForm
                                                                 return \App\Models\Program::withoutGlobalScopes()->where('UNID', $unid)->where('FACULTY_IDENT', $faculty)->get()
                                                                     ->mapWithKeys(fn($p) => [$p->PROGRAM_IDENT => (string) ($p->PROGRAM_NAME ?? $p->PROGRAM_IDENT)]);
                                                             })
-                                                            ->getOptionLabelUsing(fn ($value, \Filament\Schemas\Components\Utilities\Get $get) => (string) (\App\Models\Program::withoutGlobalScopes()->where('UNID', $get('FROM_UNIV_IDENT'))->where('FACULTY_IDENT', $get('FROM_FACULTY_IDENT'))->where('PROGRAM_IDENT', $value)->first()?->PROGRAM_NAME ?? $value))
+                                                            ->getOptionLabelUsing(fn($value, \Filament\Schemas\Components\Utilities\Get $get) => (string) (\App\Models\Program::withoutGlobalScopes()->where('UNID', $get('FROM_UNIV_IDENT'))->where('FACULTY_IDENT', $get('FROM_FACULTY_IDENT'))->where('PROGRAM_IDENT', $value)->first()?->PROGRAM_NAME ?? $value))
                                                             ->searchable()
                                                             ->live()
                                                             ->required(),

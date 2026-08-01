@@ -65,7 +65,10 @@ class Application extends Model
         return $this->belongsTo(PaymentMethod::class, 'PAYMENT_FLAG', 'PAY_METHOD_ID');
     }
 
-    
+    public function applicationGroup()
+    {
+        return $this->belongsTo(ApplicationGroup::class, 'APP_BILL_IDENT', 'APP_BILL_IDENT');
+    }
 
     public function insertedBy()
     {
