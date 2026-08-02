@@ -58,8 +58,8 @@ class UniversityResource extends Resource
     {
         return [
             'index' => ListUniversities::route('/'),
-            'create' => CreateUniversity::route('/create'),
-            'edit' => EditUniversity::route('/{record}/edit'),
+            // 'create' => CreateUniversity::route('/create'),
+            // 'edit' => EditUniversity::route('/{record}/edit'),
         ];
     }
 }

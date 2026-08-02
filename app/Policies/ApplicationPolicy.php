@@ -60,11 +60,19 @@ class ApplicationPolicy
 
     public function accept(AuthUser $authUser, Application $application): bool
     {
+        if (! ($application->university?->ENABLE_CONFIRMED ?? false)) {
+            return false;
+        }
+
         return $authUser->can('Accept:Application');
     }
 
     public function cancelAccept(AuthUser $authUser, Application $application): bool
     {
+        if (! ($application->university?->ENABLE_CONFIRMED ?? false)) {
+            return false;
+        }
+
         return $authUser->can('CancelAccept:Application');
     }
 
@@ -75,11 +83,19 @@ class ApplicationPolicy
 
     public function confirm(AuthUser $authUser, Application $application): bool
     {
+        if (! ($application->university?->ENABLE_CONFIRMED ?? false)) {
+            return false;
+        }
+
         return $authUser->can('Confirm:Application');
     }
 
     public function cancelConfirm(AuthUser $authUser, Application $application): bool
     {
+        if (! ($application->university?->ENABLE_CONFIRMED ?? false)) {
+            return false;
+        }
+
         return $authUser->can('CancelConfirm:Application');
     }
 

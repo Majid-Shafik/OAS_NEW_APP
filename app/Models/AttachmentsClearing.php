@@ -36,16 +36,20 @@ class AttachmentsClearing extends Model
      */
     public function getUploadDirectoryAttribute(): string
     {
-        // For multi-database, the active connection name can be retrieved.
-        $activeConnection = $this->getConnectionName() ?? config('database.default');
+        $activeDb = session('tenant_database', config('database.connections.tenant.database', config('database.default')));
         
-        // Example: mapping 'p2022' to 'uploads/p2022' using legacy_attachments config
-        $baseDir = config("legacy_attachments.systems.{$activeConnection}", "uploads/{$activeConnection}");
+        $baseDir = config("legacy_attachments.systems.{$activeDb}");
         
-        // Remove '../' or './' from PARENT_FOLDER
+        if (!$baseDir) {
+            if (preg_match('/(20\d{2})/', (string) $activeDb, $matches)) {
+                $baseDir = "uploads/p{$matches[1]}";
+            } else {
+                $baseDir = "uploads/{$activeDb}";
+            }
+        }
+        
         $cleanParentFolder = str_replace(['../', './'], '', $this->PARENT_FOLDER ?? '');
         
-        // Combine them
         return rtrim($baseDir, '/') . '/' . ltrim($cleanParentFolder, '/');
     }
 }

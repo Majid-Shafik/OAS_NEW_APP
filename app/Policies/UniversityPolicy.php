@@ -37,4 +37,8 @@ class UniversityPolicy
         return $authUser->can('Delete:University');
     }
 
+    public function updateUniversitySettings(AuthUser $authUser, ?University $university = null): bool
+    {
+        return $authUser->can('UpdateUniversitySettings:University');
+    }
 }

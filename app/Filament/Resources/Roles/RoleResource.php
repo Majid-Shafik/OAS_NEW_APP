@@ -195,6 +195,61 @@ class RoleResource extends Resource
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make(),
+                \Filament\Actions\Action::make('syncSingleRole')
+                    ->label('نشر الدور')
+                    ->icon('heroicon-o-arrow-path-rounded-square')
+                    ->color('info')
+                    ->visible(fn () => auth()->user()?->hasRole(['super_admin', 'admin']) || auth()->id() === 1)
+                    ->modalHeading(fn ($record) => "نشر الدور [{$record->name}] إلى قواعد بيانات أخرى")
+                    ->modalDescription('اختر قواعد البيانات التي ترغب في نسخ وتحديث هذا الدور وصلاحياته إليها.')
+                    ->modalSubmitActionLabel('بدء النشر')
+                    ->form([
+                        CheckboxList::make('target_databases')
+                            ->label('قواعد البيانات المستهدفة')
+                            ->options(fn () => \App\Services\RolePermissionSyncService::getAvailableTargetDatabases())
+                            ->default(fn () => array_keys(\App\Services\RolePermissionSyncService::getAvailableTargetDatabases()))
+                            ->bulkToggleable()
+                            ->searchable()
+                            ->required()
+                            ->minItems(1, 'يجب اختيار قاعدة بيانات واحدة على الأقل.'),
+
+                        Toggle::make('sync_manageable_roles')
+                            ->label('مزامنة الأدوار المسموح بإدارتها لهذا الدور')
+                            ->default(true),
+                    ])
+                    ->action(function ($record, array $data, \App\Services\RolePermissionSyncService $syncService): void {
+                        $result = $syncService->sync(
+                            targetDatabases: $data['target_databases'] ?? [],
+                            roleIds: [$record->id],
+                            syncUserRoles: true,
+                            syncManageableRoles: (bool) ($data['sync_manageable_roles'] ?? true),
+                            overwrite: true
+                        );
+
+                        if ($result['success']) {
+                            \Filament\Notifications\Notification::make()
+                                ->title('تم نشر الدور بنجاح')
+                                ->body($result['message'])
+                                ->success()
+                                ->send();
+                        } else {
+                            $errorDetails = [];
+                            foreach ($result['errors'] as $db => $err) {
+                                $errorDetails[] = "{$db}: {$err}";
+                            }
+                            $body = $result['message'];
+                            if (!empty($errorDetails)) {
+                                $body .= "\n\nالسبب: " . implode("\n", $errorDetails);
+                            }
+
+                            \Filament\Notifications\Notification::make()
+                                ->title('تنبيه أثناء النشر')
+                                ->body($body)
+                                ->danger()
+                                ->persistent()
+                                ->send();
+                        }
+                    }),
                 DeleteAction::make(),
             ])
             ->bulkActions([

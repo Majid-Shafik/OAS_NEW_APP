@@ -93,5 +93,6 @@ return [
         'first_review' => 'المراجعة الأولى',
         'second_review' => 'المراجعة الثانية',
         'show_with_certificate' => 'استعراض الشهادة الثانوية',
+        'update_university_settings' => 'تغيير إعدادات الجامعة',
     ],
 ];

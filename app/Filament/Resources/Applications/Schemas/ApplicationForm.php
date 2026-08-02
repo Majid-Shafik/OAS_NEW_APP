@@ -161,7 +161,7 @@ class ApplicationForm
 
         $dbName = \Illuminate\Support\Facades\DB::connection()->getDatabaseName();
         $sessionDb = session('tenant_database', '');
-        $isArchive = str_contains($dbName, 'p_oas_db_20') || str_contains($sessionDb, 'p_oas_db_20');
+        $isArchive = (bool) (preg_match('/(20\d{2})/', (string) $dbName) || preg_match('/(20\d{2})/', (string) $sessionDb));
 
         if (!$isArchive) {
             $query->whereDate('FROM_DATE', '<=', now())

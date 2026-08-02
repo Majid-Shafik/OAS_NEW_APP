@@ -9,13 +9,7 @@ use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 
-$databases = [
-    'p_oas_db_2022',
-    'p_oas_db_2021',
-    'p_oas_db_2020',
-    'p_oas_db_2019',
-    'p_oas_db_2018',
-];
+$databases = array_keys(config('academic_years.databases', []));
 
 foreach ($databases as $dbName) {
     try {

@@ -6,6 +6,7 @@ use App\Filament\Resources\Applicants\ApplicantResource;
 use App\Filament\Resources\Applications\ApplicationResource;
 use App\Filament\Resources\ClearingApplicants\ClearingApplicantResource;
 use App\Filament\Resources\HighSchoolDegreeBTypes\HighSchoolDegreeBTypeResource;
+use App\Filament\Resources\Universities\UniversityResource;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\Application;
 use BezhanSalleh\FilamentShield\Resources\Roles\RoleResource;
@@ -192,6 +193,14 @@ return [
                 'create',
                 'update',
                 'delete',
+            ],
+            UniversityResource::class => [
+                'viewAny',
+                'view',
+                'create',
+                'update',
+                'delete',
+                'updateUniversitySettings',
             ],
             ApplicantResource::class => [
                 'viewAny',

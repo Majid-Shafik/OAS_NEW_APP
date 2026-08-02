@@ -43,20 +43,34 @@ class AppServiceProvider extends ServiceProvider
             return new LegacyUserProvider($app['hash'], $config['model']);
         });
 
-        TextColumn::macro('translateFromConfig', function (string $configKey) {
-            return $this->formatStateUsing(function ($state, \Illuminate\Database\Eloquent\Model $record) use ($configKey) {
+        $resolveConfigPath = function (?string $dbName, string $configKey, ?string $state = null) {
+            $path = $state !== null ? "{$configKey}.{$state}" : $configKey;
+            
+            if ($dbName && config()->has("p.{$dbName}.{$configKey}")) {
+                return "p.{$dbName}.{$path}";
+            }
+
+            if ($dbName && preg_match('/(20\d{2})/', $dbName, $m)) {
+                $yearKey = "P_{$m[1]}";
+                if (config()->has("p.{$yearKey}.{$configKey}")) {
+                    return "p.{$yearKey}.{$path}";
+                }
+            }
+
+            return "p.default.{$path}";
+        };
+
+        TextColumn::macro('translateFromConfig', function (string $configKey) use ($resolveConfigPath) {
+            return $this->formatStateUsing(function ($state, \Illuminate\Database\Eloquent\Model $record) use ($configKey, $resolveConfigPath) {
                 static $cache = [];
-                $dbName = $record->getConnectionName();
+                $dbName = session('tenant_database', $record->getConnectionName() ?: config('database.connections.tenant.database'));
                 $cacheKey = "{$dbName}.{$configKey}.{$state}";
 
                 if (isset($cache[$cacheKey])) {
                     return $cache[$cacheKey];
                 }
 
-                $configPath = config()->has("p.{$dbName}") 
-                    ? "p.{$dbName}.{$configKey}.{$state}" 
-                    : "p.default.{$configKey}.{$state}";
-
+                $configPath = $resolveConfigPath($dbName, $configKey, (string) $state);
                 $result = config($configPath, $state);
                 $cache[$cacheKey] = $result;
 
@@ -64,20 +78,17 @@ class AppServiceProvider extends ServiceProvider
             });
         });
 
-        TextEntry::macro('translateFromConfig', function (string $configKey) {
-            return $this->formatStateUsing(function ($state, \Illuminate\Database\Eloquent\Model $record) use ($configKey) {
+        TextEntry::macro('translateFromConfig', function (string $configKey) use ($resolveConfigPath) {
+            return $this->formatStateUsing(function ($state, \Illuminate\Database\Eloquent\Model $record) use ($configKey, $resolveConfigPath) {
                 static $cache = [];
-                $dbName = $record->getConnectionName();
+                $dbName = session('tenant_database', $record->getConnectionName() ?: config('database.connections.tenant.database'));
                 $cacheKey = "{$dbName}.{$configKey}.{$state}";
 
                 if (isset($cache[$cacheKey])) {
                     return $cache[$cacheKey];
                 }
 
-                $configPath = config()->has("p.{$dbName}") 
-                    ? "p.{$dbName}.{$configKey}.{$state}" 
-                    : "p.default.{$configKey}.{$state}";
-
+                $configPath = $resolveConfigPath($dbName, $configKey, (string) $state);
                 $result = config($configPath, $state);
                 $cache[$cacheKey] = $result;
 
@@ -85,12 +96,10 @@ class AppServiceProvider extends ServiceProvider
             });
         });
 
-        \Filament\Forms\Components\Select::macro('optionsFromConfig', function (string $configKey) {
-            return $this->options(function (?\Illuminate\Database\Eloquent\Model $record) use ($configKey) {
-                $dbName = $record ? $record->getConnectionName() : config('database.default');
-                $configPath = config()->has("p.{$dbName}.{$configKey}") 
-                    ? "p.{$dbName}.{$configKey}" 
-                    : "p.default.{$configKey}";
+        \Filament\Forms\Components\Select::macro('optionsFromConfig', function (string $configKey) use ($resolveConfigPath) {
+            return $this->options(function (?\Illuminate\Database\Eloquent\Model $record) use ($configKey, $resolveConfigPath) {
+                $dbName = session('tenant_database', $record ? $record->getConnectionName() : config('database.connections.tenant.database'));
+                $configPath = $resolveConfigPath($dbName, $configKey, null);
                 return config($configPath, []);
             });
         });

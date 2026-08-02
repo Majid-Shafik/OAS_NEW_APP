@@ -41,7 +41,7 @@ class ApplicationsTable
             ->columns([
                 TextColumn::make('index')
                     ->rowIndex()
-                    ->label('مسلسل'),
+                    ->label('م'),
                 TextColumn::make('UNID')
                     ->label(__('UNID'))
                     ->sortable()
@@ -92,6 +92,11 @@ class ApplicationsTable
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+
+                      TextColumn::make('STATUS')
+                    ->label('حال سجل الرغبة')
+                    ->badge()
+                    ->sortable(),
                 TextColumn::make('insertedBy.USER_NAME')
                     ->label('بواسطة')
                     ->sortable()
@@ -132,14 +137,23 @@ class ApplicationsTable
                             ->action(
                                 Action::make('toggleAcceptColumn')
                                     ->disabled(fn($record) => (bool)$record->ACCEPTED
-                                        ? (! auth()->user()->can('cancelAccept', $record) || (bool)$record->CONFIRMED_BY_APPLICANT)
-                                        : (! auth()->user()->can('accept', $record) || empty($record->PAYMENT_FLAG) || $record->PAYMENT_FLAG === \App\Enums\PaymentMethodEnum::NONE)
+                                        ? (! auth()->user()->can('cancelAccept', $record) || (bool)$record->CONFIRMED_BY_APPLICANT || ! ($record->university?->ENABLE_CONFIRMED ?? false))
+                                        : (! auth()->user()->can('accept', $record) || empty($record->PAYMENT_FLAG) || $record->PAYMENT_FLAG === \App\Enums\PaymentMethodEnum::NONE || ! ($record->university?->ENABLE_CONFIRMED ?? false))
                                     )
                                     ->requiresConfirmation(fn($record) => (bool)$record->ACCEPTED && ! (bool)$record->CONFIRMED_BY_APPLICANT)
                                     ->modalHeading('إلغاء قبول الرغبة')
                                     ->modalDescription('هل أنت متأكد من إلغاء قبول هذه الرغبة؟ سيتم إعادة حالة الطلب إلى غير مقبول.')
                                     ->modalSubmitActionLabel('نعم، إلغاء القبول')
                                     ->action(function ($record) {
+                                        if (! ($record->university?->ENABLE_CONFIRMED ?? false)) {
+                                            \Filament\Notifications\Notification::make()
+                                                ->title('خاصية القبول والتأكيد غير مفعلة')
+                                                ->body('تم إيقاف صلاحية قبول وتأكيد الطلاب لهذه الجامعة من قبل الإدارة.')
+                                                ->warning()
+                                                ->send();
+                                            return;
+                                        }
+
                                         if ((bool)$record->ACCEPTED) {
                                             if (! auth()->user()->can('cancelAccept', $record)) {
                                                 \Filament\Notifications\Notification::make()
@@ -200,12 +214,21 @@ class ApplicationsTable
                             ->sortable()
                             ->action(
                                 Action::make('toggleConfirmColumn')
-                                    ->disabled(fn($record) => ! (bool)$record->CONFIRMED_BY_APPLICANT || ! auth()->user()->can('cancelConfirm', $record))
+                                    ->disabled(fn($record) => ! (bool)$record->CONFIRMED_BY_APPLICANT || ! auth()->user()->can('cancelConfirm', $record) || ! ($record->university?->ENABLE_CONFIRMED ?? false))
                                     ->requiresConfirmation(fn($record) => (bool)$record->CONFIRMED_BY_APPLICANT)
                                     ->modalHeading('إلغاء تأكيد الرغبة')
                                     ->modalDescription('هل أنت متأكد من إلغاء تأكيد هذه الرغبة وتصفير رقم القيد والمقعد المحجوز؟')
                                     ->modalSubmitActionLabel('نعم، إلغاء التأكيد')
                                     ->action(function ($record) {
+                                        if (! ($record->university?->ENABLE_CONFIRMED ?? false)) {
+                                            \Filament\Notifications\Notification::make()
+                                                ->title('خاصية القبول والتأكيد غير مفعلة')
+                                                ->body('تم إيقاف صلاحية قبول وتأكيد الطلاب لهذه الجامعة من قبل الإدارة.')
+                                                ->warning()
+                                                ->send();
+                                            return;
+                                        }
+
                                         if ((bool)$record->CONFIRMED_BY_APPLICANT) {
                                             if (! auth()->user()->can('cancelConfirm', $record)) {
                                                 \Filament\Notifications\Notification::make()
@@ -226,10 +249,7 @@ class ApplicationsTable
                                     })
                             ),
                     ]),
-                TextColumn::make('STATUS')
-                    ->label('الحالة')
-                    ->badge()
-                    ->sortable(),
+              
             ])
             ->filters([
                 AcademicFilter::make(),
@@ -269,13 +289,22 @@ class ApplicationsTable
                     ->label('قبول')
                     ->icon('heroicon-o-check-circle')
                     ->color('warning')
-                    ->visible(fn($record) => !empty($record->PAYMENT_FLAG) && $record->PAYMENT_FLAG !== \App\Enums\PaymentMethodEnum::NONE && ! (bool)$record->ACCEPTED)
+                    ->visible(fn($record) => !empty($record->PAYMENT_FLAG) && $record->PAYMENT_FLAG !== \App\Enums\PaymentMethodEnum::NONE && ! (bool)$record->ACCEPTED && (bool)($record->university?->ENABLE_CONFIRMED ?? false))
                     ->hidden(fn($record) => ! auth()->user()->can('accept', $record))
                     ->requiresConfirmation()
                     ->modalHeading('قبول الرغبة')
                     ->modalDescription('هل أنت متأكد من قبول وترشيح هذه الرغبة؟')
                     ->modalSubmitActionLabel('قبول')
                     ->action(function ($record) {
+                        if (! ($record->university?->ENABLE_CONFIRMED ?? false)) {
+                            \Filament\Notifications\Notification::make()
+                                ->title('خاصية القبول والتأكيد غير مفعلة')
+                                ->body('تم إيقاف صلاحية قبول وتأكيد الطلاب لهذه الجامعة من قبل الإدارة.')
+                                ->warning()
+                                ->send();
+                            return;
+                        }
+
                         $record->accept();
 
                         \Filament\Notifications\Notification::make()
@@ -288,13 +317,22 @@ class ApplicationsTable
                     ->label('إلغاء القبول')
                     ->icon('heroicon-o-x-mark')
                     ->color('danger')
-                    ->visible(fn($record) => (bool)$record->ACCEPTED && ! (bool)$record->CONFIRMED_BY_APPLICANT)
+                    ->visible(fn($record) => (bool)$record->ACCEPTED && ! (bool)$record->CONFIRMED_BY_APPLICANT && (bool)($record->university?->ENABLE_CONFIRMED ?? false))
                     ->hidden(fn($record) => ! auth()->user()->can('cancelAccept', $record))
                     ->requiresConfirmation()
                     ->modalHeading('إلغاء قبول الرغبة')
                     ->modalDescription('هل أنت متأكد من إلغاء قبول هذه الرغبة؟')
                     ->modalSubmitActionLabel('إلغاء القبول')
                     ->action(function ($record) {
+                        if (! ($record->university?->ENABLE_CONFIRMED ?? false)) {
+                            \Filament\Notifications\Notification::make()
+                                ->title('خاصية القبول والتأكيد غير مفعلة')
+                                ->body('تم إيقاف صلاحية قبول وتأكيد الطلاب لهذه الجامعة من قبل الإدارة.')
+                                ->warning()
+                                ->send();
+                            return;
+                        }
+
                         $record->cancelAccept();
 
                         \Filament\Notifications\Notification::make()
@@ -500,7 +538,7 @@ class ApplicationsTable
                     ->label('تأكيد')
                     ->icon('heroicon-o-check-badge')
                     ->color('info')
-                    ->visible(fn($record) => !empty($record->PAYMENT_FLAG) && $record->PAYMENT_FLAG !== \App\Enums\PaymentMethodEnum::NONE && (bool)$record->ACCEPTED && ! (bool)$record->CONFIRMED_BY_APPLICANT)
+                    ->visible(fn($record) => !empty($record->PAYMENT_FLAG) && $record->PAYMENT_FLAG !== \App\Enums\PaymentMethodEnum::NONE && (bool)$record->ACCEPTED && ! (bool)$record->CONFIRMED_BY_APPLICANT && (bool)($record->university?->ENABLE_CONFIRMED ?? false))
                     ->hidden(fn($record) => ! auth()->user()->can('confirm', $record))
                     ->requiresConfirmation()
                     ->schema([
@@ -520,6 +558,15 @@ class ApplicationsTable
                             ])
                     ])
                     ->action(function ($record, array $data) {
+                        if (! ($record->university?->ENABLE_CONFIRMED ?? false)) {
+                            \Filament\Notifications\Notification::make()
+                                ->title('خاصية القبول والتأكيد غير مفعلة')
+                                ->body('تم إيقاف صلاحية قبول وتأكيد الطلاب لهذه الجامعة من قبل الإدارة.')
+                                ->warning()
+                                ->send();
+                            throw new \Filament\Support\Exceptions\Halt();
+                        }
+
                         $unid = $record->UNID;
                         $programIdent = $record->PROGRAM_IDENT;
                         $studytypeIdent = $record->STUDYTYPE_IDENT;
@@ -560,13 +607,22 @@ class ApplicationsTable
                     ->label('إلغاء التأكيد')
                     ->icon('heroicon-o-x-circle')
                     ->color('danger')
-                    ->visible(fn($record) => (bool)$record->CONFIRMED_BY_APPLICANT)
+                    ->visible(fn($record) => (bool)$record->CONFIRMED_BY_APPLICANT && (bool)($record->university?->ENABLE_CONFIRMED ?? false))
                     ->hidden(fn($record) => ! auth()->user()->can('cancelConfirm', $record))
                     ->requiresConfirmation()
                     ->modalHeading('إلغاء تأكيد الرغبة')
                     ->modalDescription('هل أنت متأكد من إلغاء تأكيد هذه الرغبة وتصفير رقم القيد والمقعد المحجوز؟')
                     ->modalSubmitActionLabel('إلغاء التأكيد')
                     ->action(function ($record) {
+                        if (! ($record->university?->ENABLE_CONFIRMED ?? false)) {
+                            \Filament\Notifications\Notification::make()
+                                ->title('خاصية القبول والتأكيد غير مفعلة')
+                                ->body('تم إيقاف صلاحية قبول وتأكيد الطلاب لهذه الجامعة من قبل الإدارة.')
+                                ->warning()
+                                ->send();
+                            return;
+                        }
+
                         $record->cancelConfirm();
 
                         \Filament\Notifications\Notification::make()

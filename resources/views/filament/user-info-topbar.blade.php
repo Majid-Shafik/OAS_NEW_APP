@@ -1,12 +1,15 @@
 @php
-    $database = session('tenant_database');
-    $years = [
-        'p_oas_db_2022' => '2021-2022',
-        'p_oas_db_2021' => '2020-2021',
-        'p_oas_db_2020' => '2019-2020',
-        'p_oas_db_2019' => '2018-2019',
-    ];
-    $displayYear = $years[$database] ?? 'غير محدد';
+    $database = session('tenant_database', config('academic_years.default_database'));
+    $years = config('academic_years.databases', []);
+    
+    if (isset($years[$database])) {
+        $displayYear = $years[$database];
+    } elseif (preg_match('/(20\d{2})/', (string) $database, $matches)) {
+        $y = (int) $matches[1];
+        $displayYear = "{$y}-" . ($y - 1);
+    } else {
+        $displayYear = 'غير محدد';
+    }
 @endphp
 
 <div class="flex items-center gap-x-2 px-4 rounded-full bg-primary-50 text-primary-600 dark:bg-primary-900/50 dark:text-primary-400 border border-primary-100 dark:border-primary-800 text-sm font-semibold py-1">

@@ -26,16 +26,13 @@ class CustomLogin extends BaseLogin
 
     protected function getDatabaseFormComponent()
     {
+        $options = config('academic_years.databases', []);
+        $default = config('academic_years.default_database', array_key_first($options) ?: 'p_oas_db_2022');
+
         return Select::make('database')
             ->label('عام التنسيق')
-            ->options([
-                'p_oas_db_2022' => '2022-2021',
-                'p_oas_db_2021' => '2021-2020',
-                'p_oas_db_2020' => '2020-2019',
-                'p_oas_db_2019' => '2019-2018',
-                'p_oas_db_2018' => '2018-2017',
-            ])
-            ->default('p_oas_db_2022')
+            ->options($options)
+            ->default($default)
             ->required()
             ->extraAttributes(['tabindex' => 1]);
     }

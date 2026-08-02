@@ -27,6 +27,7 @@ class UniversityForm
                     ->maxLength(255),
                 Toggle::make('IS_IT_ENABLE')
                     ->label(__('IS_IT_ENABLE')),
+                
             ]);
     }
 }

@@ -49,7 +49,7 @@ class User extends Authenticatable implements FilamentUser, HasName
 
     public function isAdmin(): bool
     {
-        return $this->hasRole('admin') || $this->id == 1;
+        return $this->hasRole('super_admin') || $this->hasRole('admin') ;
     }
 
     public function getAuthIdentifierName()

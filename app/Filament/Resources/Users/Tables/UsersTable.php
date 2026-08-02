@@ -39,6 +39,10 @@ class UsersTable
                     ->label('المجموعة')
                     ->formatStateUsing(fn($state) => UserGroup::find($state)?->GROUP_NAME ?? $state)
                     ->sortable(),
+                TextColumn::make('roles.name')
+                    ->label('الدور الوظيفي')
+                    ->formatStateUsing(fn ($state, $record) => $record->roles->map(fn($r) => $r->label ?: $r->name)->join(', '))
+                    ->badge(),
                 TextColumn::make('USER_NAME')
                     ->searchable(),
                 TextColumn::make('LOGON_ID')
@@ -79,11 +83,18 @@ class UsersTable
             ])
             ->filters([
                 AcademicFilter::make(),
+                SelectFilter::make('roles')
+                    ->relationship('roles', 'name')
+                    ->getOptionLabelFromRecordUsing(fn ($record) => $record->label ?: $record->name)
+                    ->label('الدور الوظيفي')
+                    ->multiple()
+                    ->preload()
+                    ->searchable(),
                 SelectFilter::make('GENDER')
                     ->label('النوع (الجنس)')
                     ->options(\App\Models\ComboValue::getOptionsByCode(6)),
                 SelectFilter::make('GROUP_IDENT')
-                    ->label('المجموعة (الدور)')
+                    ->label('المجموعة')
                     ->options(UserGroup::pluck('GROUP_NAME', 'GROUP_IDENT'))
                     ->searchable(),
                 SelectFilter::make('IS_IT_ENABLE')
