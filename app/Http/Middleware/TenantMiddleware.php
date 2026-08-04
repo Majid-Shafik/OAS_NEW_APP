@@ -16,16 +16,27 @@ class TenantMiddleware
      */
     public function handle(Request $request, Closure $next)
     {
+        // Try to get the database from the session first
+        // (works for already-authenticated requests)
+        $database = null;
+
         if (session()->has('tenant_database')) {
             $database = session('tenant_database');
+        }
 
-            // Set the dynamic database name
+        // Fallback: try to read from input (e.g., during login form submission)
+        if (! $database && $request->has('data.database')) {
+            $database = $request->input('data.database');
+        }
+
+        // Apply database switching if we have a target
+        if ($database) {
             Config::set('database.connections.tenant.database', $database);
+            Config::set('database.connections.mysql.database', $database);
 
-            // Purge the connection to apply the new database
             DB::purge('tenant');
+            DB::purge('mysql');
 
-            // Set as the default connection for this request
             DB::setDefaultConnection('tenant');
         }
 

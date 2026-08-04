@@ -1,0 +1,430 @@
+{
+    "p_oas_db_2016": {
+        "missing_tables": [
+            "app_bill_ident_canceled",
+            "applications_group",
+            "high_school_degrees_b_type",
+            "high_school_degrees_history",
+            "monitor_clearing_reviwing",
+            "offerings_groups",
+            "programs_capacity",
+            "programs_capacity_history",
+            "request_adjust_offerings",
+            "roles",
+            "role_manageable_roles",
+            "systems",
+            "sessions",
+            "cache",
+            "cache_locks",
+            "jobs",
+            "job_batches",
+            "failed_jobs",
+            "permissions",
+            "model_has_permissions",
+            "model_has_roles",
+            "role_has_permissions",
+            "exports",
+            "imports",
+            "failed_import_rows",
+            "activity_log",
+            "combo_boxes",
+            "combo_values",
+            "country",
+            "payment_methods",
+            "applicant_attachment",
+            "application_group",
+            "program_capacity_history"
+        ],
+        "tables_with_missing_columns": {
+            "applicant": [
+                "NATIONAL_NUMBER (int)",
+                "APPROVED_BY (int)",
+                "APPROVED_ON (datetime)",
+                "APPLICANT_TYPE (tinyint)",
+                "IS_CLEARING (tinyint)",
+                "REVIEWED (tinyint)",
+                "SECOND_REVIEWED (tinyint)",
+                "SECOND_REVIEWED_BY (int)",
+                "SECOND_REVIEWED_ON (datetime)",
+                "SECOND_REJECT_REASON (varchar(150))",
+                "EXPORTED (int)"
+            ],
+            "applications": [
+                "OFFER_GROUP_IDENT (int)",
+                "APP_BILL_IDENT (int)",
+                "STUDENT_CODE (varchar(50))",
+                "EXPORTED (int)"
+            ],
+            "deleted_applications": [
+                "OFFER_GROUP_IDENT (int)",
+                "APP_BILL_IDENT (int)",
+                "STUDENT_CODE (varchar(50))"
+            ],
+            "faculty": [
+                "USE_LIMIT_APPS (int)",
+                "ORDERBY (int)",
+                "FACULTY_ORDER (int)"
+            ],
+            "general_standards": [
+                "Y_2017 (double)",
+                "Y_2018 (double)",
+                "Y_2019 (double)",
+                "Y_2020 (double)",
+                "Y_2021 (double)"
+            ],
+            "offerings": [
+                "OFFER_GROUP_IDENT (int)",
+                "FACULTY_IDENT (int)",
+                "Y_SEC_SCHOOL_MAX_AGE (int)",
+                "NY_SEC_SCHOOL_MAX_AGE (int)",
+                "DIRCT_RIGESTER (tinyint(1))",
+                "RECORD_ON (datetime)",
+                "RECORD_BY (int)",
+                "LAST_UPDATED_ON (timestamp)",
+                "LAST_UPDATED_BY (int)"
+            ],
+            "offerings_dh": [
+                "OFFER_GROUP_IDENT (int)",
+                "FACULTY_IDENT (int)",
+                "Y_SEC_SCHOOL_MAX_AGE (int)",
+                "NY_SEC_SCHOOL_MAX_AGE (int)",
+                "DIRCT_RIGESTER (tinyint(1))",
+                "RECORD_ON (datetime)",
+                "RECORD_BY (int)",
+                "LAST_UPDATED_ON (timestamp)",
+                "LAST_UPDATED_BY (int)"
+            ],
+            "programs": [
+                "PROGRAM_CLASS_ID (int)",
+                "PROGRAM_LEVEL_ID (int)"
+            ],
+            "province": [
+                "ID (int)"
+            ],
+            "study_type": [
+                "NEW_ID (int)"
+            ],
+            "university": [
+                "CLEARING_UN (tinyint(1))",
+                "ENABLE_CONFIRMED (int)",
+                "LAST_APP_REPORT (date)"
+            ],
+            "users": [
+                "INSERTED_BY (int)",
+                "remember_token (varchar(100))"
+            ]
+        }
+    },
+    "p_oas_db_2017": {
+        "missing_tables": [
+            "app_bill_ident_canceled",
+            "applications_group",
+            "high_school_degrees_b_type",
+            "high_school_degrees_history",
+            "monitor_clearing_reviwing",
+            "offerings_groups",
+            "programs_capacity",
+            "programs_capacity_history",
+            "request_adjust_offerings",
+            "roles",
+            "role_manageable_roles",
+            "systems",
+            "sessions",
+            "cache",
+            "cache_locks",
+            "jobs",
+            "job_batches",
+            "failed_jobs",
+            "permissions",
+            "model_has_permissions",
+            "model_has_roles",
+            "role_has_permissions",
+            "exports",
+            "imports",
+            "failed_import_rows",
+            "activity_log",
+            "combo_boxes",
+            "combo_values",
+            "country",
+            "payment_methods",
+            "applicant_attachment",
+            "application_group",
+            "program_capacity_history"
+        ],
+        "tables_with_missing_columns": {
+            "applicant": [
+                "NATIONAL_NUMBER (int)",
+                "APPROVED_BY (int)",
+                "APPROVED_ON (datetime)",
+                "APPLICANT_TYPE (tinyint)",
+                "IS_CLEARING (tinyint)",
+                "REVIEWED (tinyint)",
+                "SECOND_REVIEWED (tinyint)",
+                "SECOND_REVIEWED_BY (int)",
+                "SECOND_REVIEWED_ON (datetime)",
+                "SECOND_REJECT_REASON (varchar(150))",
+                "EXPORTED (int)"
+            ],
+            "applications": [
+                "OFFER_GROUP_IDENT (int)",
+                "APP_BILL_IDENT (int)",
+                "STUDENT_CODE (varchar(50))",
+                "EXPORTED (int)"
+            ],
+            "deleted_applications": [
+                "OFFER_GROUP_IDENT (int)",
+                "APP_BILL_IDENT (int)",
+                "STUDENT_CODE (varchar(50))"
+            ],
+            "faculty": [
+                "USE_LIMIT_APPS (int)",
+                "ORDERBY (int)",
+                "FACULTY_ORDER (int)"
+            ],
+            "general_standards": [
+                "Y_2018 (double)",
+                "Y_2019 (double)",
+                "Y_2020 (double)",
+                "Y_2021 (double)"
+            ],
+            "offerings": [
+                "OFFER_GROUP_IDENT (int)",
+                "FACULTY_IDENT (int)",
+                "Y_SEC_SCHOOL_MAX_AGE (int)",
+                "NY_SEC_SCHOOL_MAX_AGE (int)",
+                "DIRCT_RIGESTER (tinyint(1))",
+                "RECORD_ON (datetime)",
+                "RECORD_BY (int)",
+                "LAST_UPDATED_ON (timestamp)",
+                "LAST_UPDATED_BY (int)"
+            ],
+            "offerings_dh": [
+                "OFFER_GROUP_IDENT (int)",
+                "FACULTY_IDENT (int)",
+                "Y_SEC_SCHOOL_MAX_AGE (int)",
+                "NY_SEC_SCHOOL_MAX_AGE (int)",
+                "DIRCT_RIGESTER (tinyint(1))",
+                "RECORD_ON (datetime)",
+                "RECORD_BY (int)",
+                "LAST_UPDATED_ON (timestamp)",
+                "LAST_UPDATED_BY (int)"
+            ],
+            "programs": [
+                "PROGRAM_CLASS_ID (int)",
+                "PROGRAM_LEVEL_ID (int)"
+            ],
+            "province": [
+                "ID (int)"
+            ],
+            "study_type": [
+                "NEW_ID (int)"
+            ],
+            "university": [
+                "ENABLE_CONFIRMED (int)",
+                "LAST_APP_REPORT (date)"
+            ],
+            "users": [
+                "INSERTED_BY (int)",
+                "remember_token (varchar(100))"
+            ]
+        }
+    },
+    "p_oas_db_2018": {
+        "missing_tables": [
+            "app_bill_ident_canceled",
+            "applications_group",
+            "high_school_degrees_b_type",
+            "high_school_degrees_history",
+            "monitor_clearing_reviwing",
+            "offerings_groups",
+            "programs_capacity",
+            "programs_capacity_history",
+            "request_adjust_offerings",
+            "systems",
+            "combo_boxes",
+            "combo_values",
+            "country",
+            "payment_methods",
+            "applicant_attachment",
+            "application_group",
+            "program_capacity_history"
+        ],
+        "tables_with_missing_columns": {
+            "applicant": [
+                "NATIONAL_NUMBER (int)",
+                "APPROVED_BY (int)",
+                "APPROVED_ON (datetime)",
+                "APPLICANT_TYPE (tinyint)",
+                "IS_CLEARING (tinyint)",
+                "REVIEWED (tinyint)",
+                "SECOND_REVIEWED (tinyint)",
+                "SECOND_REVIEWED_BY (int)",
+                "SECOND_REVIEWED_ON (datetime)",
+                "SECOND_REJECT_REASON (varchar(150))",
+                "EXPORTED (int)"
+            ],
+            "applications": [
+                "OFFER_GROUP_IDENT (int)",
+                "APP_BILL_IDENT (int)",
+                "STUDENT_CODE (varchar(50))",
+                "EXPORTED (int)"
+            ],
+            "deleted_applications": [
+                "OFFER_GROUP_IDENT (int)",
+                "APP_BILL_IDENT (int)",
+                "STUDENT_CODE (varchar(50))"
+            ],
+            "faculty": [
+                "USE_LIMIT_APPS (int)",
+                "ORDERBY (int)",
+                "FACULTY_ORDER (int)"
+            ],
+            "general_standards": [
+                "Y_2019 (double)",
+                "Y_2020 (double)",
+                "Y_2021 (double)"
+            ],
+            "offerings": [
+                "OFFER_GROUP_IDENT (int)",
+                "FACULTY_IDENT (int)",
+                "Y_SEC_SCHOOL_MAX_AGE (int)",
+                "NY_SEC_SCHOOL_MAX_AGE (int)",
+                "DIRCT_RIGESTER (tinyint(1))",
+                "RECORD_ON (datetime)",
+                "RECORD_BY (int)",
+                "LAST_UPDATED_ON (timestamp)",
+                "LAST_UPDATED_BY (int)"
+            ],
+            "offerings_dh": [
+                "OFFER_GROUP_IDENT (int)",
+                "FACULTY_IDENT (int)",
+                "Y_SEC_SCHOOL_MAX_AGE (int)",
+                "NY_SEC_SCHOOL_MAX_AGE (int)",
+                "DIRCT_RIGESTER (tinyint(1))",
+                "RECORD_ON (datetime)",
+                "RECORD_BY (int)",
+                "LAST_UPDATED_ON (timestamp)",
+                "LAST_UPDATED_BY (int)"
+            ],
+            "programs": [
+                "PROGRAM_CLASS_ID (int)",
+                "PROGRAM_LEVEL_ID (int)"
+            ],
+            "province": [
+                "ID (int)"
+            ],
+            "study_type": [
+                "NEW_ID (int)"
+            ],
+            "university": [
+                "ENABLE_CONFIRMED (int)",
+                "LAST_APP_REPORT (date)"
+            ],
+            "users": [
+                "INSERTED_BY (int)"
+            ]
+        }
+    },
+    "p_oas_db_2019": {
+        "missing_tables": [
+            "systems",
+            "combo_boxes",
+            "combo_values",
+            "country",
+            "payment_methods",
+            "applicant_attachment",
+            "application_group",
+            "program_capacity_history"
+        ],
+        "tables_with_missing_columns": {
+            "applicant": [
+                "EXPORTED (int)"
+            ],
+            "applications": [
+                "EXPORTED (int)"
+            ],
+            "general_standards": [
+                "Y_2018 (double)",
+                "Y_2019 (double)",
+                "Y_2020 (double)",
+                "Y_2021 (double)"
+            ],
+            "request_adjust_offerings": [
+                "NEW_Y_SEC_SCHOOL_MAX_AGE (int)"
+            ],
+            "study_type": [
+                "NEW_ID (int)"
+            ]
+        }
+    },
+    "p_oas_db_2020": {
+        "missing_tables": [
+            "systems",
+            "combo_boxes",
+            "combo_values",
+            "country",
+            "payment_methods",
+            "applicant_attachment",
+            "application_group",
+            "program_capacity_history"
+        ],
+        "tables_with_missing_columns": {
+            "applicant": [
+                "EXPORTED (int)"
+            ],
+            "applications": [
+                "EXPORTED (int)"
+            ],
+            "general_standards": [
+                "Y_2020 (double)",
+                "Y_2021 (double)"
+            ],
+            "request_adjust_offerings": [
+                "NEW_Y_SEC_SCHOOL_MAX_AGE (int)"
+            ],
+            "study_type": [
+                "NEW_ID (int)"
+            ]
+        }
+    },
+    "p_oas_db_2021": {
+        "missing_tables": [
+            "systems",
+            "combo_boxes",
+            "combo_values",
+            "country",
+            "payment_methods",
+            "applicant_attachment",
+            "application_group",
+            "program_capacity_history"
+        ],
+        "tables_with_missing_columns": {
+            "applicant": [
+                "EXPORTED (int)"
+            ],
+            "applications": [
+                "EXPORTED (int)"
+            ],
+            "general_standards": [
+                "Y_2020 (double)",
+                "Y_2021 (double)"
+            ],
+            "study_type": [
+                "NEW_ID (int)"
+            ]
+        }
+    },
+    "p_oas_db_2022": {
+        "missing_tables": [
+            "systems",
+            "combo_boxes",
+            "combo_values",
+            "country",
+            "payment_methods",
+            "applicant_attachment",
+            "application_group",
+            "program_capacity_history"
+        ],
+        "tables_with_missing_columns": []
+    }
+}

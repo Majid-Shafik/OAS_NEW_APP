@@ -1,0 +1,3813 @@
+{
+    "generated_at": "2026-08-03 18:30:24",
+    "reference_database": "p_oas_db_2022",
+    "total_active_tables_checked": 52,
+    "active_tables_list": {
+        "app_bill_ident_canceled": "AppBillIdentCanceled",
+        "applicant": "ClearingApplicant",
+        "applicant_attachments": "ApplicantAttachment",
+        "applications": "Application",
+        "applications_group": "ApplicationGroup",
+        "applications_clearing": "ApplicationsClearing",
+        "attachments_clearing": "AttachmentsClearing",
+        "combe_values": "ComboValue",
+        "countries": "Country",
+        "deleted_applications": "DeletedApplication",
+        "faculty": "Faculty",
+        "general_standards": "GeneralStandard",
+        "high_school_degrees_b_type": "HighSchoolDegreeBType",
+        "high_school_degrees_history": "HighSchoolDegreeHistory",
+        "monitor_clearing_reviwing": "MonitorClearingReviewing",
+        "offerings": "Offering",
+        "offerings_dh": "OfferingDh",
+        "offerings_groups": "OfferingGroup",
+        "payment_method": "PaymentMethod",
+        "programs": "Program",
+        "programs_capacity": "ProgramCapacity",
+        "programs_capacity_history": "ProgramCapacityHistory",
+        "province": "Province",
+        "request_adjust_offerings": "RequestAdjustOffering",
+        "roles": "Role",
+        "role_manageable_roles": "RoleManageableRole",
+        "study_type": "StudyType",
+        "systems": "System",
+        "university": "University",
+        "users": "User",
+        "user_group": "UserGroup",
+        "sessions": "sessions",
+        "cache": "cache",
+        "cache_locks": "cache_locks",
+        "jobs": "jobs",
+        "job_batches": "job_batches",
+        "failed_jobs": "failed_jobs",
+        "permissions": "permissions",
+        "model_has_permissions": "model_has_permissions",
+        "model_has_roles": "model_has_roles",
+        "role_has_permissions": "role_has_permissions",
+        "exports": "exports",
+        "imports": "imports",
+        "failed_import_rows": "failed_import_rows",
+        "activity_log": "activity_log",
+        "combo_boxes": "combo_boxes",
+        "combo_values": "combo_values",
+        "country": "country",
+        "payment_methods": "payment_methods",
+        "applicant_attachment": "applicant_attachment",
+        "application_group": "application_group",
+        "program_capacity_history": "program_capacity_history"
+    },
+    "available_databases": [
+        "p_oas_db_2016",
+        "p_oas_db_2017",
+        "p_oas_db_2018",
+        "p_oas_db_2019",
+        "p_oas_db_2020",
+        "p_oas_db_2021",
+        "p_oas_db_2022",
+        "p_oas_db_unified"
+    ],
+    "database_comparisons": {
+        "p_oas_db_2016": {
+            "database": "p_oas_db_2016",
+            "missing_tables": [
+                "app_bill_ident_canceled",
+                "applications_group",
+                "high_school_degrees_b_type",
+                "high_school_degrees_history",
+                "monitor_clearing_reviwing",
+                "offerings_groups",
+                "programs_capacity",
+                "programs_capacity_history",
+                "request_adjust_offerings",
+                "systems",
+                "combo_boxes",
+                "combo_values",
+                "country",
+                "payment_methods",
+                "applicant_attachment",
+                "application_group",
+                "program_capacity_history"
+            ],
+            "existing_tables_count": 35,
+            "total_active_tables": 52,
+            "table_differences": {
+                "applicant": {
+                    "missing_columns": [
+                        {
+                            "column": "NATIONAL_NUMBER",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "APPROVED_BY",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "APPROVED_ON",
+                            "expected_type": "datetime",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "APPLICANT_TYPE",
+                            "expected_type": "tinyint",
+                            "null": "NO",
+                            "default": "1"
+                        },
+                        {
+                            "column": "IS_CLEARING",
+                            "expected_type": "tinyint",
+                            "null": "NO",
+                            "default": "0"
+                        },
+                        {
+                            "column": "REVIEWED",
+                            "expected_type": "tinyint",
+                            "null": "YES",
+                            "default": "0"
+                        },
+                        {
+                            "column": "SECOND_REVIEWED",
+                            "expected_type": "tinyint",
+                            "null": "YES",
+                            "default": "0"
+                        },
+                        {
+                            "column": "SECOND_REVIEWED_BY",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "SECOND_REVIEWED_ON",
+                            "expected_type": "datetime",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "SECOND_REJECT_REASON",
+                            "expected_type": "varchar(150)",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "EXPORTED",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": "0"
+                        }
+                    ],
+                    "differing_columns": [
+                        {
+                            "column": "APPLICANT_IDENT",
+                            "ref_type": "bigint",
+                            "target_type": "int"
+                        },
+                        {
+                            "column": "RECORDDATE",
+                            "ref_type": "datetime",
+                            "target_type": "timestamp"
+                        }
+                    ]
+                },
+                "applications": {
+                    "missing_columns": [
+                        {
+                            "column": "OFFER_GROUP_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "APP_BILL_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "STUDENT_CODE",
+                            "expected_type": "varchar(50)",
+                            "null": "NO",
+                            "default": "0"
+                        },
+                        {
+                            "column": "EXPORTED",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": "0"
+                        }
+                    ],
+                    "differing_columns": [
+                        {
+                            "column": "PAYMENT_FLAG",
+                            "ref_type": "int",
+                            "target_type": "tinyint(1)"
+                        },
+                        {
+                            "column": "SHAW_APPLICANT_RESULTE",
+                            "ref_type": "tinyint(1)",
+                            "target_type": "tinyint"
+                        },
+                        {
+                            "column": "IMPORTED",
+                            "ref_type": "tinyint(1)",
+                            "target_type": "tinyint"
+                        }
+                    ]
+                },
+                "deleted_applications": {
+                    "missing_columns": [
+                        {
+                            "column": "OFFER_GROUP_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "APP_BILL_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "STUDENT_CODE",
+                            "expected_type": "varchar(50)",
+                            "null": "NO",
+                            "default": "0"
+                        }
+                    ],
+                    "differing_columns": []
+                },
+                "faculty": {
+                    "missing_columns": [
+                        {
+                            "column": "USE_LIMIT_APPS",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": "0"
+                        },
+                        {
+                            "column": "ORDERBY",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": "1"
+                        },
+                        {
+                            "column": "FACULTY_ORDER",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": "1"
+                        }
+                    ],
+                    "differing_columns": []
+                },
+                "general_standards": {
+                    "missing_columns": [
+                        {
+                            "column": "Y_2017",
+                            "expected_type": "double",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "Y_2018",
+                            "expected_type": "double",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "Y_2019",
+                            "expected_type": "double",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "Y_2020",
+                            "expected_type": "double",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "Y_2021",
+                            "expected_type": "double",
+                            "null": "YES",
+                            "default": null
+                        }
+                    ],
+                    "differing_columns": []
+                },
+                "offerings": {
+                    "missing_columns": [
+                        {
+                            "column": "OFFER_GROUP_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": "0"
+                        },
+                        {
+                            "column": "FACULTY_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "Y_SEC_SCHOOL_MAX_AGE",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "NY_SEC_SCHOOL_MAX_AGE",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": "0"
+                        },
+                        {
+                            "column": "DIRCT_RIGESTER",
+                            "expected_type": "tinyint(1)",
+                            "null": "NO",
+                            "default": "0"
+                        },
+                        {
+                            "column": "RECORD_ON",
+                            "expected_type": "datetime",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "RECORD_BY",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "LAST_UPDATED_ON",
+                            "expected_type": "timestamp",
+                            "null": "NO",
+                            "default": "CURRENT_TIMESTAMP"
+                        },
+                        {
+                            "column": "LAST_UPDATED_BY",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        }
+                    ],
+                    "differing_columns": [
+                        {
+                            "column": "SEC_SCHOOL_TYPE",
+                            "ref_type": "varchar(50)",
+                            "target_type": "varchar(20)"
+                        },
+                        {
+                            "column": "APPROVAL_ON",
+                            "ref_type": "datetime",
+                            "target_type": "date"
+                        }
+                    ]
+                },
+                "offerings_dh": {
+                    "missing_columns": [
+                        {
+                            "column": "OFFER_GROUP_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": "0"
+                        },
+                        {
+                            "column": "FACULTY_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "Y_SEC_SCHOOL_MAX_AGE",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "NY_SEC_SCHOOL_MAX_AGE",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": "0"
+                        },
+                        {
+                            "column": "DIRCT_RIGESTER",
+                            "expected_type": "tinyint(1)",
+                            "null": "NO",
+                            "default": "0"
+                        },
+                        {
+                            "column": "RECORD_ON",
+                            "expected_type": "datetime",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "RECORD_BY",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "LAST_UPDATED_ON",
+                            "expected_type": "timestamp",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "LAST_UPDATED_BY",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        }
+                    ],
+                    "differing_columns": [
+                        {
+                            "column": "USER",
+                            "ref_type": "varchar(255)",
+                            "target_type": "varchar(50)"
+                        },
+                        {
+                            "column": "APPROVAL_ON",
+                            "ref_type": "datetime",
+                            "target_type": "date"
+                        }
+                    ]
+                },
+                "programs": {
+                    "missing_columns": [
+                        {
+                            "column": "PROGRAM_CLASS_ID",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": "2"
+                        },
+                        {
+                            "column": "PROGRAM_LEVEL_ID",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": "2"
+                        }
+                    ],
+                    "differing_columns": []
+                },
+                "province": {
+                    "missing_columns": [
+                        {
+                            "column": "ID",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        }
+                    ],
+                    "differing_columns": []
+                },
+                "study_type": {
+                    "missing_columns": [
+                        {
+                            "column": "NEW_ID",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": null
+                        }
+                    ],
+                    "differing_columns": []
+                },
+                "university": {
+                    "missing_columns": [
+                        {
+                            "column": "CLEARING_UN",
+                            "expected_type": "tinyint(1)",
+                            "null": "NO",
+                            "default": "0"
+                        },
+                        {
+                            "column": "ENABLE_CONFIRMED",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": "0"
+                        },
+                        {
+                            "column": "LAST_APP_REPORT",
+                            "expected_type": "date",
+                            "null": "YES",
+                            "default": null
+                        }
+                    ],
+                    "differing_columns": [
+                        {
+                            "column": "COUNTRY_IDENT",
+                            "ref_type": "smallint",
+                            "target_type": "int"
+                        }
+                    ]
+                },
+                "users": {
+                    "missing_columns": [
+                        {
+                            "column": "INSERTED_BY",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": null
+                        }
+                    ],
+                    "differing_columns": [
+                        {
+                            "column": "LOGON_PASS",
+                            "ref_type": "varchar(200)",
+                            "target_type": "varchar(255)"
+                        }
+                    ]
+                },
+                "exports": {
+                    "missing_columns": [],
+                    "differing_columns": [
+                        {
+                            "column": "user_USER_IDENT",
+                            "ref_type": "int",
+                            "target_type": "bigint unsigned"
+                        }
+                    ]
+                },
+                "imports": {
+                    "missing_columns": [],
+                    "differing_columns": [
+                        {
+                            "column": "user_USER_IDENT",
+                            "ref_type": "int",
+                            "target_type": "bigint unsigned"
+                        }
+                    ]
+                }
+            },
+            "ready_for_production": false,
+            "required_migrations": [
+                "CREATE TABLE `app_bill_ident_canceled` (Missing table)",
+                "ALTER TABLE `applicant` ADD COLUMN `NATIONAL_NUMBER` int NULL",
+                "ALTER TABLE `applicant` ADD COLUMN `APPROVED_BY` int NULL",
+                "ALTER TABLE `applicant` ADD COLUMN `APPROVED_ON` datetime NULL",
+                "ALTER TABLE `applicant` ADD COLUMN `APPLICANT_TYPE` tinyint NOT NULL",
+                "ALTER TABLE `applicant` ADD COLUMN `IS_CLEARING` tinyint NOT NULL",
+                "ALTER TABLE `applicant` ADD COLUMN `REVIEWED` tinyint NULL",
+                "ALTER TABLE `applicant` ADD COLUMN `SECOND_REVIEWED` tinyint NULL",
+                "ALTER TABLE `applicant` ADD COLUMN `SECOND_REVIEWED_BY` int NULL",
+                "ALTER TABLE `applicant` ADD COLUMN `SECOND_REVIEWED_ON` datetime NULL",
+                "ALTER TABLE `applicant` ADD COLUMN `SECOND_REJECT_REASON` varchar(150) NULL",
+                "ALTER TABLE `applicant` ADD COLUMN `EXPORTED` int NULL",
+                "ALTER TABLE `applications` ADD COLUMN `OFFER_GROUP_IDENT` int NOT NULL",
+                "ALTER TABLE `applications` ADD COLUMN `APP_BILL_IDENT` int NOT NULL",
+                "ALTER TABLE `applications` ADD COLUMN `STUDENT_CODE` varchar(50) NOT NULL",
+                "ALTER TABLE `applications` ADD COLUMN `EXPORTED` int NULL",
+                "CREATE TABLE `applications_group` (Missing table)",
+                "ALTER TABLE `deleted_applications` ADD COLUMN `OFFER_GROUP_IDENT` int NOT NULL",
+                "ALTER TABLE `deleted_applications` ADD COLUMN `APP_BILL_IDENT` int NOT NULL",
+                "ALTER TABLE `deleted_applications` ADD COLUMN `STUDENT_CODE` varchar(50) NOT NULL",
+                "ALTER TABLE `faculty` ADD COLUMN `USE_LIMIT_APPS` int NOT NULL",
+                "ALTER TABLE `faculty` ADD COLUMN `ORDERBY` int NOT NULL",
+                "ALTER TABLE `faculty` ADD COLUMN `FACULTY_ORDER` int NULL",
+                "ALTER TABLE `general_standards` ADD COLUMN `Y_2017` double NULL",
+                "ALTER TABLE `general_standards` ADD COLUMN `Y_2018` double NULL",
+                "ALTER TABLE `general_standards` ADD COLUMN `Y_2019` double NULL",
+                "ALTER TABLE `general_standards` ADD COLUMN `Y_2020` double NULL",
+                "ALTER TABLE `general_standards` ADD COLUMN `Y_2021` double NULL",
+                "CREATE TABLE `high_school_degrees_b_type` (Missing table)",
+                "CREATE TABLE `high_school_degrees_history` (Missing table)",
+                "CREATE TABLE `monitor_clearing_reviwing` (Missing table)",
+                "ALTER TABLE `offerings` ADD COLUMN `OFFER_GROUP_IDENT` int NOT NULL",
+                "ALTER TABLE `offerings` ADD COLUMN `FACULTY_IDENT` int NOT NULL",
+                "ALTER TABLE `offerings` ADD COLUMN `Y_SEC_SCHOOL_MAX_AGE` int NOT NULL",
+                "ALTER TABLE `offerings` ADD COLUMN `NY_SEC_SCHOOL_MAX_AGE` int NOT NULL",
+                "ALTER TABLE `offerings` ADD COLUMN `DIRCT_RIGESTER` tinyint(1) NOT NULL",
+                "ALTER TABLE `offerings` ADD COLUMN `RECORD_ON` datetime NOT NULL",
+                "ALTER TABLE `offerings` ADD COLUMN `RECORD_BY` int NOT NULL",
+                "ALTER TABLE `offerings` ADD COLUMN `LAST_UPDATED_ON` timestamp NOT NULL",
+                "ALTER TABLE `offerings` ADD COLUMN `LAST_UPDATED_BY` int NOT NULL",
+                "ALTER TABLE `offerings_dh` ADD COLUMN `OFFER_GROUP_IDENT` int NOT NULL",
+                "ALTER TABLE `offerings_dh` ADD COLUMN `FACULTY_IDENT` int NOT NULL",
+                "ALTER TABLE `offerings_dh` ADD COLUMN `Y_SEC_SCHOOL_MAX_AGE` int NOT NULL",
+                "ALTER TABLE `offerings_dh` ADD COLUMN `NY_SEC_SCHOOL_MAX_AGE` int NOT NULL",
+                "ALTER TABLE `offerings_dh` ADD COLUMN `DIRCT_RIGESTER` tinyint(1) NOT NULL",
+                "ALTER TABLE `offerings_dh` ADD COLUMN `RECORD_ON` datetime NULL",
+                "ALTER TABLE `offerings_dh` ADD COLUMN `RECORD_BY` int NULL",
+                "ALTER TABLE `offerings_dh` ADD COLUMN `LAST_UPDATED_ON` timestamp NULL",
+                "ALTER TABLE `offerings_dh` ADD COLUMN `LAST_UPDATED_BY` int NOT NULL",
+                "CREATE TABLE `offerings_groups` (Missing table)",
+                "ALTER TABLE `programs` ADD COLUMN `PROGRAM_CLASS_ID` int NULL",
+                "ALTER TABLE `programs` ADD COLUMN `PROGRAM_LEVEL_ID` int NULL",
+                "CREATE TABLE `programs_capacity` (Missing table)",
+                "CREATE TABLE `programs_capacity_history` (Missing table)",
+                "ALTER TABLE `province` ADD COLUMN `ID` int NOT NULL",
+                "CREATE TABLE `request_adjust_offerings` (Missing table)",
+                "ALTER TABLE `study_type` ADD COLUMN `NEW_ID` int NULL",
+                "CREATE TABLE `systems` (Missing table)",
+                "ALTER TABLE `university` ADD COLUMN `CLEARING_UN` tinyint(1) NOT NULL",
+                "ALTER TABLE `university` ADD COLUMN `ENABLE_CONFIRMED` int NULL",
+                "ALTER TABLE `university` ADD COLUMN `LAST_APP_REPORT` date NULL",
+                "ALTER TABLE `users` ADD COLUMN `INSERTED_BY` int NULL",
+                "CREATE TABLE `combo_boxes` (Missing table)",
+                "CREATE TABLE `combo_values` (Missing table)",
+                "CREATE TABLE `country` (Missing table)",
+                "CREATE TABLE `payment_methods` (Missing table)",
+                "CREATE TABLE `applicant_attachment` (Missing table)",
+                "CREATE TABLE `application_group` (Missing table)",
+                "CREATE TABLE `program_capacity_history` (Missing table)"
+            ]
+        },
+        "p_oas_db_2017": {
+            "database": "p_oas_db_2017",
+            "missing_tables": [
+                "app_bill_ident_canceled",
+                "applications_group",
+                "high_school_degrees_b_type",
+                "high_school_degrees_history",
+                "monitor_clearing_reviwing",
+                "offerings_groups",
+                "programs_capacity",
+                "programs_capacity_history",
+                "request_adjust_offerings",
+                "systems",
+                "combo_boxes",
+                "combo_values",
+                "country",
+                "payment_methods",
+                "applicant_attachment",
+                "application_group",
+                "program_capacity_history"
+            ],
+            "existing_tables_count": 35,
+            "total_active_tables": 52,
+            "table_differences": {
+                "applicant": {
+                    "missing_columns": [
+                        {
+                            "column": "NATIONAL_NUMBER",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "APPROVED_BY",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "APPROVED_ON",
+                            "expected_type": "datetime",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "APPLICANT_TYPE",
+                            "expected_type": "tinyint",
+                            "null": "NO",
+                            "default": "1"
+                        },
+                        {
+                            "column": "IS_CLEARING",
+                            "expected_type": "tinyint",
+                            "null": "NO",
+                            "default": "0"
+                        },
+                        {
+                            "column": "REVIEWED",
+                            "expected_type": "tinyint",
+                            "null": "YES",
+                            "default": "0"
+                        },
+                        {
+                            "column": "SECOND_REVIEWED",
+                            "expected_type": "tinyint",
+                            "null": "YES",
+                            "default": "0"
+                        },
+                        {
+                            "column": "SECOND_REVIEWED_BY",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "SECOND_REVIEWED_ON",
+                            "expected_type": "datetime",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "SECOND_REJECT_REASON",
+                            "expected_type": "varchar(150)",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "EXPORTED",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": "0"
+                        }
+                    ],
+                    "differing_columns": [
+                        {
+                            "column": "APPLICANT_IDENT",
+                            "ref_type": "bigint",
+                            "target_type": "int"
+                        },
+                        {
+                            "column": "RECORDDATE",
+                            "ref_type": "datetime",
+                            "target_type": "timestamp"
+                        }
+                    ]
+                },
+                "applications": {
+                    "missing_columns": [
+                        {
+                            "column": "OFFER_GROUP_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "APP_BILL_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "STUDENT_CODE",
+                            "expected_type": "varchar(50)",
+                            "null": "NO",
+                            "default": "0"
+                        },
+                        {
+                            "column": "EXPORTED",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": "0"
+                        }
+                    ],
+                    "differing_columns": [
+                        {
+                            "column": "PAYMENT_FLAG",
+                            "ref_type": "int",
+                            "target_type": "tinyint(1)"
+                        },
+                        {
+                            "column": "SHAW_APPLICANT_RESULTE",
+                            "ref_type": "tinyint(1)",
+                            "target_type": "tinyint"
+                        },
+                        {
+                            "column": "IMPORTED",
+                            "ref_type": "tinyint(1)",
+                            "target_type": "tinyint"
+                        }
+                    ]
+                },
+                "deleted_applications": {
+                    "missing_columns": [
+                        {
+                            "column": "OFFER_GROUP_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "APP_BILL_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "STUDENT_CODE",
+                            "expected_type": "varchar(50)",
+                            "null": "NO",
+                            "default": "0"
+                        }
+                    ],
+                    "differing_columns": []
+                },
+                "faculty": {
+                    "missing_columns": [
+                        {
+                            "column": "USE_LIMIT_APPS",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": "0"
+                        },
+                        {
+                            "column": "ORDERBY",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": "1"
+                        },
+                        {
+                            "column": "FACULTY_ORDER",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": "1"
+                        }
+                    ],
+                    "differing_columns": []
+                },
+                "general_standards": {
+                    "missing_columns": [
+                        {
+                            "column": "Y_2018",
+                            "expected_type": "double",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "Y_2019",
+                            "expected_type": "double",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "Y_2020",
+                            "expected_type": "double",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "Y_2021",
+                            "expected_type": "double",
+                            "null": "YES",
+                            "default": null
+                        }
+                    ],
+                    "differing_columns": []
+                },
+                "offerings": {
+                    "missing_columns": [
+                        {
+                            "column": "OFFER_GROUP_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": "0"
+                        },
+                        {
+                            "column": "FACULTY_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "Y_SEC_SCHOOL_MAX_AGE",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "NY_SEC_SCHOOL_MAX_AGE",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": "0"
+                        },
+                        {
+                            "column": "DIRCT_RIGESTER",
+                            "expected_type": "tinyint(1)",
+                            "null": "NO",
+                            "default": "0"
+                        },
+                        {
+                            "column": "RECORD_ON",
+                            "expected_type": "datetime",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "RECORD_BY",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "LAST_UPDATED_ON",
+                            "expected_type": "timestamp",
+                            "null": "NO",
+                            "default": "CURRENT_TIMESTAMP"
+                        },
+                        {
+                            "column": "LAST_UPDATED_BY",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        }
+                    ],
+                    "differing_columns": [
+                        {
+                            "column": "SEC_SCHOOL_TYPE",
+                            "ref_type": "varchar(50)",
+                            "target_type": "varchar(20)"
+                        },
+                        {
+                            "column": "APPROVAL_ON",
+                            "ref_type": "datetime",
+                            "target_type": "date"
+                        }
+                    ]
+                },
+                "offerings_dh": {
+                    "missing_columns": [
+                        {
+                            "column": "OFFER_GROUP_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": "0"
+                        },
+                        {
+                            "column": "FACULTY_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "Y_SEC_SCHOOL_MAX_AGE",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "NY_SEC_SCHOOL_MAX_AGE",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": "0"
+                        },
+                        {
+                            "column": "DIRCT_RIGESTER",
+                            "expected_type": "tinyint(1)",
+                            "null": "NO",
+                            "default": "0"
+                        },
+                        {
+                            "column": "RECORD_ON",
+                            "expected_type": "datetime",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "RECORD_BY",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "LAST_UPDATED_ON",
+                            "expected_type": "timestamp",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "LAST_UPDATED_BY",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        }
+                    ],
+                    "differing_columns": [
+                        {
+                            "column": "USER",
+                            "ref_type": "varchar(255)",
+                            "target_type": "varchar(50)"
+                        },
+                        {
+                            "column": "APPROVAL_ON",
+                            "ref_type": "datetime",
+                            "target_type": "date"
+                        }
+                    ]
+                },
+                "programs": {
+                    "missing_columns": [
+                        {
+                            "column": "PROGRAM_CLASS_ID",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": "2"
+                        },
+                        {
+                            "column": "PROGRAM_LEVEL_ID",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": "2"
+                        }
+                    ],
+                    "differing_columns": []
+                },
+                "province": {
+                    "missing_columns": [
+                        {
+                            "column": "ID",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        }
+                    ],
+                    "differing_columns": []
+                },
+                "study_type": {
+                    "missing_columns": [
+                        {
+                            "column": "NEW_ID",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": null
+                        }
+                    ],
+                    "differing_columns": []
+                },
+                "university": {
+                    "missing_columns": [
+                        {
+                            "column": "ENABLE_CONFIRMED",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": "0"
+                        },
+                        {
+                            "column": "LAST_APP_REPORT",
+                            "expected_type": "date",
+                            "null": "YES",
+                            "default": null
+                        }
+                    ],
+                    "differing_columns": [
+                        {
+                            "column": "COUNTRY_IDENT",
+                            "ref_type": "smallint",
+                            "target_type": "int"
+                        },
+                        {
+                            "column": "CLEARING_UN",
+                            "ref_type": "tinyint(1)",
+                            "target_type": "int"
+                        }
+                    ]
+                },
+                "users": {
+                    "missing_columns": [
+                        {
+                            "column": "INSERTED_BY",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": null
+                        }
+                    ],
+                    "differing_columns": [
+                        {
+                            "column": "LOGON_PASS",
+                            "ref_type": "varchar(200)",
+                            "target_type": "varchar(255)"
+                        }
+                    ]
+                },
+                "exports": {
+                    "missing_columns": [],
+                    "differing_columns": [
+                        {
+                            "column": "user_USER_IDENT",
+                            "ref_type": "int",
+                            "target_type": "bigint unsigned"
+                        }
+                    ]
+                },
+                "imports": {
+                    "missing_columns": [],
+                    "differing_columns": [
+                        {
+                            "column": "user_USER_IDENT",
+                            "ref_type": "int",
+                            "target_type": "bigint unsigned"
+                        }
+                    ]
+                }
+            },
+            "ready_for_production": false,
+            "required_migrations": [
+                "CREATE TABLE `app_bill_ident_canceled` (Missing table)",
+                "ALTER TABLE `applicant` ADD COLUMN `NATIONAL_NUMBER` int NULL",
+                "ALTER TABLE `applicant` ADD COLUMN `APPROVED_BY` int NULL",
+                "ALTER TABLE `applicant` ADD COLUMN `APPROVED_ON` datetime NULL",
+                "ALTER TABLE `applicant` ADD COLUMN `APPLICANT_TYPE` tinyint NOT NULL",
+                "ALTER TABLE `applicant` ADD COLUMN `IS_CLEARING` tinyint NOT NULL",
+                "ALTER TABLE `applicant` ADD COLUMN `REVIEWED` tinyint NULL",
+                "ALTER TABLE `applicant` ADD COLUMN `SECOND_REVIEWED` tinyint NULL",
+                "ALTER TABLE `applicant` ADD COLUMN `SECOND_REVIEWED_BY` int NULL",
+                "ALTER TABLE `applicant` ADD COLUMN `SECOND_REVIEWED_ON` datetime NULL",
+                "ALTER TABLE `applicant` ADD COLUMN `SECOND_REJECT_REASON` varchar(150) NULL",
+                "ALTER TABLE `applicant` ADD COLUMN `EXPORTED` int NULL",
+                "ALTER TABLE `applications` ADD COLUMN `OFFER_GROUP_IDENT` int NOT NULL",
+                "ALTER TABLE `applications` ADD COLUMN `APP_BILL_IDENT` int NOT NULL",
+                "ALTER TABLE `applications` ADD COLUMN `STUDENT_CODE` varchar(50) NOT NULL",
+                "ALTER TABLE `applications` ADD COLUMN `EXPORTED` int NULL",
+                "CREATE TABLE `applications_group` (Missing table)",
+                "ALTER TABLE `deleted_applications` ADD COLUMN `OFFER_GROUP_IDENT` int NOT NULL",
+                "ALTER TABLE `deleted_applications` ADD COLUMN `APP_BILL_IDENT` int NOT NULL",
+                "ALTER TABLE `deleted_applications` ADD COLUMN `STUDENT_CODE` varchar(50) NOT NULL",
+                "ALTER TABLE `faculty` ADD COLUMN `USE_LIMIT_APPS` int NOT NULL",
+                "ALTER TABLE `faculty` ADD COLUMN `ORDERBY` int NOT NULL",
+                "ALTER TABLE `faculty` ADD COLUMN `FACULTY_ORDER` int NULL",
+                "ALTER TABLE `general_standards` ADD COLUMN `Y_2018` double NULL",
+                "ALTER TABLE `general_standards` ADD COLUMN `Y_2019` double NULL",
+                "ALTER TABLE `general_standards` ADD COLUMN `Y_2020` double NULL",
+                "ALTER TABLE `general_standards` ADD COLUMN `Y_2021` double NULL",
+                "CREATE TABLE `high_school_degrees_b_type` (Missing table)",
+                "CREATE TABLE `high_school_degrees_history` (Missing table)",
+                "CREATE TABLE `monitor_clearing_reviwing` (Missing table)",
+                "ALTER TABLE `offerings` ADD COLUMN `OFFER_GROUP_IDENT` int NOT NULL",
+                "ALTER TABLE `offerings` ADD COLUMN `FACULTY_IDENT` int NOT NULL",
+                "ALTER TABLE `offerings` ADD COLUMN `Y_SEC_SCHOOL_MAX_AGE` int NOT NULL",
+                "ALTER TABLE `offerings` ADD COLUMN `NY_SEC_SCHOOL_MAX_AGE` int NOT NULL",
+                "ALTER TABLE `offerings` ADD COLUMN `DIRCT_RIGESTER` tinyint(1) NOT NULL",
+                "ALTER TABLE `offerings` ADD COLUMN `RECORD_ON` datetime NOT NULL",
+                "ALTER TABLE `offerings` ADD COLUMN `RECORD_BY` int NOT NULL",
+                "ALTER TABLE `offerings` ADD COLUMN `LAST_UPDATED_ON` timestamp NOT NULL",
+                "ALTER TABLE `offerings` ADD COLUMN `LAST_UPDATED_BY` int NOT NULL",
+                "ALTER TABLE `offerings_dh` ADD COLUMN `OFFER_GROUP_IDENT` int NOT NULL",
+                "ALTER TABLE `offerings_dh` ADD COLUMN `FACULTY_IDENT` int NOT NULL",
+                "ALTER TABLE `offerings_dh` ADD COLUMN `Y_SEC_SCHOOL_MAX_AGE` int NOT NULL",
+                "ALTER TABLE `offerings_dh` ADD COLUMN `NY_SEC_SCHOOL_MAX_AGE` int NOT NULL",
+                "ALTER TABLE `offerings_dh` ADD COLUMN `DIRCT_RIGESTER` tinyint(1) NOT NULL",
+                "ALTER TABLE `offerings_dh` ADD COLUMN `RECORD_ON` datetime NULL",
+                "ALTER TABLE `offerings_dh` ADD COLUMN `RECORD_BY` int NULL",
+                "ALTER TABLE `offerings_dh` ADD COLUMN `LAST_UPDATED_ON` timestamp NULL",
+                "ALTER TABLE `offerings_dh` ADD COLUMN `LAST_UPDATED_BY` int NOT NULL",
+                "CREATE TABLE `offerings_groups` (Missing table)",
+                "ALTER TABLE `programs` ADD COLUMN `PROGRAM_CLASS_ID` int NULL",
+                "ALTER TABLE `programs` ADD COLUMN `PROGRAM_LEVEL_ID` int NULL",
+                "CREATE TABLE `programs_capacity` (Missing table)",
+                "CREATE TABLE `programs_capacity_history` (Missing table)",
+                "ALTER TABLE `province` ADD COLUMN `ID` int NOT NULL",
+                "CREATE TABLE `request_adjust_offerings` (Missing table)",
+                "ALTER TABLE `study_type` ADD COLUMN `NEW_ID` int NULL",
+                "CREATE TABLE `systems` (Missing table)",
+                "ALTER TABLE `university` ADD COLUMN `ENABLE_CONFIRMED` int NULL",
+                "ALTER TABLE `university` ADD COLUMN `LAST_APP_REPORT` date NULL",
+                "ALTER TABLE `users` ADD COLUMN `INSERTED_BY` int NULL",
+                "CREATE TABLE `combo_boxes` (Missing table)",
+                "CREATE TABLE `combo_values` (Missing table)",
+                "CREATE TABLE `country` (Missing table)",
+                "CREATE TABLE `payment_methods` (Missing table)",
+                "CREATE TABLE `applicant_attachment` (Missing table)",
+                "CREATE TABLE `application_group` (Missing table)",
+                "CREATE TABLE `program_capacity_history` (Missing table)"
+            ]
+        },
+        "p_oas_db_2018": {
+            "database": "p_oas_db_2018",
+            "missing_tables": [
+                "app_bill_ident_canceled",
+                "applications_group",
+                "high_school_degrees_b_type",
+                "high_school_degrees_history",
+                "monitor_clearing_reviwing",
+                "offerings_groups",
+                "programs_capacity",
+                "programs_capacity_history",
+                "request_adjust_offerings",
+                "systems",
+                "combo_boxes",
+                "combo_values",
+                "country",
+                "payment_methods",
+                "applicant_attachment",
+                "application_group",
+                "program_capacity_history"
+            ],
+            "existing_tables_count": 35,
+            "total_active_tables": 52,
+            "table_differences": {
+                "applicant": {
+                    "missing_columns": [
+                        {
+                            "column": "NATIONAL_NUMBER",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "APPROVED_BY",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "APPROVED_ON",
+                            "expected_type": "datetime",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "APPLICANT_TYPE",
+                            "expected_type": "tinyint",
+                            "null": "NO",
+                            "default": "1"
+                        },
+                        {
+                            "column": "IS_CLEARING",
+                            "expected_type": "tinyint",
+                            "null": "NO",
+                            "default": "0"
+                        },
+                        {
+                            "column": "REVIEWED",
+                            "expected_type": "tinyint",
+                            "null": "YES",
+                            "default": "0"
+                        },
+                        {
+                            "column": "SECOND_REVIEWED",
+                            "expected_type": "tinyint",
+                            "null": "YES",
+                            "default": "0"
+                        },
+                        {
+                            "column": "SECOND_REVIEWED_BY",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "SECOND_REVIEWED_ON",
+                            "expected_type": "datetime",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "SECOND_REJECT_REASON",
+                            "expected_type": "varchar(150)",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "EXPORTED",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": "0"
+                        }
+                    ],
+                    "differing_columns": [
+                        {
+                            "column": "APPLICANT_IDENT",
+                            "ref_type": "bigint",
+                            "target_type": "int"
+                        },
+                        {
+                            "column": "RECORDDATE",
+                            "ref_type": "datetime",
+                            "target_type": "timestamp"
+                        }
+                    ]
+                },
+                "applications": {
+                    "missing_columns": [
+                        {
+                            "column": "OFFER_GROUP_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "APP_BILL_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "STUDENT_CODE",
+                            "expected_type": "varchar(50)",
+                            "null": "NO",
+                            "default": "0"
+                        },
+                        {
+                            "column": "EXPORTED",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": "0"
+                        }
+                    ],
+                    "differing_columns": [
+                        {
+                            "column": "PAYMENT_FLAG",
+                            "ref_type": "int",
+                            "target_type": "tinyint(1)"
+                        },
+                        {
+                            "column": "SHAW_APPLICANT_RESULTE",
+                            "ref_type": "tinyint(1)",
+                            "target_type": "tinyint"
+                        },
+                        {
+                            "column": "IMPORTED",
+                            "ref_type": "tinyint(1)",
+                            "target_type": "tinyint"
+                        }
+                    ]
+                },
+                "deleted_applications": {
+                    "missing_columns": [
+                        {
+                            "column": "OFFER_GROUP_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "APP_BILL_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "STUDENT_CODE",
+                            "expected_type": "varchar(50)",
+                            "null": "NO",
+                            "default": "0"
+                        }
+                    ],
+                    "differing_columns": []
+                },
+                "faculty": {
+                    "missing_columns": [
+                        {
+                            "column": "USE_LIMIT_APPS",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": "0"
+                        },
+                        {
+                            "column": "ORDERBY",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": "1"
+                        },
+                        {
+                            "column": "FACULTY_ORDER",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": "1"
+                        }
+                    ],
+                    "differing_columns": []
+                },
+                "general_standards": {
+                    "missing_columns": [
+                        {
+                            "column": "Y_2019",
+                            "expected_type": "double",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "Y_2020",
+                            "expected_type": "double",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "Y_2021",
+                            "expected_type": "double",
+                            "null": "YES",
+                            "default": null
+                        }
+                    ],
+                    "differing_columns": []
+                },
+                "offerings": {
+                    "missing_columns": [
+                        {
+                            "column": "OFFER_GROUP_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": "0"
+                        },
+                        {
+                            "column": "FACULTY_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "Y_SEC_SCHOOL_MAX_AGE",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "NY_SEC_SCHOOL_MAX_AGE",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": "0"
+                        },
+                        {
+                            "column": "DIRCT_RIGESTER",
+                            "expected_type": "tinyint(1)",
+                            "null": "NO",
+                            "default": "0"
+                        },
+                        {
+                            "column": "RECORD_ON",
+                            "expected_type": "datetime",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "RECORD_BY",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "LAST_UPDATED_ON",
+                            "expected_type": "timestamp",
+                            "null": "NO",
+                            "default": "CURRENT_TIMESTAMP"
+                        },
+                        {
+                            "column": "LAST_UPDATED_BY",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        }
+                    ],
+                    "differing_columns": [
+                        {
+                            "column": "SEC_SCHOOL_TYPE",
+                            "ref_type": "varchar(50)",
+                            "target_type": "varchar(20)"
+                        },
+                        {
+                            "column": "APPROVAL_ON",
+                            "ref_type": "datetime",
+                            "target_type": "date"
+                        }
+                    ]
+                },
+                "offerings_dh": {
+                    "missing_columns": [
+                        {
+                            "column": "OFFER_GROUP_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": "0"
+                        },
+                        {
+                            "column": "FACULTY_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "Y_SEC_SCHOOL_MAX_AGE",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "NY_SEC_SCHOOL_MAX_AGE",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": "0"
+                        },
+                        {
+                            "column": "DIRCT_RIGESTER",
+                            "expected_type": "tinyint(1)",
+                            "null": "NO",
+                            "default": "0"
+                        },
+                        {
+                            "column": "RECORD_ON",
+                            "expected_type": "datetime",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "RECORD_BY",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "LAST_UPDATED_ON",
+                            "expected_type": "timestamp",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "LAST_UPDATED_BY",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        }
+                    ],
+                    "differing_columns": [
+                        {
+                            "column": "USER",
+                            "ref_type": "varchar(255)",
+                            "target_type": "varchar(50)"
+                        },
+                        {
+                            "column": "APPROVAL_ON",
+                            "ref_type": "datetime",
+                            "target_type": "date"
+                        }
+                    ]
+                },
+                "programs": {
+                    "missing_columns": [
+                        {
+                            "column": "PROGRAM_CLASS_ID",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": "2"
+                        },
+                        {
+                            "column": "PROGRAM_LEVEL_ID",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": "2"
+                        }
+                    ],
+                    "differing_columns": []
+                },
+                "province": {
+                    "missing_columns": [
+                        {
+                            "column": "ID",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        }
+                    ],
+                    "differing_columns": []
+                },
+                "study_type": {
+                    "missing_columns": [
+                        {
+                            "column": "NEW_ID",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": null
+                        }
+                    ],
+                    "differing_columns": []
+                },
+                "university": {
+                    "missing_columns": [
+                        {
+                            "column": "ENABLE_CONFIRMED",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": "0"
+                        },
+                        {
+                            "column": "LAST_APP_REPORT",
+                            "expected_type": "date",
+                            "null": "YES",
+                            "default": null
+                        }
+                    ],
+                    "differing_columns": [
+                        {
+                            "column": "COUNTRY_IDENT",
+                            "ref_type": "smallint",
+                            "target_type": "int"
+                        },
+                        {
+                            "column": "CLEARING_UN",
+                            "ref_type": "tinyint(1)",
+                            "target_type": "int"
+                        }
+                    ]
+                },
+                "users": {
+                    "missing_columns": [
+                        {
+                            "column": "INSERTED_BY",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": null
+                        }
+                    ],
+                    "differing_columns": [
+                        {
+                            "column": "LOGON_PASS",
+                            "ref_type": "varchar(200)",
+                            "target_type": "varchar(255)"
+                        }
+                    ]
+                },
+                "sessions": {
+                    "missing_columns": [],
+                    "differing_columns": [
+                        {
+                            "column": "user_id",
+                            "ref_type": "bigint unsigned",
+                            "target_type": "int"
+                        }
+                    ]
+                }
+            },
+            "ready_for_production": false,
+            "required_migrations": [
+                "CREATE TABLE `app_bill_ident_canceled` (Missing table)",
+                "ALTER TABLE `applicant` ADD COLUMN `NATIONAL_NUMBER` int NULL",
+                "ALTER TABLE `applicant` ADD COLUMN `APPROVED_BY` int NULL",
+                "ALTER TABLE `applicant` ADD COLUMN `APPROVED_ON` datetime NULL",
+                "ALTER TABLE `applicant` ADD COLUMN `APPLICANT_TYPE` tinyint NOT NULL",
+                "ALTER TABLE `applicant` ADD COLUMN `IS_CLEARING` tinyint NOT NULL",
+                "ALTER TABLE `applicant` ADD COLUMN `REVIEWED` tinyint NULL",
+                "ALTER TABLE `applicant` ADD COLUMN `SECOND_REVIEWED` tinyint NULL",
+                "ALTER TABLE `applicant` ADD COLUMN `SECOND_REVIEWED_BY` int NULL",
+                "ALTER TABLE `applicant` ADD COLUMN `SECOND_REVIEWED_ON` datetime NULL",
+                "ALTER TABLE `applicant` ADD COLUMN `SECOND_REJECT_REASON` varchar(150) NULL",
+                "ALTER TABLE `applicant` ADD COLUMN `EXPORTED` int NULL",
+                "ALTER TABLE `applications` ADD COLUMN `OFFER_GROUP_IDENT` int NOT NULL",
+                "ALTER TABLE `applications` ADD COLUMN `APP_BILL_IDENT` int NOT NULL",
+                "ALTER TABLE `applications` ADD COLUMN `STUDENT_CODE` varchar(50) NOT NULL",
+                "ALTER TABLE `applications` ADD COLUMN `EXPORTED` int NULL",
+                "CREATE TABLE `applications_group` (Missing table)",
+                "ALTER TABLE `deleted_applications` ADD COLUMN `OFFER_GROUP_IDENT` int NOT NULL",
+                "ALTER TABLE `deleted_applications` ADD COLUMN `APP_BILL_IDENT` int NOT NULL",
+                "ALTER TABLE `deleted_applications` ADD COLUMN `STUDENT_CODE` varchar(50) NOT NULL",
+                "ALTER TABLE `faculty` ADD COLUMN `USE_LIMIT_APPS` int NOT NULL",
+                "ALTER TABLE `faculty` ADD COLUMN `ORDERBY` int NOT NULL",
+                "ALTER TABLE `faculty` ADD COLUMN `FACULTY_ORDER` int NULL",
+                "ALTER TABLE `general_standards` ADD COLUMN `Y_2019` double NULL",
+                "ALTER TABLE `general_standards` ADD COLUMN `Y_2020` double NULL",
+                "ALTER TABLE `general_standards` ADD COLUMN `Y_2021` double NULL",
+                "CREATE TABLE `high_school_degrees_b_type` (Missing table)",
+                "CREATE TABLE `high_school_degrees_history` (Missing table)",
+                "CREATE TABLE `monitor_clearing_reviwing` (Missing table)",
+                "ALTER TABLE `offerings` ADD COLUMN `OFFER_GROUP_IDENT` int NOT NULL",
+                "ALTER TABLE `offerings` ADD COLUMN `FACULTY_IDENT` int NOT NULL",
+                "ALTER TABLE `offerings` ADD COLUMN `Y_SEC_SCHOOL_MAX_AGE` int NOT NULL",
+                "ALTER TABLE `offerings` ADD COLUMN `NY_SEC_SCHOOL_MAX_AGE` int NOT NULL",
+                "ALTER TABLE `offerings` ADD COLUMN `DIRCT_RIGESTER` tinyint(1) NOT NULL",
+                "ALTER TABLE `offerings` ADD COLUMN `RECORD_ON` datetime NOT NULL",
+                "ALTER TABLE `offerings` ADD COLUMN `RECORD_BY` int NOT NULL",
+                "ALTER TABLE `offerings` ADD COLUMN `LAST_UPDATED_ON` timestamp NOT NULL",
+                "ALTER TABLE `offerings` ADD COLUMN `LAST_UPDATED_BY` int NOT NULL",
+                "ALTER TABLE `offerings_dh` ADD COLUMN `OFFER_GROUP_IDENT` int NOT NULL",
+                "ALTER TABLE `offerings_dh` ADD COLUMN `FACULTY_IDENT` int NOT NULL",
+                "ALTER TABLE `offerings_dh` ADD COLUMN `Y_SEC_SCHOOL_MAX_AGE` int NOT NULL",
+                "ALTER TABLE `offerings_dh` ADD COLUMN `NY_SEC_SCHOOL_MAX_AGE` int NOT NULL",
+                "ALTER TABLE `offerings_dh` ADD COLUMN `DIRCT_RIGESTER` tinyint(1) NOT NULL",
+                "ALTER TABLE `offerings_dh` ADD COLUMN `RECORD_ON` datetime NULL",
+                "ALTER TABLE `offerings_dh` ADD COLUMN `RECORD_BY` int NULL",
+                "ALTER TABLE `offerings_dh` ADD COLUMN `LAST_UPDATED_ON` timestamp NULL",
+                "ALTER TABLE `offerings_dh` ADD COLUMN `LAST_UPDATED_BY` int NOT NULL",
+                "CREATE TABLE `offerings_groups` (Missing table)",
+                "ALTER TABLE `programs` ADD COLUMN `PROGRAM_CLASS_ID` int NULL",
+                "ALTER TABLE `programs` ADD COLUMN `PROGRAM_LEVEL_ID` int NULL",
+                "CREATE TABLE `programs_capacity` (Missing table)",
+                "CREATE TABLE `programs_capacity_history` (Missing table)",
+                "ALTER TABLE `province` ADD COLUMN `ID` int NOT NULL",
+                "CREATE TABLE `request_adjust_offerings` (Missing table)",
+                "ALTER TABLE `study_type` ADD COLUMN `NEW_ID` int NULL",
+                "CREATE TABLE `systems` (Missing table)",
+                "ALTER TABLE `university` ADD COLUMN `ENABLE_CONFIRMED` int NULL",
+                "ALTER TABLE `university` ADD COLUMN `LAST_APP_REPORT` date NULL",
+                "ALTER TABLE `users` ADD COLUMN `INSERTED_BY` int NULL",
+                "CREATE TABLE `combo_boxes` (Missing table)",
+                "CREATE TABLE `combo_values` (Missing table)",
+                "CREATE TABLE `country` (Missing table)",
+                "CREATE TABLE `payment_methods` (Missing table)",
+                "CREATE TABLE `applicant_attachment` (Missing table)",
+                "CREATE TABLE `application_group` (Missing table)",
+                "CREATE TABLE `program_capacity_history` (Missing table)"
+            ]
+        },
+        "p_oas_db_2019": {
+            "database": "p_oas_db_2019",
+            "missing_tables": [
+                "systems",
+                "combo_boxes",
+                "combo_values",
+                "country",
+                "payment_methods",
+                "applicant_attachment",
+                "application_group",
+                "program_capacity_history"
+            ],
+            "existing_tables_count": 44,
+            "total_active_tables": 52,
+            "table_differences": {
+                "applicant": {
+                    "missing_columns": [
+                        {
+                            "column": "EXPORTED",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": "0"
+                        }
+                    ],
+                    "differing_columns": []
+                },
+                "applications": {
+                    "missing_columns": [
+                        {
+                            "column": "EXPORTED",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": "0"
+                        }
+                    ],
+                    "differing_columns": []
+                },
+                "general_standards": {
+                    "missing_columns": [
+                        {
+                            "column": "Y_2018",
+                            "expected_type": "double",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "Y_2019",
+                            "expected_type": "double",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "Y_2020",
+                            "expected_type": "double",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "Y_2021",
+                            "expected_type": "double",
+                            "null": "YES",
+                            "default": null
+                        }
+                    ],
+                    "differing_columns": []
+                },
+                "offerings": {
+                    "missing_columns": [],
+                    "differing_columns": [
+                        {
+                            "column": "SEC_SCHOOL_TYPE",
+                            "ref_type": "varchar(50)",
+                            "target_type": "varchar(20)"
+                        }
+                    ]
+                },
+                "offerings_dh": {
+                    "missing_columns": [],
+                    "differing_columns": [
+                        {
+                            "column": "APPROVAL_ON",
+                            "ref_type": "datetime",
+                            "target_type": "date"
+                        }
+                    ]
+                },
+                "request_adjust_offerings": {
+                    "missing_columns": [
+                        {
+                            "column": "NEW_Y_SEC_SCHOOL_MAX_AGE",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": "0"
+                        }
+                    ],
+                    "differing_columns": []
+                },
+                "study_type": {
+                    "missing_columns": [
+                        {
+                            "column": "NEW_ID",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": null
+                        }
+                    ],
+                    "differing_columns": []
+                },
+                "users": {
+                    "missing_columns": [],
+                    "differing_columns": [
+                        {
+                            "column": "LOGON_PASS",
+                            "ref_type": "varchar(200)",
+                            "target_type": "varchar(255)"
+                        }
+                    ]
+                },
+                "sessions": {
+                    "missing_columns": [],
+                    "differing_columns": [
+                        {
+                            "column": "user_id",
+                            "ref_type": "bigint unsigned",
+                            "target_type": "int"
+                        }
+                    ]
+                }
+            },
+            "ready_for_production": false,
+            "required_migrations": [
+                "ALTER TABLE `applicant` ADD COLUMN `EXPORTED` int NULL",
+                "ALTER TABLE `applications` ADD COLUMN `EXPORTED` int NULL",
+                "ALTER TABLE `general_standards` ADD COLUMN `Y_2018` double NULL",
+                "ALTER TABLE `general_standards` ADD COLUMN `Y_2019` double NULL",
+                "ALTER TABLE `general_standards` ADD COLUMN `Y_2020` double NULL",
+                "ALTER TABLE `general_standards` ADD COLUMN `Y_2021` double NULL",
+                "ALTER TABLE `request_adjust_offerings` ADD COLUMN `NEW_Y_SEC_SCHOOL_MAX_AGE` int NOT NULL",
+                "ALTER TABLE `study_type` ADD COLUMN `NEW_ID` int NULL",
+                "CREATE TABLE `systems` (Missing table)",
+                "CREATE TABLE `combo_boxes` (Missing table)",
+                "CREATE TABLE `combo_values` (Missing table)",
+                "CREATE TABLE `country` (Missing table)",
+                "CREATE TABLE `payment_methods` (Missing table)",
+                "CREATE TABLE `applicant_attachment` (Missing table)",
+                "CREATE TABLE `application_group` (Missing table)",
+                "CREATE TABLE `program_capacity_history` (Missing table)"
+            ]
+        },
+        "p_oas_db_2020": {
+            "database": "p_oas_db_2020",
+            "missing_tables": [
+                "systems",
+                "combo_boxes",
+                "combo_values",
+                "country",
+                "payment_methods",
+                "applicant_attachment",
+                "application_group",
+                "program_capacity_history"
+            ],
+            "existing_tables_count": 44,
+            "total_active_tables": 52,
+            "table_differences": {
+                "applicant": {
+                    "missing_columns": [
+                        {
+                            "column": "EXPORTED",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": "0"
+                        }
+                    ],
+                    "differing_columns": []
+                },
+                "applications": {
+                    "missing_columns": [
+                        {
+                            "column": "EXPORTED",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": "0"
+                        }
+                    ],
+                    "differing_columns": []
+                },
+                "general_standards": {
+                    "missing_columns": [
+                        {
+                            "column": "Y_2020",
+                            "expected_type": "double",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "Y_2021",
+                            "expected_type": "double",
+                            "null": "YES",
+                            "default": null
+                        }
+                    ],
+                    "differing_columns": []
+                },
+                "request_adjust_offerings": {
+                    "missing_columns": [
+                        {
+                            "column": "NEW_Y_SEC_SCHOOL_MAX_AGE",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": "0"
+                        }
+                    ],
+                    "differing_columns": []
+                },
+                "study_type": {
+                    "missing_columns": [
+                        {
+                            "column": "NEW_ID",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": null
+                        }
+                    ],
+                    "differing_columns": []
+                },
+                "sessions": {
+                    "missing_columns": [],
+                    "differing_columns": [
+                        {
+                            "column": "user_id",
+                            "ref_type": "bigint unsigned",
+                            "target_type": "int"
+                        }
+                    ]
+                }
+            },
+            "ready_for_production": false,
+            "required_migrations": [
+                "ALTER TABLE `applicant` ADD COLUMN `EXPORTED` int NULL",
+                "ALTER TABLE `applications` ADD COLUMN `EXPORTED` int NULL",
+                "ALTER TABLE `general_standards` ADD COLUMN `Y_2020` double NULL",
+                "ALTER TABLE `general_standards` ADD COLUMN `Y_2021` double NULL",
+                "ALTER TABLE `request_adjust_offerings` ADD COLUMN `NEW_Y_SEC_SCHOOL_MAX_AGE` int NOT NULL",
+                "ALTER TABLE `study_type` ADD COLUMN `NEW_ID` int NULL",
+                "CREATE TABLE `systems` (Missing table)",
+                "CREATE TABLE `combo_boxes` (Missing table)",
+                "CREATE TABLE `combo_values` (Missing table)",
+                "CREATE TABLE `country` (Missing table)",
+                "CREATE TABLE `payment_methods` (Missing table)",
+                "CREATE TABLE `applicant_attachment` (Missing table)",
+                "CREATE TABLE `application_group` (Missing table)",
+                "CREATE TABLE `program_capacity_history` (Missing table)"
+            ]
+        },
+        "p_oas_db_2021": {
+            "database": "p_oas_db_2021",
+            "missing_tables": [
+                "systems",
+                "combo_boxes",
+                "combo_values",
+                "country",
+                "payment_methods",
+                "applicant_attachment",
+                "application_group",
+                "program_capacity_history"
+            ],
+            "existing_tables_count": 44,
+            "total_active_tables": 52,
+            "table_differences": {
+                "applicant": {
+                    "missing_columns": [
+                        {
+                            "column": "EXPORTED",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": "0"
+                        }
+                    ],
+                    "differing_columns": []
+                },
+                "applications": {
+                    "missing_columns": [
+                        {
+                            "column": "EXPORTED",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": "0"
+                        }
+                    ],
+                    "differing_columns": []
+                },
+                "general_standards": {
+                    "missing_columns": [
+                        {
+                            "column": "Y_2020",
+                            "expected_type": "double",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "Y_2021",
+                            "expected_type": "double",
+                            "null": "YES",
+                            "default": null
+                        }
+                    ],
+                    "differing_columns": []
+                },
+                "offerings": {
+                    "missing_columns": [],
+                    "differing_columns": [
+                        {
+                            "column": "SEC_SCHOOL_TYPE",
+                            "ref_type": "varchar(50)",
+                            "target_type": "varchar(20)"
+                        }
+                    ]
+                },
+                "study_type": {
+                    "missing_columns": [
+                        {
+                            "column": "NEW_ID",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": null
+                        }
+                    ],
+                    "differing_columns": []
+                },
+                "model_has_roles": {
+                    "missing_columns": [],
+                    "differing_columns": [
+                        {
+                            "column": "model_id",
+                            "ref_type": "bigint unsigned",
+                            "target_type": "int"
+                        }
+                    ]
+                }
+            },
+            "ready_for_production": false,
+            "required_migrations": [
+                "ALTER TABLE `applicant` ADD COLUMN `EXPORTED` int NULL",
+                "ALTER TABLE `applications` ADD COLUMN `EXPORTED` int NULL",
+                "ALTER TABLE `general_standards` ADD COLUMN `Y_2020` double NULL",
+                "ALTER TABLE `general_standards` ADD COLUMN `Y_2021` double NULL",
+                "ALTER TABLE `study_type` ADD COLUMN `NEW_ID` int NULL",
+                "CREATE TABLE `systems` (Missing table)",
+                "CREATE TABLE `combo_boxes` (Missing table)",
+                "CREATE TABLE `combo_values` (Missing table)",
+                "CREATE TABLE `country` (Missing table)",
+                "CREATE TABLE `payment_methods` (Missing table)",
+                "CREATE TABLE `applicant_attachment` (Missing table)",
+                "CREATE TABLE `application_group` (Missing table)",
+                "CREATE TABLE `program_capacity_history` (Missing table)"
+            ]
+        },
+        "p_oas_db_2022": {
+            "database": "p_oas_db_2022",
+            "missing_tables": [
+                "systems",
+                "combo_boxes",
+                "combo_values",
+                "country",
+                "payment_methods",
+                "applicant_attachment",
+                "application_group",
+                "program_capacity_history"
+            ],
+            "existing_tables_count": 44,
+            "total_active_tables": 52,
+            "table_differences": [],
+            "ready_for_production": false,
+            "required_migrations": [
+                "CREATE TABLE `systems` (Missing table)",
+                "CREATE TABLE `combo_boxes` (Missing table)",
+                "CREATE TABLE `combo_values` (Missing table)",
+                "CREATE TABLE `country` (Missing table)",
+                "CREATE TABLE `payment_methods` (Missing table)",
+                "CREATE TABLE `applicant_attachment` (Missing table)",
+                "CREATE TABLE `application_group` (Missing table)",
+                "CREATE TABLE `program_capacity_history` (Missing table)"
+            ]
+        },
+        "p_oas_db_unified": {
+            "database": "p_oas_db_unified",
+            "missing_tables": [
+                "app_bill_ident_canceled",
+                "applicant",
+                "applications_group",
+                "combe_values",
+                "faculty",
+                "high_school_degrees_b_type",
+                "monitor_clearing_reviwing",
+                "offerings_groups",
+                "payment_method",
+                "programs_capacity",
+                "programs_capacity_history",
+                "province",
+                "roles",
+                "role_manageable_roles",
+                "study_type",
+                "systems",
+                "university",
+                "user_group",
+                "sessions",
+                "cache",
+                "cache_locks",
+                "jobs",
+                "job_batches",
+                "failed_jobs",
+                "permissions",
+                "model_has_permissions",
+                "model_has_roles",
+                "role_has_permissions",
+                "exports",
+                "imports",
+                "failed_import_rows",
+                "activity_log",
+                "combo_boxes",
+                "country",
+                "applicant_attachment",
+                "application_group",
+                "program_capacity_history"
+            ],
+            "existing_tables_count": 15,
+            "total_active_tables": 52,
+            "table_differences": {
+                "applicant_attachments": {
+                    "missing_columns": [
+                        {
+                            "column": "UNID",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "APPLICANT_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "ATTACH_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        }
+                    ],
+                    "differing_columns": []
+                },
+                "applications": {
+                    "missing_columns": [
+                        {
+                            "column": "APPLICATION_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "UNID",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "APPLICANT_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "FACULTY_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "PROGRAM_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "OFFERING_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "OFFER_GROUP_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "STUDYTYPE_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "CHOICE_NO",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "SEC_SCHOOL_RATE",
+                            "expected_type": "decimal(6,2)",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "F_ACCEPT",
+                            "expected_type": "tinyint",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "ACCEPTED",
+                            "expected_type": "tinyint",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "ENTRANCE_EXAM_AVERAGE",
+                            "expected_type": "decimal(6,2)",
+                            "null": "NO",
+                            "default": "0.00"
+                        },
+                        {
+                            "column": "ENTRANCE_EXAM_WEIGHT",
+                            "expected_type": "decimal(6,2)",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "FINAL_MARK",
+                            "expected_type": "decimal(6,2)",
+                            "null": "NO",
+                            "default": "0.00"
+                        },
+                        {
+                            "column": "CONFIRMED_BY_APPLICANT",
+                            "expected_type": "tinyint(1)",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "CONFIRMED_ON",
+                            "expected_type": "timestamp",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "RECORDDATE",
+                            "expected_type": "timestamp",
+                            "null": "NO",
+                            "default": "CURRENT_TIMESTAMP"
+                        },
+                        {
+                            "column": "INSERTED_BY",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "APP_BILL_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "PAYMENT_FLAG",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "STATUS",
+                            "expected_type": "varchar(10)",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "SHAW_APPLICANT_RESULTE",
+                            "expected_type": "tinyint(1)",
+                            "null": "NO",
+                            "default": "0"
+                        },
+                        {
+                            "column": "IMPORTED",
+                            "expected_type": "tinyint(1)",
+                            "null": "NO",
+                            "default": "0"
+                        },
+                        {
+                            "column": "STUDENT_CODE",
+                            "expected_type": "varchar(50)",
+                            "null": "NO",
+                            "default": "0"
+                        },
+                        {
+                            "column": "EXPORTED",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": "0"
+                        }
+                    ],
+                    "differing_columns": []
+                },
+                "applications_clearing": {
+                    "missing_columns": [
+                        {
+                            "column": "UNID",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "APPLICANT_IDENT",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "FROM_COUNTRY_IDENT",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "FROM_COUNTRY_NAME",
+                            "expected_type": "varchar(150)",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "FROM_UNIV_IDENT",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "FROM_UNIV_NAME",
+                            "expected_type": "varchar(150)",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "FROM_FACULTY_IDENT",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "FROM_FACULTY_NAME",
+                            "expected_type": "varchar(150)",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "FROM_PROGRAM_IDENT",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "FROM_PROGRAM_NAME",
+                            "expected_type": "varchar(150)",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "NO_STUDY_YEARS",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "STUDY_LEVEL",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "FROM_YEAR",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "MOVING_REASON",
+                            "expected_type": "varchar(150)",
+                            "null": "YES",
+                            "default": null
+                        }
+                    ],
+                    "differing_columns": []
+                },
+                "attachments_clearing": {
+                    "missing_columns": [
+                        {
+                            "column": "ATTACH_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "ATTACH_NAME",
+                            "expected_type": "varchar(50)",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "FORCE_RESIZE",
+                            "expected_type": "binary(1)",
+                            "null": "YES",
+                            "default": "0x31"
+                        },
+                        {
+                            "column": "ATTACH_HEIGHT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "ATTACH_WIDTH",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "ATTACH_SMALLEST_SIZE_KBYTE",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": "0"
+                        },
+                        {
+                            "column": "ATTACH_BIGGEST_SIZE_KBYTE",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "PARENT_FOLDER",
+                            "expected_type": "varchar(50)",
+                            "null": "NO",
+                            "default": null
+                        }
+                    ],
+                    "differing_columns": []
+                },
+                "countries": {
+                    "missing_columns": [
+                        {
+                            "column": "COUNTRY_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "CODE",
+                            "expected_type": "char(2)",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "COUNTRY_ENG_NAME",
+                            "expected_type": "varchar(64)",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "COUNTRY_NAME",
+                            "expected_type": "varchar(100)",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "FULL_NAME",
+                            "expected_type": "varchar(128)",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "ISO3",
+                            "expected_type": "char(3)",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "NUMBER",
+                            "expected_type": "smallint(3) unsigned zerofill",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "CONTINENT_CODE",
+                            "expected_type": "char(2)",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "DISPLAY_ORDER",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": "900"
+                        }
+                    ],
+                    "differing_columns": []
+                },
+                "deleted_applications": {
+                    "missing_columns": [
+                        {
+                            "column": "APPLICATION_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "UNID",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "APPLICANT_IDENT",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "FACULTY_IDENT",
+                            "expected_type": "varchar(11)",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "PROGRAM_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "OFFERING_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "OFFER_GROUP_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "STUDYTYPE_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "CHOICE_NO",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "SEC_SCHOOL_RATE",
+                            "expected_type": "decimal(6,2)",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "F_ACCEPT",
+                            "expected_type": "tinyint",
+                            "null": "YES",
+                            "default": "0"
+                        },
+                        {
+                            "column": "ACCEPTED",
+                            "expected_type": "tinyint",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "ENTRANCE_EXAM_AVERAGE",
+                            "expected_type": "decimal(6,2)",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "ENTRANCE_EXAM_WEIGHT",
+                            "expected_type": "decimal(6,2)",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "FINAL_MARK",
+                            "expected_type": "decimal(6,2)",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "CONFIRMED_BY_APPLICANT",
+                            "expected_type": "binary(1)",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "CONFIRMED_ON",
+                            "expected_type": "datetime",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "RECORDDATE",
+                            "expected_type": "datetime",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "INSERTED_BY",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "APP_BILL_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "PAYMENT_FLAG",
+                            "expected_type": "tinyint(1)",
+                            "null": "YES",
+                            "default": "0"
+                        },
+                        {
+                            "column": "STATUS",
+                            "expected_type": "varchar(10)",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "SHAW_APPLICANT_RESULTE",
+                            "expected_type": "tinyint",
+                            "null": "NO",
+                            "default": "0"
+                        },
+                        {
+                            "column": "IMPORTED",
+                            "expected_type": "tinyint",
+                            "null": "NO",
+                            "default": "0"
+                        },
+                        {
+                            "column": "STUDENT_CODE",
+                            "expected_type": "varchar(50)",
+                            "null": "NO",
+                            "default": "0"
+                        },
+                        {
+                            "column": "DELETED_ID_BY",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "DELETED_NAME_BY",
+                            "expected_type": "varchar(100)",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "DELETED_ON",
+                            "expected_type": "timestamp",
+                            "null": "NO",
+                            "default": "CURRENT_TIMESTAMP"
+                        }
+                    ],
+                    "differing_columns": []
+                },
+                "general_standards": {
+                    "missing_columns": [
+                        {
+                            "column": "UNID",
+                            "expected_type": "double",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "FACULTY_IDENT",
+                            "expected_type": "double",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "PROGRAM_IDENT",
+                            "expected_type": "double",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "PROGRAM_NAME",
+                            "expected_type": "varchar(255)",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "Y_2011",
+                            "expected_type": "double",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "Y_2012",
+                            "expected_type": "double",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "Y_2013",
+                            "expected_type": "double",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "Y_2014",
+                            "expected_type": "double",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "Y_2015",
+                            "expected_type": "double",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "Y_2016",
+                            "expected_type": "double",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "Y_2017",
+                            "expected_type": "double",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "Y_2018",
+                            "expected_type": "double",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "Y_2019",
+                            "expected_type": "double",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "Y_2020",
+                            "expected_type": "double",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "Y_2021",
+                            "expected_type": "double",
+                            "null": "YES",
+                            "default": null
+                        }
+                    ],
+                    "differing_columns": []
+                },
+                "high_school_degrees_history": {
+                    "missing_columns": [
+                        {
+                            "column": "IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "SEC_SCHOOL_YEAR",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "SEC_SCHOOL_SEATNO",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "STUDENT_NAME",
+                            "expected_type": "varchar(255)",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "SEC_SCHOOL_MARK",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "FINAL_STATUS",
+                            "expected_type": "varchar(255)",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "SEC_SCHOOL_RATE",
+                            "expected_type": "double",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "SEC_SCHOOL_PROVINCE",
+                            "expected_type": "varchar(255)",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "SEC_SCHOOL_TERRITORY",
+                            "expected_type": "varchar(255)",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "SEC_SCHOOL_TYPE",
+                            "expected_type": "varchar(255)",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "SEC_SCHOOL_NAME",
+                            "expected_type": "varchar(255)",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "SEC_SCHOOL_PLACE",
+                            "expected_type": "varchar(255)",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "PLACE_OF_BIRTH",
+                            "expected_type": "varchar(255)",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "DATE_OF_BIRTH",
+                            "expected_type": "date",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "PROVINCE",
+                            "expected_type": "varchar(255)",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "TERRITORY",
+                            "expected_type": "varchar(255)",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "NATIONALITY",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "COUNTRY_NAME",
+                            "expected_type": "varchar(255)",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "COUNTRY_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "YEMEN_NATIONAL",
+                            "expected_type": "tinyint(1)",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "GENDER",
+                            "expected_type": "varchar(255)",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "NATIONALITY_NAME",
+                            "expected_type": "varchar(255)",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "UPDATE_BY",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "UPDATE_ON",
+                            "expected_type": "timestamp",
+                            "null": "NO",
+                            "default": "CURRENT_TIMESTAMP"
+                        },
+                        {
+                            "column": "NOTES",
+                            "expected_type": "text",
+                            "null": "NO",
+                            "default": null
+                        }
+                    ],
+                    "differing_columns": []
+                },
+                "offerings": {
+                    "missing_columns": [
+                        {
+                            "column": "OFFERING_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "UNID",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "OFFER_GROUP_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": "0"
+                        },
+                        {
+                            "column": "FACULTY_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "PROGRAM_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "STUDYTYPE_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "SEC_SCHOOL_TYPE",
+                            "expected_type": "varchar(50)",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "SEC_SCHOOL_ACCEPT_RATE",
+                            "expected_type": "decimal(6,2)",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "ENTRANCE_EXAM_WEIGHT",
+                            "expected_type": "decimal(6,2)",
+                            "null": "NO",
+                            "default": "0.00"
+                        },
+                        {
+                            "column": "Y_SEC_SCHOOL_MAX_AGE",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "NY_SEC_SCHOOL_MAX_AGE",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": "0"
+                        },
+                        {
+                            "column": "STUDY_FEES",
+                            "expected_type": "varchar(150)",
+                            "null": "YES",
+                            "default": "1000"
+                        },
+                        {
+                            "column": "STUDY_FEES_NY",
+                            "expected_type": "varchar(150)",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "ENTRANCE_EXAM_REQUIRED",
+                            "expected_type": "tinyint(1)",
+                            "null": "YES",
+                            "default": "0"
+                        },
+                        {
+                            "column": "FROM_DATE",
+                            "expected_type": "date",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "TO_DATE",
+                            "expected_type": "date",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "SHOW_ALL_APPLICANTS",
+                            "expected_type": "tinyint(1)",
+                            "null": "YES",
+                            "default": "0"
+                        },
+                        {
+                            "column": "DIRCT_RIGESTER",
+                            "expected_type": "tinyint(1)",
+                            "null": "NO",
+                            "default": "0"
+                        },
+                        {
+                            "column": "RECORD_ON",
+                            "expected_type": "datetime",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "RECORD_BY",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "LAST_UPDATED_ON",
+                            "expected_type": "timestamp",
+                            "null": "NO",
+                            "default": "CURRENT_TIMESTAMP"
+                        },
+                        {
+                            "column": "LAST_UPDATED_BY",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "APPROVAL",
+                            "expected_type": "tinyint(1)",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "APPROVAL_BY",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": "0"
+                        },
+                        {
+                            "column": "APPROVAL_ON",
+                            "expected_type": "datetime",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "APPROVAL_REGECT_REASON",
+                            "expected_type": "varchar(200)",
+                            "null": "YES",
+                            "default": null
+                        }
+                    ],
+                    "differing_columns": []
+                },
+                "offerings_dh": {
+                    "missing_columns": [
+                        {
+                            "column": "REVESION",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "ACTION",
+                            "expected_type": "varchar(8)",
+                            "null": "NO",
+                            "default": "0"
+                        },
+                        {
+                            "column": "USER",
+                            "expected_type": "varchar(255)",
+                            "null": "NO",
+                            "default": "0"
+                        },
+                        {
+                            "column": "ATIME",
+                            "expected_type": "timestamp",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "OFFERING_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "UNID",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "OFFER_GROUP_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": "0"
+                        },
+                        {
+                            "column": "FACULTY_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "PROGRAM_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "STUDYTYPE_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "SEC_SCHOOL_TYPE",
+                            "expected_type": "varchar(20)",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "SEC_SCHOOL_ACCEPT_RATE",
+                            "expected_type": "decimal(6,2)",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "ENTRANCE_EXAM_WEIGHT",
+                            "expected_type": "decimal(6,2)",
+                            "null": "NO",
+                            "default": "0.00"
+                        },
+                        {
+                            "column": "Y_SEC_SCHOOL_MAX_AGE",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "NY_SEC_SCHOOL_MAX_AGE",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": "0"
+                        },
+                        {
+                            "column": "ENTRANCE_EXAM_REQUIRED",
+                            "expected_type": "tinyint(1)",
+                            "null": "YES",
+                            "default": "0"
+                        },
+                        {
+                            "column": "FROM_DATE",
+                            "expected_type": "date",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "TO_DATE",
+                            "expected_type": "date",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "SHOW_ALL_APPLICANTS",
+                            "expected_type": "tinyint(1)",
+                            "null": "YES",
+                            "default": "0"
+                        },
+                        {
+                            "column": "DIRCT_RIGESTER",
+                            "expected_type": "tinyint(1)",
+                            "null": "NO",
+                            "default": "0"
+                        },
+                        {
+                            "column": "RECORD_ON",
+                            "expected_type": "datetime",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "RECORD_BY",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "LAST_UPDATED_ON",
+                            "expected_type": "timestamp",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "LAST_UPDATED_BY",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "APPROVAL",
+                            "expected_type": "tinyint(1)",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "APPROVAL_BY",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": "0"
+                        },
+                        {
+                            "column": "APPROVAL_ON",
+                            "expected_type": "datetime",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "APPROVAL_REGECT_REASON",
+                            "expected_type": "varchar(200)",
+                            "null": "YES",
+                            "default": null
+                        }
+                    ],
+                    "differing_columns": []
+                },
+                "programs": {
+                    "missing_columns": [
+                        {
+                            "column": "UNID",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "FACULTY_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "PROGRAM_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "NEW_ID",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "PROGRAM_NAME",
+                            "expected_type": "varchar(200)",
+                            "null": "NO",
+                            "default": ""
+                        },
+                        {
+                            "column": "NEW_NAME",
+                            "expected_type": "varchar(200)",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "PROGRAM_CLASS_ID",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": "2"
+                        },
+                        {
+                            "column": "PROGRAM_LEVEL_ID",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": "2"
+                        },
+                        {
+                            "column": "IS_IT_ENABLE",
+                            "expected_type": "tinyint(1)",
+                            "null": "NO",
+                            "default": "0"
+                        }
+                    ],
+                    "differing_columns": []
+                },
+                "request_adjust_offerings": {
+                    "missing_columns": [
+                        {
+                            "column": "REQUEST_ID",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "UNID",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": "0"
+                        },
+                        {
+                            "column": "FACULTY_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": "0"
+                        },
+                        {
+                            "column": "PROGRAM_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": "0"
+                        },
+                        {
+                            "column": "OFFERING_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": "0"
+                        },
+                        {
+                            "column": "TYPE_UPDATE",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": "0"
+                        },
+                        {
+                            "column": "NEW_ACCEPT_RATE",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": "0"
+                        },
+                        {
+                            "column": "FROM_DATE",
+                            "expected_type": "date",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "TO_DATE",
+                            "expected_type": "datetime",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "NEW_Y_SEC_SCHOOL_MAX_AGE",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": "0"
+                        },
+                        {
+                            "column": "NOTE",
+                            "expected_type": "text",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "ADD_BY",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": "0"
+                        },
+                        {
+                            "column": "RECORDED_ON",
+                            "expected_type": "timestamp",
+                            "null": "NO",
+                            "default": "CURRENT_TIMESTAMP"
+                        },
+                        {
+                            "column": "ACCEPT",
+                            "expected_type": "tinyint(1)",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "REASON",
+                            "expected_type": "text",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "RUN_IT",
+                            "expected_type": "tinyint(1)",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "RUN_ON",
+                            "expected_type": "datetime",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "RUN_BY",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": "0"
+                        }
+                    ],
+                    "differing_columns": []
+                },
+                "users": {
+                    "missing_columns": [
+                        {
+                            "column": "UNID",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": "0"
+                        },
+                        {
+                            "column": "USER_IDENT",
+                            "expected_type": "bigint unsigned",
+                            "null": "NO",
+                            "default": null
+                        },
+                        {
+                            "column": "GROUP_IDENT",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "USER_NAME",
+                            "expected_type": "varchar(100)",
+                            "null": "NO",
+                            "default": ""
+                        },
+                        {
+                            "column": "LOGON_ID",
+                            "expected_type": "varchar(100)",
+                            "null": "NO",
+                            "default": ""
+                        },
+                        {
+                            "column": "LOGON_PASS",
+                            "expected_type": "varchar(200)",
+                            "null": "NO",
+                            "default": ""
+                        },
+                        {
+                            "column": "GENDER",
+                            "expected_type": "varchar(100)",
+                            "null": "NO",
+                            "default": ""
+                        },
+                        {
+                            "column": "MOBILE_PHONE",
+                            "expected_type": "varchar(20)",
+                            "null": "NO",
+                            "default": ""
+                        },
+                        {
+                            "column": "IDENT_TYPE",
+                            "expected_type": "varchar(20)",
+                            "null": "NO",
+                            "default": ""
+                        },
+                        {
+                            "column": "IDENT_NO",
+                            "expected_type": "varchar(20)",
+                            "null": "NO",
+                            "default": ""
+                        },
+                        {
+                            "column": "EMAIL",
+                            "expected_type": "varchar(90)",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "FIRST_TIME",
+                            "expected_type": "tinyint(1)",
+                            "null": "NO",
+                            "default": "0"
+                        },
+                        {
+                            "column": "RECORDDATE",
+                            "expected_type": "timestamp",
+                            "null": "YES",
+                            "default": "CURRENT_TIMESTAMP"
+                        },
+                        {
+                            "column": "INSERTED_BY",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "IS_IT_ENABLE",
+                            "expected_type": "tinyint",
+                            "null": "NO",
+                            "default": "1"
+                        },
+                        {
+                            "column": "FACULTY_IDENT",
+                            "expected_type": "int",
+                            "null": "YES",
+                            "default": null
+                        },
+                        {
+                            "column": "PROGRAM_IDENT",
+                            "expected_type": "int",
+                            "null": "NO",
+                            "default": "0"
+                        },
+                        {
+                            "column": "remember_token",
+                            "expected_type": "varchar(100)",
+                            "null": "YES",
+                            "default": null
+                        }
+                    ],
+                    "differing_columns": []
+                }
+            },
+            "ready_for_production": false,
+            "required_migrations": [
+                "CREATE TABLE `app_bill_ident_canceled` (Missing table)",
+                "CREATE TABLE `applicant` (Missing table)",
+                "ALTER TABLE `applicant_attachments` ADD COLUMN `UNID` int NOT NULL",
+                "ALTER TABLE `applicant_attachments` ADD COLUMN `APPLICANT_IDENT` int NOT NULL",
+                "ALTER TABLE `applicant_attachments` ADD COLUMN `ATTACH_IDENT` int NOT NULL",
+                "ALTER TABLE `applications` ADD COLUMN `APPLICATION_IDENT` int NOT NULL",
+                "ALTER TABLE `applications` ADD COLUMN `UNID` int NOT NULL",
+                "ALTER TABLE `applications` ADD COLUMN `APPLICANT_IDENT` int NOT NULL",
+                "ALTER TABLE `applications` ADD COLUMN `FACULTY_IDENT` int NOT NULL",
+                "ALTER TABLE `applications` ADD COLUMN `PROGRAM_IDENT` int NOT NULL",
+                "ALTER TABLE `applications` ADD COLUMN `OFFERING_IDENT` int NOT NULL",
+                "ALTER TABLE `applications` ADD COLUMN `OFFER_GROUP_IDENT` int NOT NULL",
+                "ALTER TABLE `applications` ADD COLUMN `STUDYTYPE_IDENT` int NOT NULL",
+                "ALTER TABLE `applications` ADD COLUMN `CHOICE_NO` int NULL",
+                "ALTER TABLE `applications` ADD COLUMN `SEC_SCHOOL_RATE` decimal(6,2) NULL",
+                "ALTER TABLE `applications` ADD COLUMN `F_ACCEPT` tinyint NULL",
+                "ALTER TABLE `applications` ADD COLUMN `ACCEPTED` tinyint NULL",
+                "ALTER TABLE `applications` ADD COLUMN `ENTRANCE_EXAM_AVERAGE` decimal(6,2) NOT NULL",
+                "ALTER TABLE `applications` ADD COLUMN `ENTRANCE_EXAM_WEIGHT` decimal(6,2) NULL",
+                "ALTER TABLE `applications` ADD COLUMN `FINAL_MARK` decimal(6,2) NOT NULL",
+                "ALTER TABLE `applications` ADD COLUMN `CONFIRMED_BY_APPLICANT` tinyint(1) NULL",
+                "ALTER TABLE `applications` ADD COLUMN `CONFIRMED_ON` timestamp NULL",
+                "ALTER TABLE `applications` ADD COLUMN `RECORDDATE` timestamp NOT NULL",
+                "ALTER TABLE `applications` ADD COLUMN `INSERTED_BY` int NOT NULL",
+                "ALTER TABLE `applications` ADD COLUMN `APP_BILL_IDENT` int NOT NULL",
+                "ALTER TABLE `applications` ADD COLUMN `PAYMENT_FLAG` int NOT NULL",
+                "ALTER TABLE `applications` ADD COLUMN `STATUS` varchar(10) NULL",
+                "ALTER TABLE `applications` ADD COLUMN `SHAW_APPLICANT_RESULTE` tinyint(1) NOT NULL",
+                "ALTER TABLE `applications` ADD COLUMN `IMPORTED` tinyint(1) NOT NULL",
+                "ALTER TABLE `applications` ADD COLUMN `STUDENT_CODE` varchar(50) NOT NULL",
+                "ALTER TABLE `applications` ADD COLUMN `EXPORTED` int NULL",
+                "CREATE TABLE `applications_group` (Missing table)",
+                "ALTER TABLE `applications_clearing` ADD COLUMN `UNID` int NOT NULL",
+                "ALTER TABLE `applications_clearing` ADD COLUMN `APPLICANT_IDENT` int NULL",
+                "ALTER TABLE `applications_clearing` ADD COLUMN `FROM_COUNTRY_IDENT` int NULL",
+                "ALTER TABLE `applications_clearing` ADD COLUMN `FROM_COUNTRY_NAME` varchar(150) NULL",
+                "ALTER TABLE `applications_clearing` ADD COLUMN `FROM_UNIV_IDENT` int NULL",
+                "ALTER TABLE `applications_clearing` ADD COLUMN `FROM_UNIV_NAME` varchar(150) NULL",
+                "ALTER TABLE `applications_clearing` ADD COLUMN `FROM_FACULTY_IDENT` int NULL",
+                "ALTER TABLE `applications_clearing` ADD COLUMN `FROM_FACULTY_NAME` varchar(150) NULL",
+                "ALTER TABLE `applications_clearing` ADD COLUMN `FROM_PROGRAM_IDENT` int NULL",
+                "ALTER TABLE `applications_clearing` ADD COLUMN `FROM_PROGRAM_NAME` varchar(150) NULL",
+                "ALTER TABLE `applications_clearing` ADD COLUMN `NO_STUDY_YEARS` int NULL",
+                "ALTER TABLE `applications_clearing` ADD COLUMN `STUDY_LEVEL` int NULL",
+                "ALTER TABLE `applications_clearing` ADD COLUMN `FROM_YEAR` int NULL",
+                "ALTER TABLE `applications_clearing` ADD COLUMN `MOVING_REASON` varchar(150) NULL",
+                "ALTER TABLE `attachments_clearing` ADD COLUMN `ATTACH_IDENT` int NOT NULL",
+                "ALTER TABLE `attachments_clearing` ADD COLUMN `ATTACH_NAME` varchar(50) NOT NULL",
+                "ALTER TABLE `attachments_clearing` ADD COLUMN `FORCE_RESIZE` binary(1) NULL",
+                "ALTER TABLE `attachments_clearing` ADD COLUMN `ATTACH_HEIGHT` int NOT NULL",
+                "ALTER TABLE `attachments_clearing` ADD COLUMN `ATTACH_WIDTH` int NOT NULL",
+                "ALTER TABLE `attachments_clearing` ADD COLUMN `ATTACH_SMALLEST_SIZE_KBYTE` int NOT NULL",
+                "ALTER TABLE `attachments_clearing` ADD COLUMN `ATTACH_BIGGEST_SIZE_KBYTE` int NOT NULL",
+                "ALTER TABLE `attachments_clearing` ADD COLUMN `PARENT_FOLDER` varchar(50) NOT NULL",
+                "CREATE TABLE `combe_values` (Missing table)",
+                "ALTER TABLE `countries` ADD COLUMN `COUNTRY_IDENT` int NOT NULL",
+                "ALTER TABLE `countries` ADD COLUMN `CODE` char(2) NOT NULL",
+                "ALTER TABLE `countries` ADD COLUMN `COUNTRY_ENG_NAME` varchar(64) NOT NULL",
+                "ALTER TABLE `countries` ADD COLUMN `COUNTRY_NAME` varchar(100) NULL",
+                "ALTER TABLE `countries` ADD COLUMN `FULL_NAME` varchar(128) NOT NULL",
+                "ALTER TABLE `countries` ADD COLUMN `ISO3` char(3) NOT NULL",
+                "ALTER TABLE `countries` ADD COLUMN `NUMBER` smallint(3) unsigned zerofill NOT NULL",
+                "ALTER TABLE `countries` ADD COLUMN `CONTINENT_CODE` char(2) NOT NULL",
+                "ALTER TABLE `countries` ADD COLUMN `DISPLAY_ORDER` int NOT NULL",
+                "ALTER TABLE `deleted_applications` ADD COLUMN `APPLICATION_IDENT` int NOT NULL",
+                "ALTER TABLE `deleted_applications` ADD COLUMN `UNID` int NOT NULL",
+                "ALTER TABLE `deleted_applications` ADD COLUMN `APPLICANT_IDENT` int NULL",
+                "ALTER TABLE `deleted_applications` ADD COLUMN `FACULTY_IDENT` varchar(11) NOT NULL",
+                "ALTER TABLE `deleted_applications` ADD COLUMN `PROGRAM_IDENT` int NOT NULL",
+                "ALTER TABLE `deleted_applications` ADD COLUMN `OFFERING_IDENT` int NOT NULL",
+                "ALTER TABLE `deleted_applications` ADD COLUMN `OFFER_GROUP_IDENT` int NOT NULL",
+                "ALTER TABLE `deleted_applications` ADD COLUMN `STUDYTYPE_IDENT` int NOT NULL",
+                "ALTER TABLE `deleted_applications` ADD COLUMN `CHOICE_NO` int NULL",
+                "ALTER TABLE `deleted_applications` ADD COLUMN `SEC_SCHOOL_RATE` decimal(6,2) NULL",
+                "ALTER TABLE `deleted_applications` ADD COLUMN `F_ACCEPT` tinyint NULL",
+                "ALTER TABLE `deleted_applications` ADD COLUMN `ACCEPTED` tinyint NULL",
+                "ALTER TABLE `deleted_applications` ADD COLUMN `ENTRANCE_EXAM_AVERAGE` decimal(6,2) NULL",
+                "ALTER TABLE `deleted_applications` ADD COLUMN `ENTRANCE_EXAM_WEIGHT` decimal(6,2) NULL",
+                "ALTER TABLE `deleted_applications` ADD COLUMN `FINAL_MARK` decimal(6,2) NULL",
+                "ALTER TABLE `deleted_applications` ADD COLUMN `CONFIRMED_BY_APPLICANT` binary(1) NULL",
+                "ALTER TABLE `deleted_applications` ADD COLUMN `CONFIRMED_ON` datetime NULL",
+                "ALTER TABLE `deleted_applications` ADD COLUMN `RECORDDATE` datetime NOT NULL",
+                "ALTER TABLE `deleted_applications` ADD COLUMN `INSERTED_BY` int NOT NULL",
+                "ALTER TABLE `deleted_applications` ADD COLUMN `APP_BILL_IDENT` int NOT NULL",
+                "ALTER TABLE `deleted_applications` ADD COLUMN `PAYMENT_FLAG` tinyint(1) NULL",
+                "ALTER TABLE `deleted_applications` ADD COLUMN `STATUS` varchar(10) NULL",
+                "ALTER TABLE `deleted_applications` ADD COLUMN `SHAW_APPLICANT_RESULTE` tinyint NOT NULL",
+                "ALTER TABLE `deleted_applications` ADD COLUMN `IMPORTED` tinyint NOT NULL",
+                "ALTER TABLE `deleted_applications` ADD COLUMN `STUDENT_CODE` varchar(50) NOT NULL",
+                "ALTER TABLE `deleted_applications` ADD COLUMN `DELETED_ID_BY` int NOT NULL",
+                "ALTER TABLE `deleted_applications` ADD COLUMN `DELETED_NAME_BY` varchar(100) NOT NULL",
+                "ALTER TABLE `deleted_applications` ADD COLUMN `DELETED_ON` timestamp NOT NULL",
+                "CREATE TABLE `faculty` (Missing table)",
+                "ALTER TABLE `general_standards` ADD COLUMN `UNID` double NULL",
+                "ALTER TABLE `general_standards` ADD COLUMN `FACULTY_IDENT` double NULL",
+                "ALTER TABLE `general_standards` ADD COLUMN `PROGRAM_IDENT` double NULL",
+                "ALTER TABLE `general_standards` ADD COLUMN `PROGRAM_NAME` varchar(255) NULL",
+                "ALTER TABLE `general_standards` ADD COLUMN `Y_2011` double NULL",
+                "ALTER TABLE `general_standards` ADD COLUMN `Y_2012` double NULL",
+                "ALTER TABLE `general_standards` ADD COLUMN `Y_2013` double NULL",
+                "ALTER TABLE `general_standards` ADD COLUMN `Y_2014` double NULL",
+                "ALTER TABLE `general_standards` ADD COLUMN `Y_2015` double NULL",
+                "ALTER TABLE `general_standards` ADD COLUMN `Y_2016` double NULL",
+                "ALTER TABLE `general_standards` ADD COLUMN `Y_2017` double NULL",
+                "ALTER TABLE `general_standards` ADD COLUMN `Y_2018` double NULL",
+                "ALTER TABLE `general_standards` ADD COLUMN `Y_2019` double NULL",
+                "ALTER TABLE `general_standards` ADD COLUMN `Y_2020` double NULL",
+                "ALTER TABLE `general_standards` ADD COLUMN `Y_2021` double NULL",
+                "CREATE TABLE `high_school_degrees_b_type` (Missing table)",
+                "ALTER TABLE `high_school_degrees_history` ADD COLUMN `IDENT` int NOT NULL",
+                "ALTER TABLE `high_school_degrees_history` ADD COLUMN `SEC_SCHOOL_YEAR` int NOT NULL",
+                "ALTER TABLE `high_school_degrees_history` ADD COLUMN `SEC_SCHOOL_SEATNO` int NOT NULL",
+                "ALTER TABLE `high_school_degrees_history` ADD COLUMN `STUDENT_NAME` varchar(255) NOT NULL",
+                "ALTER TABLE `high_school_degrees_history` ADD COLUMN `SEC_SCHOOL_MARK` int NOT NULL",
+                "ALTER TABLE `high_school_degrees_history` ADD COLUMN `FINAL_STATUS` varchar(255) NOT NULL",
+                "ALTER TABLE `high_school_degrees_history` ADD COLUMN `SEC_SCHOOL_RATE` double NOT NULL",
+                "ALTER TABLE `high_school_degrees_history` ADD COLUMN `SEC_SCHOOL_PROVINCE` varchar(255) NOT NULL",
+                "ALTER TABLE `high_school_degrees_history` ADD COLUMN `SEC_SCHOOL_TERRITORY` varchar(255) NOT NULL",
+                "ALTER TABLE `high_school_degrees_history` ADD COLUMN `SEC_SCHOOL_TYPE` varchar(255) NOT NULL",
+                "ALTER TABLE `high_school_degrees_history` ADD COLUMN `SEC_SCHOOL_NAME` varchar(255) NULL",
+                "ALTER TABLE `high_school_degrees_history` ADD COLUMN `SEC_SCHOOL_PLACE` varchar(255) NULL",
+                "ALTER TABLE `high_school_degrees_history` ADD COLUMN `PLACE_OF_BIRTH` varchar(255) NULL",
+                "ALTER TABLE `high_school_degrees_history` ADD COLUMN `DATE_OF_BIRTH` date NULL",
+                "ALTER TABLE `high_school_degrees_history` ADD COLUMN `PROVINCE` varchar(255) NULL",
+                "ALTER TABLE `high_school_degrees_history` ADD COLUMN `TERRITORY` varchar(255) NOT NULL",
+                "ALTER TABLE `high_school_degrees_history` ADD COLUMN `NATIONALITY` int NULL",
+                "ALTER TABLE `high_school_degrees_history` ADD COLUMN `COUNTRY_NAME` varchar(255) NOT NULL",
+                "ALTER TABLE `high_school_degrees_history` ADD COLUMN `COUNTRY_IDENT` int NOT NULL",
+                "ALTER TABLE `high_school_degrees_history` ADD COLUMN `YEMEN_NATIONAL` tinyint(1) NOT NULL",
+                "ALTER TABLE `high_school_degrees_history` ADD COLUMN `GENDER` varchar(255) NOT NULL",
+                "ALTER TABLE `high_school_degrees_history` ADD COLUMN `NATIONALITY_NAME` varchar(255) NOT NULL",
+                "ALTER TABLE `high_school_degrees_history` ADD COLUMN `UPDATE_BY` int NOT NULL",
+                "ALTER TABLE `high_school_degrees_history` ADD COLUMN `UPDATE_ON` timestamp NOT NULL",
+                "ALTER TABLE `high_school_degrees_history` ADD COLUMN `NOTES` text NOT NULL",
+                "CREATE TABLE `monitor_clearing_reviwing` (Missing table)",
+                "ALTER TABLE `offerings` ADD COLUMN `OFFERING_IDENT` int NOT NULL",
+                "ALTER TABLE `offerings` ADD COLUMN `UNID` int NOT NULL",
+                "ALTER TABLE `offerings` ADD COLUMN `OFFER_GROUP_IDENT` int NOT NULL",
+                "ALTER TABLE `offerings` ADD COLUMN `FACULTY_IDENT` int NOT NULL",
+                "ALTER TABLE `offerings` ADD COLUMN `PROGRAM_IDENT` int NOT NULL",
+                "ALTER TABLE `offerings` ADD COLUMN `STUDYTYPE_IDENT` int NOT NULL",
+                "ALTER TABLE `offerings` ADD COLUMN `SEC_SCHOOL_TYPE` varchar(50) NOT NULL",
+                "ALTER TABLE `offerings` ADD COLUMN `SEC_SCHOOL_ACCEPT_RATE` decimal(6,2) NOT NULL",
+                "ALTER TABLE `offerings` ADD COLUMN `ENTRANCE_EXAM_WEIGHT` decimal(6,2) NOT NULL",
+                "ALTER TABLE `offerings` ADD COLUMN `Y_SEC_SCHOOL_MAX_AGE` int NOT NULL",
+                "ALTER TABLE `offerings` ADD COLUMN `NY_SEC_SCHOOL_MAX_AGE` int NOT NULL",
+                "ALTER TABLE `offerings` ADD COLUMN `STUDY_FEES` varchar(150) NULL",
+                "ALTER TABLE `offerings` ADD COLUMN `STUDY_FEES_NY` varchar(150) NULL",
+                "ALTER TABLE `offerings` ADD COLUMN `ENTRANCE_EXAM_REQUIRED` tinyint(1) NULL",
+                "ALTER TABLE `offerings` ADD COLUMN `FROM_DATE` date NOT NULL",
+                "ALTER TABLE `offerings` ADD COLUMN `TO_DATE` date NOT NULL",
+                "ALTER TABLE `offerings` ADD COLUMN `SHOW_ALL_APPLICANTS` tinyint(1) NULL",
+                "ALTER TABLE `offerings` ADD COLUMN `DIRCT_RIGESTER` tinyint(1) NOT NULL",
+                "ALTER TABLE `offerings` ADD COLUMN `RECORD_ON` datetime NOT NULL",
+                "ALTER TABLE `offerings` ADD COLUMN `RECORD_BY` int NOT NULL",
+                "ALTER TABLE `offerings` ADD COLUMN `LAST_UPDATED_ON` timestamp NOT NULL",
+                "ALTER TABLE `offerings` ADD COLUMN `LAST_UPDATED_BY` int NOT NULL",
+                "ALTER TABLE `offerings` ADD COLUMN `APPROVAL` tinyint(1) NULL",
+                "ALTER TABLE `offerings` ADD COLUMN `APPROVAL_BY` int NULL",
+                "ALTER TABLE `offerings` ADD COLUMN `APPROVAL_ON` datetime NULL",
+                "ALTER TABLE `offerings` ADD COLUMN `APPROVAL_REGECT_REASON` varchar(200) NULL",
+                "ALTER TABLE `offerings_dh` ADD COLUMN `REVESION` int NOT NULL",
+                "ALTER TABLE `offerings_dh` ADD COLUMN `ACTION` varchar(8) NOT NULL",
+                "ALTER TABLE `offerings_dh` ADD COLUMN `USER` varchar(255) NOT NULL",
+                "ALTER TABLE `offerings_dh` ADD COLUMN `ATIME` timestamp NULL",
+                "ALTER TABLE `offerings_dh` ADD COLUMN `OFFERING_IDENT` int NOT NULL",
+                "ALTER TABLE `offerings_dh` ADD COLUMN `UNID` int NOT NULL",
+                "ALTER TABLE `offerings_dh` ADD COLUMN `OFFER_GROUP_IDENT` int NOT NULL",
+                "ALTER TABLE `offerings_dh` ADD COLUMN `FACULTY_IDENT` int NOT NULL",
+                "ALTER TABLE `offerings_dh` ADD COLUMN `PROGRAM_IDENT` int NOT NULL",
+                "ALTER TABLE `offerings_dh` ADD COLUMN `STUDYTYPE_IDENT` int NOT NULL",
+                "ALTER TABLE `offerings_dh` ADD COLUMN `SEC_SCHOOL_TYPE` varchar(20) NOT NULL",
+                "ALTER TABLE `offerings_dh` ADD COLUMN `SEC_SCHOOL_ACCEPT_RATE` decimal(6,2) NOT NULL",
+                "ALTER TABLE `offerings_dh` ADD COLUMN `ENTRANCE_EXAM_WEIGHT` decimal(6,2) NOT NULL",
+                "ALTER TABLE `offerings_dh` ADD COLUMN `Y_SEC_SCHOOL_MAX_AGE` int NOT NULL",
+                "ALTER TABLE `offerings_dh` ADD COLUMN `NY_SEC_SCHOOL_MAX_AGE` int NOT NULL",
+                "ALTER TABLE `offerings_dh` ADD COLUMN `ENTRANCE_EXAM_REQUIRED` tinyint(1) NULL",
+                "ALTER TABLE `offerings_dh` ADD COLUMN `FROM_DATE` date NULL",
+                "ALTER TABLE `offerings_dh` ADD COLUMN `TO_DATE` date NULL",
+                "ALTER TABLE `offerings_dh` ADD COLUMN `SHOW_ALL_APPLICANTS` tinyint(1) NULL",
+                "ALTER TABLE `offerings_dh` ADD COLUMN `DIRCT_RIGESTER` tinyint(1) NOT NULL",
+                "ALTER TABLE `offerings_dh` ADD COLUMN `RECORD_ON` datetime NULL",
+                "ALTER TABLE `offerings_dh` ADD COLUMN `RECORD_BY` int NULL",
+                "ALTER TABLE `offerings_dh` ADD COLUMN `LAST_UPDATED_ON` timestamp NULL",
+                "ALTER TABLE `offerings_dh` ADD COLUMN `LAST_UPDATED_BY` int NOT NULL",
+                "ALTER TABLE `offerings_dh` ADD COLUMN `APPROVAL` tinyint(1) NULL",
+                "ALTER TABLE `offerings_dh` ADD COLUMN `APPROVAL_BY` int NOT NULL",
+                "ALTER TABLE `offerings_dh` ADD COLUMN `APPROVAL_ON` datetime NULL",
+                "ALTER TABLE `offerings_dh` ADD COLUMN `APPROVAL_REGECT_REASON` varchar(200) NULL",
+                "CREATE TABLE `offerings_groups` (Missing table)",
+                "CREATE TABLE `payment_method` (Missing table)",
+                "ALTER TABLE `programs` ADD COLUMN `UNID` int NOT NULL",
+                "ALTER TABLE `programs` ADD COLUMN `FACULTY_IDENT` int NOT NULL",
+                "ALTER TABLE `programs` ADD COLUMN `PROGRAM_IDENT` int NOT NULL",
+                "ALTER TABLE `programs` ADD COLUMN `NEW_ID` int NULL",
+                "ALTER TABLE `programs` ADD COLUMN `PROGRAM_NAME` varchar(200) NOT NULL",
+                "ALTER TABLE `programs` ADD COLUMN `NEW_NAME` varchar(200) NULL",
+                "ALTER TABLE `programs` ADD COLUMN `PROGRAM_CLASS_ID` int NULL",
+                "ALTER TABLE `programs` ADD COLUMN `PROGRAM_LEVEL_ID` int NULL",
+                "ALTER TABLE `programs` ADD COLUMN `IS_IT_ENABLE` tinyint(1) NOT NULL",
+                "CREATE TABLE `programs_capacity` (Missing table)",
+                "CREATE TABLE `programs_capacity_history` (Missing table)",
+                "CREATE TABLE `province` (Missing table)",
+                "ALTER TABLE `request_adjust_offerings` ADD COLUMN `REQUEST_ID` int NOT NULL",
+                "ALTER TABLE `request_adjust_offerings` ADD COLUMN `UNID` int NOT NULL",
+                "ALTER TABLE `request_adjust_offerings` ADD COLUMN `FACULTY_IDENT` int NOT NULL",
+                "ALTER TABLE `request_adjust_offerings` ADD COLUMN `PROGRAM_IDENT` int NOT NULL",
+                "ALTER TABLE `request_adjust_offerings` ADD COLUMN `OFFERING_IDENT` int NOT NULL",
+                "ALTER TABLE `request_adjust_offerings` ADD COLUMN `TYPE_UPDATE` int NOT NULL",
+                "ALTER TABLE `request_adjust_offerings` ADD COLUMN `NEW_ACCEPT_RATE` int NULL",
+                "ALTER TABLE `request_adjust_offerings` ADD COLUMN `FROM_DATE` date NULL",
+                "ALTER TABLE `request_adjust_offerings` ADD COLUMN `TO_DATE` datetime NULL",
+                "ALTER TABLE `request_adjust_offerings` ADD COLUMN `NEW_Y_SEC_SCHOOL_MAX_AGE` int NOT NULL",
+                "ALTER TABLE `request_adjust_offerings` ADD COLUMN `NOTE` text NOT NULL",
+                "ALTER TABLE `request_adjust_offerings` ADD COLUMN `ADD_BY` int NOT NULL",
+                "ALTER TABLE `request_adjust_offerings` ADD COLUMN `RECORDED_ON` timestamp NOT NULL",
+                "ALTER TABLE `request_adjust_offerings` ADD COLUMN `ACCEPT` tinyint(1) NULL",
+                "ALTER TABLE `request_adjust_offerings` ADD COLUMN `REASON` text NOT NULL",
+                "ALTER TABLE `request_adjust_offerings` ADD COLUMN `RUN_IT` tinyint(1) NULL",
+                "ALTER TABLE `request_adjust_offerings` ADD COLUMN `RUN_ON` datetime NOT NULL",
+                "ALTER TABLE `request_adjust_offerings` ADD COLUMN `RUN_BY` int NOT NULL",
+                "CREATE TABLE `roles` (Missing table)",
+                "CREATE TABLE `role_manageable_roles` (Missing table)",
+                "CREATE TABLE `study_type` (Missing table)",
+                "CREATE TABLE `systems` (Missing table)",
+                "CREATE TABLE `university` (Missing table)",
+                "ALTER TABLE `users` ADD COLUMN `UNID` int NULL",
+                "ALTER TABLE `users` ADD COLUMN `USER_IDENT` bigint unsigned NOT NULL",
+                "ALTER TABLE `users` ADD COLUMN `GROUP_IDENT` int NULL",
+                "ALTER TABLE `users` ADD COLUMN `USER_NAME` varchar(100) NOT NULL",
+                "ALTER TABLE `users` ADD COLUMN `LOGON_ID` varchar(100) NOT NULL",
+                "ALTER TABLE `users` ADD COLUMN `LOGON_PASS` varchar(200) NOT NULL",
+                "ALTER TABLE `users` ADD COLUMN `GENDER` varchar(100) NOT NULL",
+                "ALTER TABLE `users` ADD COLUMN `MOBILE_PHONE` varchar(20) NOT NULL",
+                "ALTER TABLE `users` ADD COLUMN `IDENT_TYPE` varchar(20) NOT NULL",
+                "ALTER TABLE `users` ADD COLUMN `IDENT_NO` varchar(20) NOT NULL",
+                "ALTER TABLE `users` ADD COLUMN `EMAIL` varchar(90) NULL",
+                "ALTER TABLE `users` ADD COLUMN `FIRST_TIME` tinyint(1) NOT NULL",
+                "ALTER TABLE `users` ADD COLUMN `RECORDDATE` timestamp NULL",
+                "ALTER TABLE `users` ADD COLUMN `INSERTED_BY` int NULL",
+                "ALTER TABLE `users` ADD COLUMN `IS_IT_ENABLE` tinyint NOT NULL",
+                "ALTER TABLE `users` ADD COLUMN `FACULTY_IDENT` int NULL",
+                "ALTER TABLE `users` ADD COLUMN `PROGRAM_IDENT` int NOT NULL",
+                "ALTER TABLE `users` ADD COLUMN `remember_token` varchar(100) NULL",
+                "CREATE TABLE `user_group` (Missing table)",
+                "CREATE TABLE `sessions` (Missing table)",
+                "CREATE TABLE `cache` (Missing table)",
+                "CREATE TABLE `cache_locks` (Missing table)",
+                "CREATE TABLE `jobs` (Missing table)",
+                "CREATE TABLE `job_batches` (Missing table)",
+                "CREATE TABLE `failed_jobs` (Missing table)",
+                "CREATE TABLE `permissions` (Missing table)",
+                "CREATE TABLE `model_has_permissions` (Missing table)",
+                "CREATE TABLE `model_has_roles` (Missing table)",
+                "CREATE TABLE `role_has_permissions` (Missing table)",
+                "CREATE TABLE `exports` (Missing table)",
+                "CREATE TABLE `imports` (Missing table)",
+                "CREATE TABLE `failed_import_rows` (Missing table)",
+                "CREATE TABLE `activity_log` (Missing table)",
+                "CREATE TABLE `combo_boxes` (Missing table)",
+                "CREATE TABLE `country` (Missing table)",
+                "CREATE TABLE `applicant_attachment` (Missing table)",
+                "CREATE TABLE `application_group` (Missing table)",
+                "CREATE TABLE `program_capacity_history` (Missing table)"
+            ]
+        }
+    }
+}

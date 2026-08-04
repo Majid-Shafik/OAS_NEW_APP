@@ -16,6 +16,7 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -108,29 +109,32 @@ class UsersTable
                 \Filament\Actions\Action::make('changePassword')
                     ->visible(fn(User $record) => auth()->user()->can('ResetPassword:User', $record))
                     ->label('')
-                    ->tooltip('تغيير كلمة المرور')
+                    ->tooltip('تهيئة / تغيير كلمة المرور')
+                    ->modalHeading('تهيئة / تغيير كلمة المرور للمستخدم')
+                    ->modalSubmitActionLabel('حفظ كلمة المرور')
+                    ->modalCancelActionLabel('إلغاء')
                     ->action(function (User $record, array $data): void {
                         $record->update([
-                            'password' => Hash::make($data['new_password']),
+                            'LOGON_PASS' => Hash::make($data['new_password']),
                         ]);
                         Notification::make()
-                            ->title('Password changed successfully.')
+                            ->title('تم تغيير كلمة المرور بنجاح.')
                             ->success()
                             ->send();
                     })
                     ->form([
                         TextInput::make('new_password')
                             ->password()
-                            ->label('New Password')
+                            ->label('كلمة المرور الجديدة')
                             ->required()
                             ->rule(Password::default()),
                         TextInput::make('new_password_confirmation')
                             ->password()
-                            ->label('Confirm New Password')
+                            ->label('تأكيد كلمة المرور الجديدة')
                             ->rule('required', fn($get) => !!$get('new_password'))
                             ->same('new_password'),
                     ])
-                    ->icon('heroicon-o-key'),
+                    ->icon(Heroicon::OutlinedKey),
                 ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make()

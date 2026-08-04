@@ -58,9 +58,9 @@ class RolePermissionSyncService
         bool $syncManageableRoles = true,
         bool $overwrite = true
     ): array {
-        // التحقق من الصلاحيات: مقتصرة فقط على المشرف العام (Admin / Super Admin / ID 1)
+        // التحقق من الصلاحيات: مقتصرة فقط على المشرف العام (Admin / Super Admin)
         $user = auth()->user();
-        if ($user && !$user->hasRole(['super_admin', 'admin']) && $user->id != 1) {
+        if ($user && method_exists($user, 'isAdmin') && !$user->isAdmin()) {
             return [
                 'success' => false,
                 'synced_databases' => [],

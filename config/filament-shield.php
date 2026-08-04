@@ -79,7 +79,7 @@ return [
     'super_admin' => [
         'enabled' => true,
         'name' => 'super_admin',
-        'define_via_gate' => false,
+        'define_via_gate' => true,   // ← super_admin يتجاوز كل الصلاحيات تلقائياً
         'intercept_gate' => 'before',
     ],
 

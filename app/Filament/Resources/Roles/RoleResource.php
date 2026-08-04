@@ -199,7 +199,7 @@ class RoleResource extends Resource
                     ->label('نشر الدور')
                     ->icon('heroicon-o-arrow-path-rounded-square')
                     ->color('info')
-                    ->visible(fn () => auth()->user()?->hasRole(['super_admin', 'admin']) || auth()->id() === 1)
+                    ->visible(fn () => auth()->user()?->isAdmin())
                     ->modalHeading(fn ($record) => "نشر الدور [{$record->name}] إلى قواعد بيانات أخرى")
                     ->modalDescription('اختر قواعد البيانات التي ترغب في نسخ وتحديث هذا الدور وصلاحياته إليها.')
                     ->modalSubmitActionLabel('بدء النشر')

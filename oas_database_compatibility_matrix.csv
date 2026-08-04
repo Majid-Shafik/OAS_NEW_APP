@@ -1,0 +1,8 @@
+"Academic_Year","Database_Name","Active_Tables_Total","Existing_Tables","Missing_Tables_Count","Missing_Tables_List","Missing_Columns_Tables_Count","Compatibility_Status","Action_Required"
+"2022","p_oas_db_2022","44","44","0","None","0","Fully Compatible (Reference)","None"
+"2021","p_oas_db_2021","44","44","0","None","4","Fully Compatible","Minor column sync"
+"2020","p_oas_db_2020","44","44","0","None","4","Fully Compatible","Minor column sync"
+"2019","p_oas_db_2019","44","44","0","None","5","Fully Compatible","Minor column sync"
+"2018","p_oas_db_2018","44","35","9","high_school_degrees_b_type, programs_capacity, app_bill_ident_canceled, monitor_clearing_reviwing, offerings_groups, request_adjust_offerings, high_school_degrees_history, programs_capacity_history, systems","13","Ready for Final Sync","Run Column & Feature Sync"
+"2017","p_oas_db_2017","44","35","9","high_school_degrees_b_type, programs_capacity, app_bill_ident_canceled, monitor_clearing_reviwing, offerings_groups, request_adjust_offerings, high_school_degrees_history, programs_capacity_history, systems","14","Ready for Final Sync","Run Column & Feature Sync"
+"2016","p_oas_db_2016","44","35","9","high_school_degrees_b_type, programs_capacity, app_bill_ident_canceled, monitor_clearing_reviwing, offerings_groups, request_adjust_offerings, high_school_degrees_history, programs_capacity_history, systems","14","Ready for Final Sync","Run Column & Feature Sync"

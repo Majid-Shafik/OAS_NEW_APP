@@ -41,7 +41,7 @@ class AdminPanelProvider extends PanelProvider
                 'warning' => Color::Orange,
                 'info' => '#36b4e2ff',
             ])
-            ->spa(hasPrefetching: true)
+            ->spa(hasPrefetching: true) // تم إعادة التفعيل بعد إصلاح ترتيب TenantMiddleware
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([
@@ -68,8 +68,8 @@ class AdminPanelProvider extends PanelProvider
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
-                StartSession::class,
-                TenantMiddleware::class,
+                StartSession::class,              // ← يجب أن يكون أولاً لقراءة الجلسة
+                TenantMiddleware::class,           // ← بعد StartSession حتى يقرأ tenant_database من الجلسة
                 AuthenticateSession::class,
                 ShareErrorsFromSession::class,
                 PreventRequestForgery::class,
@@ -80,7 +80,7 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])
-            ->sidebarCollapsibleOnDesktop()
+            // ->sidebarCollapsibleOnDesktop() // معطّل مؤقتاً للاختبار - لفحص سبب اختفاء القوائم
             ->sidebarWidth('18rem')
             ->maxContentWidth(Width::Full)
             // ->collapsedSidebarWidth('2rem')
@@ -91,7 +91,7 @@ class AdminPanelProvider extends PanelProvider
                 PanelsRenderHook::GLOBAL_SEARCH_BEFORE,
                 fn(): string => Blade::render('@livewire(\'university-switcher\')'),
             )
-            ->collapsedSidebarWidth('5rem')
+            // ->collapsedSidebarWidth('5rem')  // معطّل مؤقتاً للاختبار
             ->renderHook(
                 PanelsRenderHook::GLOBAL_SEARCH_BEFORE,
                 fn() => view('filament.user-info-topbar')
