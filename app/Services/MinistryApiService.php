@@ -17,16 +17,18 @@ class MinistryApiService
      */
     public function fetchStudentData($year, $seatno, $total = 0)
     {
-        $secret = env('MINISTRY_API_SECRET');
-        $apiUrl = env('MINISTRY_API_URL', 'https://portal.test.oasyemen.net/api/high-school-api');
+        $secret = config('services.ministry_api.secret', env('MINISTRY_API_SECRET'));
+        $apiUrl = config('services.ministry_api.url', env('MINISTRY_API_URL', 'https://portal.test.oasyemen.net/api/high-school-api'));
+        $useLocalDb = config('services.ministry_api.use_local_db', env('USE_LOCAL_MINISTRY_DB', false));
 
-        // Check if local fallback is forced
-        if (env('USE_LOCAL_MINISTRY_DB', false)) {
+        // Check if local fallback is explicitly forced
+        if ($useLocalDb) {
+            Log::info("MinistryApiService: USE_LOCAL_MINISTRY_DB is enabled. Fetching directly from local DB.");
             return $this->fetchFromLocalDB($year, $seatno, $total);
         }
 
         if (!$secret) {
-            Log::error('MinistryApiService: MINISTRY_API_SECRET is missing in .env');
+            Log::error('MinistryApiService: MINISTRY_API_SECRET is missing in config / .env');
             return null;
         }
 
@@ -45,14 +47,36 @@ class MinistryApiService
         // Create signature
         $signature = hash_hmac('sha256', $payload, $secret);
 
+        Log::info("MinistryApiService: Sending request to Ministry API", [
+            'url' => $apiUrl,
+            'year' => $year,
+            'seat_number' => $seatno,
+            'total' => $total,
+        ]);
+
+        $timeout = config('services.ministry_api.timeout', 20);
+        $connectTimeout = config('services.ministry_api.connect_timeout', 10);
+        $verifySsl = config('services.ministry_api.verify_ssl', true);
+
         try {
-            $response = Http::withHeaders([
+            $httpClient = Http::withHeaders([
                 'Content-Type' => 'application/json',
                 'X-Signature' => $signature
             ])
-            ->timeout(10)
-            ->withBody($payload, 'application/json')
-            ->post($apiUrl);
+            ->timeout($timeout)
+            ->connectTimeout($connectTimeout);
+
+            if (!$verifySsl) {
+                $httpClient = $httpClient->withoutVerifying();
+            }
+
+            $response = $httpClient
+                ->withBody($payload, 'application/json')
+                ->post($apiUrl);
+
+            Log::info("MinistryApiService: Received API response", [
+                'status' => $response->status(),
+            ]);
 
             if ($response->successful()) {
                 $responseData = $response->json();
@@ -65,7 +89,9 @@ class MinistryApiService
                 
                 return $responseData;
             } elseif ($response->status() === 403 || $response->serverError()) {
-                Log::warning("MinistryApiService: API returned 403 or Error, falling back to local DB.");
+                Log::warning("MinistryApiService: API returned status {$response->status()}, falling back to local DB.", [
+                    'body' => $response->body()
+                ]);
                 return $this->fetchFromLocalDB($year, $seatno, $total);
             } else {
                 Log::error("MinistryApiService: API request failed", [
@@ -74,9 +100,11 @@ class MinistryApiService
                 ]);
             }
         } catch (\Exception $e) {
-            Log::error("MinistryApiService: Exception occurred", [
+            Log::error("MinistryApiService: Exception occurred during API request", [
                 'message' => $e->getMessage()
             ]);
+            // Fallback to local DB on connection exception
+            return $this->fetchFromLocalDB($year, $seatno, $total);
         }
 
         return null;

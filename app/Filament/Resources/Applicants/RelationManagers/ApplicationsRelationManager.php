@@ -57,6 +57,8 @@ class ApplicationsRelationManager extends RelationManager
                                 $set('OFFERING_IDENT', null);
                             })
                             ->searchable()
+                            ->disabled()
+                            ->dehydrated()
                             ->required(),
 
                         Select::make('FACULTY_IDENT')
@@ -170,13 +172,23 @@ class ApplicationsRelationManager extends RelationManager
                     $imported = $applicant->IMPORTED ?? 2;
 
                     $service = app(\App\Services\ApplicantRegistrationService::class);
-                    $result = $service->registerApplications($applicant, [$offeringIdent], $isClearing, $imported);
+                    
+                    try {
+                        $result = $service->registerApplications($applicant, [$offeringIdent], $isClearing, $imported);
 
-                    if (!empty($result['failed'])) {
-                        $reasons = collect($result['failed'])->pluck('reason')->unique()->join(', ');
+                        if (!empty($result['failed'])) {
+                            $reasons = collect($result['failed'])->pluck('reason')->unique()->join(', ');
+                            \Filament\Notifications\Notification::make()
+                                ->title('تعذر تسجيل الرغبة')
+                                ->body('السبب: ' . $reasons)
+                                ->danger()
+                                ->send();
+                            throw new \Filament\Support\Exceptions\Halt();
+                        }
+                    } catch (\Exception $e) {
                         \Filament\Notifications\Notification::make()
-                            ->title('تعذر تسجيل الرغبة')
-                            ->body('السبب: ' . $reasons)
+                            ->title('خطأ أثناء العملية')
+                            ->body($e->getMessage())
                             ->danger()
                             ->send();
                         throw new \Filament\Support\Exceptions\Halt();

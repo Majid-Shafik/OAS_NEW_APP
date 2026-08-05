@@ -1,18 +1,19 @@
 @php
-    $database = session('tenant_database', config('academic_years.default_database'));
-    $years = config('academic_years.databases', []);
+    $user = auth()->user();
+    $userName = $user?->USER_NAME ?? $user?->LOGON_ID ?? 'مستخدم';
     
-    if (isset($years[$database])) {
-        $displayYear = $years[$database];
-    } elseif (preg_match('/(20\d{2})/', (string) $database, $matches)) {
-        $y = (int) $matches[1];
-        $displayYear = "{$y}-" . ($y - 1);
-    } else {
-        $displayYear = 'غير محدد';
-    }
+    // جلب اسم أول دور وظيفي للمستخدم من جدول الأدوار (Roles)
+    $roleLabel = $user?->getRoleNames()?->first() 
+        ?? $user?->roles?->first()?->name 
+        ?? null;
 @endphp
 
-<div class="flex items-center gap-x-2 px-4 rounded-full bg-primary-50 text-primary-600 dark:bg-primary-900/50 dark:text-primary-400 border border-primary-100 dark:border-primary-800 text-sm font-semibold py-1">
-    {{-- <x-heroicon-o-calendar class="w-1 h-1" /> --}}
-    <span>بوابة القبول  للعام : {{ $displayYear }}</span>
-</div>
+@if($user)
+    <div style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; font-size: 13px; font-weight: 600;" class="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 rounded-lg whitespace-nowrap">
+        <span style="width: 8px; height: 8px; border-radius: 9999px;" class="bg-emerald-500 shrink-0"></span>
+        <span>{{ $userName }}</span>
+        @if($roleLabel)
+            <span class="text-primary-600 dark:text-primary-400 font-bold">({{ $roleLabel }})</span>
+        @endif
+    </div>
+@endif

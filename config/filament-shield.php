@@ -211,6 +211,7 @@ return [
                 'deleteAny',
                 'updateFromMinistryApplicant',
                 'completeFile',
+                'convertToClearing',
             ],
             ClearingApplicantResource::class => [
                 'viewAny',
@@ -222,6 +223,7 @@ return [
                 'firstReview',
                 'secondReview',
                 'showClearingAttachments',
+                'convertToApplicant',
             ],
             ApplicationResource::class => [
                 'viewAny',

@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use Illuminate\Foundation\Auth\User as AuthUser;
+use App\Models\Applicant;
 use App\Models\ClearingApplicant;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Foundation\Auth\User as AuthUser;
 
 class ClearingApplicantPolicy
 {
@@ -59,5 +60,10 @@ class ClearingApplicantPolicy
     public function showClearingAttachments(AuthUser $authUser, ClearingApplicant $clearingApplicant): bool
     {
         return $authUser->can('ShowClearingAttachments:ClearingApplicant');
+    }
+
+      public function convertToApplicant(AuthUser $authUser, ClearingApplicant $clearingApplicant): bool
+    {
+        return $authUser->can('ConvertToApplicant:ClearingApplicant');
     }
 }

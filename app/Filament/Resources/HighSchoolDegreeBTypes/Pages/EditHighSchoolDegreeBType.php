@@ -13,9 +13,9 @@ class EditHighSchoolDegreeBType extends EditRecord
     protected function mutateFormDataBeforeFill(array $data): array
     {
         if (!empty($data['SEC_SCHOOL_CERTIFICATE'])) {
-            $portalYear = \App\Helpers\PortalHelper::getActiveYear();
+            $portalPrefix = \App\Helpers\PortalHelper::getPortalPrefix();
             $basename = $data['SEC_SCHOOL_CERTIFICATE'];
-            $data['SEC_SCHOOL_CERTIFICATE'] = "uploads/p{$portalYear}/images/attachments/secondary/{$basename}.jpg";
+            $data['SEC_SCHOOL_CERTIFICATE'] = "uploads/{$portalPrefix}/images/attachments/secondary/{$basename}.jpg";
         }
         return $data;
     }

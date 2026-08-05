@@ -21,6 +21,13 @@ class UniversitySwitcher extends Component
         $this->redirect(request()->header('Referer') ?? '/admin');
     }
 
+    public function selectUniversity($value)
+    {
+        $this->selectedUnid = $value;
+        session(['selected_unid' => $value]);
+        $this->redirect(request()->header('Referer') ?? '/admin');
+    }
+
     public function render()
     {
         $universities = University::withoutGlobalScope(UniversityScope::class)->coordination()->pluck('U_NAME', 'UNID')->prepend('الكل (جميع الجامعات)', 0);

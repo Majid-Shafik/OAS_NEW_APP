@@ -51,4 +51,14 @@ class ApplicantPolicy
         return $authUser->can('UpdateFromMinistryApplicant:Applicant');
     }
 
+    public function convertToClearing(AuthUser $authUser, Applicant $applicant): bool
+    {
+        return $authUser->can('ConvertToClearing:Applicant');
+    }
+
+    public function completeFile(AuthUser $authUser, Applicant $applicant): bool
+    {
+        return $authUser->can('CompleteFile:Applicant');
+    }
+
 }

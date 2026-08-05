@@ -12,8 +12,11 @@ use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Builder;
 use UnitEnum;
 
+use App\Filament\Traits\HasClearingReviewActions;
+
 class ClearingApplicantResource extends ApplicantResource
 {
+    use HasClearingReviewActions;
     protected static ?string $model = ClearingApplicant::class;
         protected static ?int $navigationSort = 20;
 
@@ -44,5 +47,22 @@ class ClearingApplicantResource extends ApplicantResource
         return array_merge(parent::getRelations(), [
             RelationManagers\ApplicationsClearingRelationManager::class,
         ]);
+    }
+    public static function table(\Filament\Tables\Table $table): \Filament\Tables\Table
+    {
+        $table = parent::table($table);
+
+        $reviewActions = self::getClearingReviewActions(
+            \Filament\Actions\Action::class,
+            \Filament\Actions\ActionGroup::class
+        );
+
+        return $table
+            ->recordActions([
+                \Filament\Actions\ViewAction::make(),
+                \Filament\Actions\EditAction::make(),
+                ...$reviewActions,
+            ])
+            ->recordUrl(fn (\Illuminate\Database\Eloquent\Model $record): string => static::getUrl('view', ['record' => $record]));
     }
 }

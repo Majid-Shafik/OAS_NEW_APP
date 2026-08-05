@@ -57,7 +57,7 @@ class ApplicationsTable
                 TextColumn::make('applicant.FULL_NAME')
                     ->label('المتقدم')
                     ->searchable(['FULL_NAME', 'MOBILE_PHONE', 'APPLICANT_IDENT', 'SEC_SCHOOL_SEATNO'])
-                    ->url(fn($record) => $record->applicant ? \App\Filament\Resources\Applicants\ApplicantResource::getUrl('view', ['record' => $record->applicant]) : null)
+                    ->url(fn($record) => $record->applicant ? $record->applicant->getProfileUrl() : null)
                     ->tooltip('انقر هنا للانتقال إلى ملف المتقدم')
                     ->openUrlInNewTab()
                     ->color('primary')
@@ -346,7 +346,13 @@ class ApplicationsTable
                     ->label('طباعة الحافظة')
                     ->icon('heroicon-o-printer')
                     ->color('success')
-                    ->visible(fn($record) => (empty($record->PAYMENT_FLAG) || $record->PAYMENT_FLAG === \App\Enums\PaymentMethodEnum::NONE) && $record->applicant && $record->applicant->FREEZE === \App\Enums\FreezeStatus::FROZEN)
+                    ->visible(function($record) {
+                        $isNotPaid = empty($record->PAYMENT_FLAG) || $record->PAYMENT_FLAG === \App\Enums\PaymentMethodEnum::NONE;
+                        $isFrozen = $record->applicant && $record->applicant->FREEZE === \App\Enums\FreezeStatus::FROZEN;
+                        $isClearingApproved = !$record->applicant || $record->applicant->IS_CLEARING?->value !== 1 || ($record->applicant->REVIEWED == 1 && $record->applicant->SECOND_REVIEWED == 1);
+                        
+                        return $isNotPaid && $isFrozen && $isClearingApproved;
+                    })
                     ->hidden(fn($record) => ! auth()->user()->can('printReceipt', $record))
                     ->url(fn($record) => route('applicant.receipt', ['unid' => $record->UNID, 'applicant_ident' => $record->APPLICANT_IDENT]))
                     ->openUrlInNewTab(),
@@ -355,7 +361,12 @@ class ApplicationsTable
                     ->label('تسديد')
                     ->icon('heroicon-o-currency-dollar')
                     ->color('warning')
-                    ->visible(fn($record) => (empty($record->PAYMENT_FLAG) || $record->PAYMENT_FLAG === \App\Enums\PaymentMethodEnum::NONE))
+                    ->visible(function($record) {
+                        $isNotPaid = empty($record->PAYMENT_FLAG) || $record->PAYMENT_FLAG === \App\Enums\PaymentMethodEnum::NONE;
+                        $isClearingApproved = !$record->applicant || $record->applicant->IS_CLEARING?->value !== 1 || ($record->applicant->REVIEWED == 1 && $record->applicant->SECOND_REVIEWED == 1);
+                        
+                        return $isNotPaid && $isClearingApproved;
+                    })
                     ->hidden(fn($record) => ! auth()->user()->can('pay', $record))
                     ->modalHeading(function ($record) {
                         $program = $record->program?->PROGRAM_NAME ?? $record->APPLICATION_IDENT;

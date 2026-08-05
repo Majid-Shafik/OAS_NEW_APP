@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\ApplicationStatus;
+use App\Models\University;
 use App\Traits\HasCompositeKey;
 use App\Traits\HasUniversityScope;
 use Awobaz\Compoships\Compoships;
@@ -155,11 +156,18 @@ class Application extends Model
     protected static function booted()
     {
         static::creating(function ($application) {
+            $application->IMPORTED = $application->IMPORTED ?? 2;
+            $application->INSERTED_BY = $application->INSERTED_BY ?? (auth()->id() ?? -1);
+            $application->RECORDDATE = $application->RECORDDATE ?? now();
+
             if (empty($application->APPLICATION_IDENT)) {
                 // قفل سجل الجامعة لمنع التداخل (Race Condition) أثناء توليد المعرف
-                \App\Models\University::where('UNID', $application->UNID)->lockForUpdate()->first();
+                University::where('UNID', $application->UNID)->lockForUpdate()->first();
                 
-                $maxIdent = static::where('UNID', $application->UNID)->max('APPLICATION_IDENT');
+                $maxIdent = \Illuminate\Support\Facades\DB::table('applications')
+                    ->where('UNID', $application->UNID)
+                    ->max('APPLICATION_IDENT');
+                    
                 $application->APPLICATION_IDENT = $maxIdent ? $maxIdent + 1 : 1;
             }
         });

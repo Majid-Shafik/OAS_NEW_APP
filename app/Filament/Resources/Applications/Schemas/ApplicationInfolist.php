@@ -56,7 +56,7 @@ class ApplicationInfolist
                             ->schema([
                                 TextEntry::make('applicant.FULL_NAME')
                                     ->label('اسم المتقدم')
-                                    ->url(fn($record) => $record->applicant ? ApplicantResource::getUrl('view', ['record' => $record->applicant]) : null)
+                                    ->url(fn($record) => $record->applicant ? $record->applicant->getProfileUrl() : null)
                                     ->tooltip('انقر هنا للانتقال إلى ملف المتقدم')
                                     ->openUrlInNewTab()
                                     ->color('primary')

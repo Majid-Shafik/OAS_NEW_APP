@@ -63,8 +63,8 @@ class CreateApplicant extends CreateRecord
             if (!empty($data['secondary_certificate'])) {
                 $file = is_array($data['secondary_certificate']) ? reset($data['secondary_certificate']) : $data['secondary_certificate'];
                 
-                $portalYear = \App\Helpers\PortalHelper::getActiveYear();
-                $path = "uploads/p{$portalYear}/images/attachments/secondary";
+                $portalPrefix = \App\Helpers\PortalHelper::getPortalPrefix();
+                $path = "uploads/{$portalPrefix}/images/attachments/secondary";
                 
                 if ($file instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile) {
                     $filename = \Illuminate\Support\Str::random(15) . '.' . $file->getClientOriginalExtension();
@@ -145,6 +145,18 @@ class CreateApplicant extends CreateRecord
 
     protected function getRedirectUrl(): string
     {
-        return $this->getResource()::getUrl('view', ['record' => $this->record]);
+        return $this->record->getProfileUrl();
+    }
+
+    protected function getCreateFormAction(): \Filament\Actions\Action
+    {
+        return parent::getCreateFormAction()
+            ->hidden(fn () => $this->data['applicant_exists'] ?? false);
+    }
+
+    protected function getCreateAnotherFormAction(): \Filament\Actions\Action
+    {
+        return parent::getCreateAnotherFormAction()
+            ->hidden(fn () => $this->data['applicant_exists'] ?? false);
     }
 }

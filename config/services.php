@@ -35,4 +35,13 @@ return [
         ],
     ],
 
+    'ministry_api' => [
+        'url' => env('MINISTRY_API_URL', 'https://portal.test.oasyemen.net/api/high-school-api'),
+        'secret' => env('MINISTRY_API_SECRET'),
+        'use_local_db' => env('USE_LOCAL_MINISTRY_DB', false),
+        'timeout' => (int) env('MINISTRY_API_TIMEOUT', 80),
+        'connect_timeout' => (int) env('MINISTRY_API_CONNECT_TIMEOUT', 10),
+        'verify_ssl' => env('MINISTRY_API_VERIFY_SSL', true),
+    ],
+
 ];

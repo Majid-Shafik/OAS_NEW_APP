@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\ApplicantStatus;
 use App\Enums\Gender;
+use App\Models\University;
 use App\Traits\HasCompositeKey;
 use App\Traits\HasUniversityScope;
 use Awobaz\Compoships\Compoships;
@@ -56,6 +57,20 @@ class Applicant extends Model
         return $this->hasMany(Application::class, ['UNID', 'APPLICANT_IDENT'], ['UNID', 'APPLICANT_IDENT']);
     }
 
+    public function getProfileUrl(): string
+    {
+        $isClearing = $this->IS_CLEARING;
+        if ($isClearing instanceof \App\Enums\IsClearingType) {
+            $isClearing = $isClearing->value;
+        }
+
+        if ($isClearing === 1 || $isClearing === \App\Enums\IsClearingType::CLEARING->value) {
+            return \App\Filament\Resources\ClearingApplicants\ClearingApplicantResource::getUrl('view', ['record' => $this]);
+        }
+
+        return \App\Filament\Resources\Applicants\ApplicantResource::getUrl('view', ['record' => $this]);
+    }
+
     public function applicationGroups()
     {
         return $this->hasMany(ApplicationGroup::class, ['UNID', 'APPLICANT_IDENT'], ['UNID', 'APPLICANT_IDENT']);
@@ -106,12 +121,18 @@ class Applicant extends Model
         static::creating(function ($applicant) {
             $applicant->INSERTED_BY = $applicant->INSERTED_BY ?? (auth()->id() ?? -1);
             $applicant->RECORDDATE = $applicant->RECORDDATE ?? now();
+            $applicant->IMPORTED = $applicant->IMPORTED ?? 2;
+            $applicant->APPLICANT_TYPE = $applicant->APPLICANT_TYPE ?? 1;
+            $applicant->YEMEN_NATIONAL = $applicant->YEMEN_NATIONAL ?? 1;
             
             if (empty($applicant->APPLICANT_IDENT)) {
                 // قفل سجل الجامعة لمنع التداخل (Race Condition) أثناء توليد المعرف
-                \App\Models\University::where('UNID', $applicant->UNID)->lockForUpdate()->first();
+                University::where('UNID', $applicant->UNID)->lockForUpdate()->first();
                 
-                $maxIdent = static::where('UNID', $applicant->UNID)->max('APPLICANT_IDENT');
+                $maxIdent = \Illuminate\Support\Facades\DB::table('applicant')
+                    ->where('UNID', $applicant->UNID)
+                    ->max('APPLICANT_IDENT');
+                    
                 $applicant->APPLICANT_IDENT = $maxIdent ? $maxIdent + 1 : 1;
             }
         });

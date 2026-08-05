@@ -38,6 +38,9 @@ class TenantMiddleware
             DB::purge('mysql');
 
             DB::setDefaultConnection('tenant');
+            \Illuminate\Support\Facades\Log::info('TenantMiddleware ran for URL: ' . $request->url() . ' | Database set to: ' . $database);
+        } else {
+            \Illuminate\Support\Facades\Log::info('TenantMiddleware ran for URL: ' . $request->url() . ' | NO DATABASE SET');
         }
 
         return $next($request);

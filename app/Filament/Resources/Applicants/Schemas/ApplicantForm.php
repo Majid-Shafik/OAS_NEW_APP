@@ -50,8 +50,8 @@ class ApplicantForm
                         Hidden::make('hs_degree_not_approved')->dehydrated(false),
                         Hidden::make('hs_degree_id')->dehydrated(false),
                         Hidden::make('is_hs_degree_b')->dehydrated(false),
-                        Hidden::make('IMPORTED'),
-                        Hidden::make('APPLICANT_TYPE'),
+                        Hidden::make('IMPORTED')->default(2),
+                        Hidden::make('APPLICANT_TYPE')->default(1),
                         // القسم الأيمن الأكبر (عرض 9)
                         Grid::make(1)->schema([
                             Callout::make('تنبيه')
@@ -95,7 +95,7 @@ class ApplicantForm
                                             ->live(),
                                         TextInput::make('search_seatno')->label('رقم الجلوس')->numeric()->dehydrated(false)->required(),
                                         TextInput::make('search_year')->label('عام التخرج')
-                                            ->hint('*سنة الشهادة لعام 2012/2011 هي: 2012')
+                                            ->hint('*سنة الشهادة2012/2011 هي: 2012')
                                             ->numeric()->rule('digits:4')->dehydrated(false)->required(),
                                     ])
                                     ->columns(3)
@@ -356,26 +356,60 @@ class ApplicantForm
                                     ->description('بيانات المؤهل الثانوي والمعلومات الشخصية')
                                     ->icon('heroicon-o-user')
                                     ->schema([
-                                        Callout::make('ملاحظة هامة!')
+                                        Callout::make('بيانات الطالب الأساسية')
                                             ->description(function (Get $get) {
                                                 $id = $get('applicant_id');
                                                 if ($id) {
                                                     $existing = \App\Models\Applicant::find($id);
                                                     if ($existing) {
-                                                        $url = \App\Filament\Resources\Applicants\ApplicantResource::getUrl('view', ['record' => $existing]);
+                                                        $url = $existing->getProfileUrl();
+                                                        
+                                                        $isClearingVal = $existing->IS_CLEARING;
+                                                        if ($isClearingVal instanceof \App\Enums\IsClearingType) {
+                                                            $isClearingVal = $isClearingVal->value;
+                                                        }
+                                                        $type = ($isClearingVal === 1 || $isClearingVal === \App\Enums\IsClearingType::CLEARING->value) ? 'مقاصة' : 'اعتيادي';
+                                                        
+                                                        $status = $existing->STATUS;
+                                                        if ($status instanceof \App\Enums\ApplicantStatus) {
+                                                            $status = $status->getLabel();
+                                                        } else {
+                                                            $status = $status ?? 'غير محدد';
+                                                        }
+                                                        
                                                         return new \Illuminate\Support\HtmlString('
                                                             <div class="mb-4 text-base font-bold">
-                                                                المتقدم موجود مسبقاً في النظام ببيانات معتمدة. يمكنك الاستمرار للتنسيق له في تخصص آخر.
+                                                                المتقدم موجود مسبقاً في الجامعة.
                                                             </div>
-                                                            <a href="'.$url.'" target="_blank" style="text-decoration: none;" class="fi-btn fi-btn-size-md fi-btn-color-success fi-btn-style-solid shadow-sm inline-flex items-center justify-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold outline-none transition duration-75 bg-success-600 text-white hover:bg-success-500">
-                                                                فتح ملف الطالب في تبويب جديد
-                                                            </a>
+                                                            <table class="w-full text-sm text-right mb-4" dir="rtl" style="border-collapse: collapse; border: 1px solid #e5e7eb;">
+                                                                <tr>
+                                                                    <td class="font-bold p-2 border" style="border: 1px solid #e5e7eb; background-color: #f9fafb; width: 15%;">الاسم</td>
+                                                                    <td class="p-2 border" style="border: 1px solid #e5e7eb; width: 35%;">'.$existing->FULL_NAME.'</td>
+                                                                    <td class="font-bold p-2 border" style="border: 1px solid #e5e7eb; background-color: #f9fafb; width: 15%;">رقم الجلوس</td>
+                                                                    <td class="p-2 border" style="border: 1px solid #e5e7eb; width: 35%;">'.$existing->SEC_SCHOOL_SEATNO.'</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td class="font-bold p-2 border" style="border: 1px solid #e5e7eb; background-color: #f9fafb;">عام التخرج</td>
+                                                                    <td class="p-2 border" style="border: 1px solid #e5e7eb;">'.$existing->SEC_SCHOOL_YEAR.'</td>
+                                                                    <td class="font-bold p-2 border" style="border: 1px solid #e5e7eb; background-color: #f9fafb;">نوع الطالب</td>
+                                                                    <td class="p-2 border" style="border: 1px solid #e5e7eb;">'.$type.'</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td class="font-bold p-2 border" style="border: 1px solid #e5e7eb; background-color: #f9fafb;">حالة الملف</td>
+                                                                    <td class="p-2 border" style="border: 1px solid #e5e7eb;" colspan="3">'.$status.'</td>
+                                                                </tr>
+                                                            </table>
+                                                            <div class="mt-4">
+                                                                <a href="'.$url.'" style="text-decoration: none;" class="fi-btn fi-btn-size-md fi-btn-color-primary fi-btn-style-solid shadow-sm inline-flex items-center justify-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold outline-none transition duration-75 bg-primary-600 text-white hover:bg-primary-500">
+                                                                    الانتقال إلى ملف المتقدم
+                                                                </a>
+                                                            </div>
                                                         ');
                                                     }
                                                 }
                                                 return '';
                                             })
-                                            ->success()
+                                            ->info()
                                             ->visible(fn(Get $get) => $get('applicant_exists') === true)
                                             ->columnSpanFull(),
 
@@ -409,7 +443,7 @@ class ApplicantForm
                                             ->columnSpanFull(),
 
                                         Fieldset::make('بيانات الثانوية')
-                                            ->hidden(fn(Get $get) => $get('hs_degree_not_approved') === true)
+                                            ->hidden(fn(Get $get) => $get('hs_degree_not_approved') === true || $get('applicant_exists') === true)
                                             ->columnSpanFull()
                                             ->schema(
                                                 [
@@ -494,8 +528,8 @@ class ApplicantForm
                                                         ->downloadable()
                                                         ->formatStateUsing(function ($record) {
                                                             if (!$record) return null;
-                                                            $activeConnection = $record->getConnectionName() ?? config('database.default');
-                                                            $baseDir = config("legacy_attachments.systems.{$activeConnection}", "uploads/{$activeConnection}");
+                                                            $portalPrefix = \App\Helpers\PortalHelper::getPortalPrefix();
+                                                            $baseDir = "uploads/{$portalPrefix}";
                                                             
                                                             // Check for JPG first, then PDF
                                                             $filePathJpg = rtrim($baseDir, '/') . '/images/attachments/secondary/' . $record->UNID . '-' . $record->APPLICANT_IDENT . '.jpg';
@@ -511,9 +545,8 @@ class ApplicantForm
                                                             if (!$state) return;
                                                             $file = is_array($state) ? reset($state) : $state;
                                                             if ($file instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile) {
-                                                                $activeConnection = $record->getConnectionName() ?? config('database.default');
-                                                                $baseDir = config("legacy_attachments.systems.{$activeConnection}", "uploads/{$activeConnection}");
-                                                                $path = rtrim($baseDir, '/') . '/images/attachments/secondary';
+                                                                $portalPrefix = \App\Helpers\PortalHelper::getPortalPrefix();
+                                                                $path = "uploads/{$portalPrefix}/images/attachments/secondary";
                                                                 $extension = $file->getClientOriginalExtension();
                                                                 $filename = "{$record->UNID}-{$record->APPLICANT_IDENT}.{$extension}";
                                                                 $file->storeAs($path, $filename, config('legacy_attachments.disk', 'public'));
@@ -544,7 +577,7 @@ class ApplicantForm
                                                 ]
                                             )->columns(4),
                                         Fieldset::make('بيانات المتقدم')
-                                            ->hidden(fn(Get $get) => $get('hs_degree_not_approved') === true)
+                                            ->hidden(fn(Get $get) => $get('hs_degree_not_approved') === true || $get('applicant_exists') === true)
                                             ->columnSpanFull()
                                             ->columns(4)
                                             ->schema(

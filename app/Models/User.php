@@ -97,6 +97,11 @@ class User extends Authenticatable implements FilamentUser, HasName
         return $this->belongsTo(University::class, 'UNID', 'UNID');
     }
 
+    public function userGroup()
+    {
+        return $this->belongsTo(UserGroup::class, 'GROUP_IDENT', 'GROUP_IDENT');
+    }
+
     public function inserter()
     {
         return $this->belongsTo(User::class, 'INSERTED_BY', 'USER_IDENT');

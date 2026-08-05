@@ -94,5 +94,7 @@ return [
         'second_review' => 'المراجعة الثانية',
         'show_with_certificate' => 'استعراض الشهادة الثانوية',
         'update_university_settings' => 'تغيير إعدادات الجامعة',
+        'convert_to_clearing' => 'تحويل إلى طالب مقاصاة',
+        'convert_to_applicant' => 'تحويل إلى طالب اعتيادي',
     ],
 ];

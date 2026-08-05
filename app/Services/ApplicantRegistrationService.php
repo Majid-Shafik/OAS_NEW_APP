@@ -40,7 +40,7 @@ class ApplicantRegistrationService
                 ->get();
 
             if ($offerings->isEmpty()) {
-                throw new Exception("No valid offerings found.");
+                throw new Exception("لم يتم العثور على الرغبة المحددة أو أنها غير متاحة لهذه الجامعة.");
             }
 
             // Get current number of applications for choice number ordering
@@ -65,12 +65,12 @@ class ApplicantRegistrationService
                 $offerGroupIdent = $offerGroup->OFFER_GROUP_IDENT;
 
                 // 1. Check if the applicant is allowed to apply to this offering
-                $ifAllowed = $this->checkIfAllowed($applicant, $offering);
-                
-                if (!$ifAllowed) {
+                try {
+                    $this->checkIfAllowed($applicant, $offering);
+                } catch (Exception $e) {
                     $failedOfferings[] = [
                         'offering' => $offering->OFFERING_IDENT,
-                        'reason' => 'Not allowed by rules'
+                        'reason' => $e->getMessage()
                     ];
                     continue;
                 }
@@ -171,34 +171,26 @@ class ApplicantRegistrationService
 
     /**
      * Checks if the applicant is allowed to apply for the specified offering.
-     * Stub based on legacy `check_if_allowed`.
+     * Throws an exception if any rule is violated.
      *
      * @param Applicant $applicant
      * @param Offering $offering
-     * @return bool
+     * @return void
      * @throws Exception
      */
-    public function checkIfAllowed(Applicant $applicant, Offering $offering): bool
+    public function checkIfAllowed(Applicant $applicant, Offering $offering): void
     {
-        $limitAllowed = $this->checkLimitApp($applicant, $offering);
-        $standardAllowed = $this->checkStandardApp($applicant, $offering);
-        $registerDate = $this->checkRegisterDate($offering);
-        $approving = $this->checkApproving($offering);
-        $groupPaid = $this->checkGroupPaid($applicant, $offering);
-
-        if ($limitAllowed && $standardAllowed && $registerDate && $approving && $groupPaid) {
-            return true;
-        }
-
-        // You can throw specific exceptions here based on which check failed,
-        // but for now we just return false if any fails.
-        return false;
+        $this->checkLimitApp($applicant, $offering);
+        $this->checkStandardApp($applicant, $offering);
+        $this->checkRegisterDate($offering);
+        $this->checkApproving($offering);
+        $this->checkGroupPaid($applicant, $offering);
     }
 
-    private function checkLimitApp(Applicant $applicant, Offering $offering): bool
+    private function checkLimitApp(Applicant $applicant, Offering $offering): void
     {
         $offerGroup = $offering->offeringGroup;
-        if (!$offerGroup) return false;
+        if (!$offerGroup) throw new Exception("مجموعة الرغبة غير موجودة.");
 
         $maxNo = $offerGroup->MAX_CHOICE ?? 999;
         
@@ -208,20 +200,20 @@ class ApplicantRegistrationService
             ->where('STUDYTYPE_IDENT', $offerGroup->STUDYTYPE_IDENT)
             ->count();
             
-        return $applicationsNo <= $maxNo;
+        if ($applicationsNo >= $maxNo) {
+            throw new Exception("لقد تجاوزت الحد الأعلى المسموح به للرغبات في هذه المجموعة ({$maxNo}).");
+        }
     }
 
-    private function checkStandardApp(Applicant $applicant, Offering $offering): bool
+    private function checkStandardApp(Applicant $applicant, Offering $offering): void
     {
-        $errCount = 0;
-
         $isYemeni = $applicant->YEMEN_NATIONAL == 1;
         $maxAgeColumn = $isYemeni ? 'Y_SEC_SCHOOL_MAX_AGE' : 'NY_SEC_SCHOOL_MAX_AGE';
 
         // Secondary School Type match
         if ($offering->SEC_SCHOOL_TYPE != 'الكل') {
             if (trim($applicant->SEC_SCHOOL_TYPE) != trim($offering->SEC_SCHOOL_TYPE)) {
-                $errCount++;
+                throw new Exception("نوع الثانوية للطالب (" . trim($applicant->SEC_SCHOOL_TYPE) . ") لا يتطابق مع نوع الثانوية المطلوب للرغبة (" . trim($offering->SEC_SCHOOL_TYPE) . ").");
             }
         } else {
             // Check double program parameter logic
@@ -234,21 +226,20 @@ class ApplicantRegistrationService
                 ->whereDate('TO_DATE', '>=', now())
                 ->count();
             if ($duplicateCount > 0) {
-                $errCount++;
+                throw new Exception("يوجد تخصص آخر متاح لنفس نوع الثانوية.");
             }
         }
 
         // Check Rate
         if (!($applicant->SEC_SCHOOL_RATE >= $offering->SEC_SCHOOL_ACCEPT_RATE)) {
-            $errCount++;
+            throw new Exception("معدل الثانوية للطالب ({$applicant->SEC_SCHOOL_RATE}%) أقل من الحد الأدنى المطلوب للقبول ({$offering->SEC_SCHOOL_ACCEPT_RATE}%).");
         }
 
         // Check Expire Date (Age of certificate)
-        // Note: For full accuracy, the 'sec_school_age_exceptions' table check would be here
         $maxAge = $offering->$maxAgeColumn ?? 10;
         $tillYear = date('Y') - $maxAge;
         if (intval($applicant->SEC_SCHOOL_YEAR) < $tillYear) {
-            $errCount++;
+            throw new Exception("سنة تخرج الطالب ({$applicant->SEC_SCHOOL_YEAR}) تتجاوز أقصى عمر مسموح به لشهادة الثانوية ({$maxAge} سنوات).");
         }
 
         // GS_MULTI_SYSTEMS_ONE_OFFER
@@ -259,7 +250,7 @@ class ApplicantRegistrationService
                 ->where('PROGRAM_IDENT', $offering->PROGRAM_IDENT)
                 ->count();
             if ($countSameProg > 0) {
-                $errCount++;
+                throw new Exception("لا يسمح بتسجيل نفس التخصص في أكثر من نظام دراسي.");
             }
         }
 
@@ -270,33 +261,34 @@ class ApplicantRegistrationService
                 ->where('STUDYTYPE_IDENT', '<>', $offering->STUDYTYPE_IDENT)
                 ->count();
             if ($countDiffSystem > 0) {
-                $errCount++;
+                throw new Exception("يجب أن تكون الرغبات في نفس النظام الدراسي الذي تم اختياره أولاً.");
             }
         }
 
         // GS_NY_GENERAL_SYSTEM
         if ($university && $university->GS_NY_GENERAL_SYSTEM == 0 && $offering->STUDYTYPE_IDENT == 1 && !$isYemeni) {
-            $errCount++;
+            throw new Exception("لا يسمح بتنسيق الطلاب غير اليمنيين في النظام العام.");
         }
-
-        return $errCount == 0;
     }
 
-    private function checkRegisterDate(Offering $offering): bool
+    private function checkRegisterDate(Offering $offering): void
     {
         $today = now()->format('Y-m-d');
         if ($offering->FROM_DATE && $offering->TO_DATE) {
-            return ($today <= $offering->TO_DATE) && ($today >= $offering->FROM_DATE);
+            if ($today > $offering->TO_DATE || $today < $offering->FROM_DATE) {
+                throw new Exception("تاريخ التنسيق لهذه الرغبة منتهي أو لم يبدأ بعد.");
+            }
         }
-        return true;
     }
 
-    private function checkApproving(Offering $offering): bool
+    private function checkApproving(Offering $offering): void
     {
-        return $offering->APPROVAL == 1;
+        if ($offering->APPROVAL != 1) {
+            throw new Exception("هذه الرغبة غير معتمدة حالياً.");
+        }
     }
 
-    private function checkGroupPaid(Applicant $applicant, Offering $offering): bool
+    private function checkGroupPaid(Applicant $applicant, Offering $offering): void
     {
         $appGroup = ApplicationGroup::where('UNID', $offering->UNID)
             ->where('OFFER_GROUP_IDENT', $offering->OFFER_GROUP_IDENT)
@@ -304,9 +296,8 @@ class ApplicantRegistrationService
             ->first();
 
         if ($appGroup && $appGroup->PAYMENT_FLAG > 0) {
-            return false;
+            throw new Exception("لقد تم السداد لهذه المجموعة مسبقاً، لا يمكن إضافة رغبات جديدة.");
         }
-        return true;
     }
 
     /**

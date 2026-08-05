@@ -61,11 +61,11 @@ trait HasCompositeKey
     public function resolveRouteBinding($value, $field = null)
     {
         if (isset($this->compositeKeys)) {
-            $parts = explode('_', $value);
+            $parts = explode('_', (string) $value);
             if (count($parts) === count($this->compositeKeys)) {
                 $query = $this->newQuery();
                 foreach ($this->compositeKeys as $index => $key) {
-                    $query->where($key, $parts[$index]);
+                    $query->where($this->getTable() . '.' . $key, $parts[$index]);
                 }
 
                 return $query->first();
@@ -80,11 +80,11 @@ trait HasCompositeKey
      */
     public function resolveRouteBindingQuery($query, $value, $field = null)
     {
-        if (isset($this->compositeKeys) && $field === null) {
-            $parts = explode('_', $value);
+        if (isset($this->compositeKeys)) {
+            $parts = explode('_', (string) $value);
             if (count($parts) === count($this->compositeKeys)) {
                 foreach ($this->compositeKeys as $index => $key) {
-                    $query->where($key, $parts[$index]);
+                    $query->where($this->getTable() . '.' . $key, $parts[$index]);
                 }
                 return $query;
             }

@@ -326,9 +326,8 @@ class ApplicantEditForm
                                                 ->downloadable()
                                                 ->formatStateUsing(function ($record) {
                                                     if (!$record) return null;
-                                                    $activeConnection = $record->getConnectionName() ?? config('database.default');
-                                                    $dbName = config("database.connections.{$activeConnection}.database");
-                                                    $baseDir = config("legacy_attachments.systems.{$dbName}", config("legacy_attachments.systems.{$activeConnection}", "uploads/{$activeConnection}"));
+                                                    $portalPrefix = \App\Helpers\PortalHelper::getPortalPrefix();
+                                                    $baseDir = "uploads/{$portalPrefix}";
 
                                                     // Check for JPG first, then PDF
                                                     $filePathJpg = rtrim($baseDir, '/') . '/images/attachments/secondary/' . $record->UNID . '-' . $record->APPLICANT_IDENT . '.jpg';
@@ -359,10 +358,8 @@ class ApplicantEditForm
                                                     if (!$state) return;
                                                     $file = is_array($state) ? reset($state) : $state;
                                                     if ($file instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile) {
-                                                        $activeConnection = $record->getConnectionName() ?? config('database.default');
-                                                        $dbName = config("database.connections.{$activeConnection}.database");
-                                                        $baseDir = config("legacy_attachments.systems.{$dbName}", config("legacy_attachments.systems.{$activeConnection}", "uploads/{$activeConnection}"));
-                                                        $path = rtrim($baseDir, '/') . '/images/attachments/secondary';
+                                                        $portalPrefix = \App\Helpers\PortalHelper::getPortalPrefix();
+                                                        $path = "uploads/{$portalPrefix}/images/attachments/secondary";
                                                         $extension = $file->getClientOriginalExtension();
                                                         $filename = "{$record->UNID}-{$record->APPLICANT_IDENT}.{$extension}";
                                                         $file->storeAs($path, $filename, config('legacy_attachments.disk', 'public'));

@@ -115,8 +115,8 @@ class HighSchoolDegreeBTypeForm
                                             ->imageEditor()
                                             ->downloadable()
                                             ->directory(function () {
-                                                $portalYear = PortalHelper::getActiveYear();
-                                                return "uploads/p{$portalYear}/images/attachments/secondary";
+                                                $portalPrefix = PortalHelper::getPortalPrefix();
+                                                return "uploads/{$portalPrefix}/images/attachments/secondary";
                                             })
                                             ->getUploadedFileNameForStorageUsing(function () {
                                                 return \Illuminate\Support\Str::random(15) . '.jpg';

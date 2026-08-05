@@ -231,7 +231,7 @@ class ApplicantsTable
                 SelectFilter::make('IS_CLEARING')
                     ->label('نوع الطالب (مقاصة / اعتيادي)')
                     ->options(\App\Enums\IsClearingType::class)
-                    ->visible($isClearing),
+                    ->hidden(),
                 SelectFilter::make('APPLICANT_TYPE')
                     ->label('نوع المتقدم')
                     ->options(config('p.default.applicant_type', [])),
@@ -286,6 +286,7 @@ class ApplicantsTable
                 ViewAction::make(),
                 EditAction::make(),
             ])
+            // ->recordUrl(fn (\Illuminate\Database\Eloquent\Model $record): string => \App\Filament\Resources\Applicants\ApplicantResource::getUrl('view', ['record' => $record]))
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),

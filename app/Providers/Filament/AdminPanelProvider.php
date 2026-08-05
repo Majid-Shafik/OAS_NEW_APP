@@ -40,7 +40,37 @@ class AdminPanelProvider extends PanelProvider
                 'danger' => Color::Red,
                 'warning' => Color::Orange,
                 'info' => '#36b4e2ff',
+            // ])
+            //             ->colors([
+                // اللون الأساسي للنظام: أزرق نيلي أنيق (رسمي ومريح للعين)
+                // 'primary' => '#4f46e5', // Indigo
+                
+                // لون النجاح (للأزرار الإيجابية مثل: إكمال الملف، الاعتماد، القبول)
+                // أخضر زمردي هادئ بدلاً من الليموني الفاقع
+                // 'success' => '#10b981', // Emerald Green
+                
+                // لون الخطر (للرفض، الحذف)
+                // أحمر قرمزي ناعم لا يزعج العين
+                // 'danger'  => '#e11d48', // Rose/Crimson
+                
+                // لون التحذير (للتحويل، التعديل)
+                // أصفر ذهبي دافئ
+                // 'warning' => '#f59e0b', // Warm Amber
+                
+                // لون المعلومات (للتحديث من الوزارة، الاستعراض)
+                // أزرق سماوي صافي
+                // 'info'    => '#0ea5e9', // Sky Blue
+                
+                // لون جديد إضافي: رمادي داكن للخيارات الثانوية أو الإلغاء
+                // 'gray'    => '#9aa08df1', // Slate Gray
+                
+                // الألوان المخصصة (Custom Colors)
+                'brand'   => '#0f172a', // Dark Navy / Brand
+                'purple'  => '#8b5cf6', // Violet
+                'teal'    => '#14b8a6', // Teal
+                'rose'    => '#f43f5e', // Rose
             ])
+
             ->spa(hasPrefetching: true) // تم إعادة التفعيل بعد إصلاح ترتيب TenantMiddleware
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
@@ -86,12 +116,13 @@ class AdminPanelProvider extends PanelProvider
             // ->collapsedSidebarWidth('2rem')
             // ->viteTheme('resources/css/filament/admin/theme.css')
             ->renderHook(
-                // PanelsRenderHook::SIDEBAR_NAV_START,
-                // PanelsRenderHook::TOPBAR_START,
                 PanelsRenderHook::GLOBAL_SEARCH_BEFORE,
                 fn(): string => Blade::render('@livewire(\'university-switcher\')'),
             )
-            // ->collapsedSidebarWidth('5rem')  // معطّل مؤقتاً للاختبار
+            ->renderHook(
+                PanelsRenderHook::GLOBAL_SEARCH_BEFORE,
+                fn(): string => Blade::render('@livewire(\'academic-year-switcher\')'),
+            )
             ->renderHook(
                 PanelsRenderHook::GLOBAL_SEARCH_BEFORE,
                 fn() => view('filament.user-info-topbar')
@@ -118,8 +149,15 @@ class AdminPanelProvider extends PanelProvider
                         'default' => 1,
                         'sm' => 2,
                     ]),
+                     
+
                 // FilamentLoggerPlugin::make(),
                 // ApiServicePlugin::make(),
-            ]);
+            ])
+            ->maxContentWidth(Width::Full)
+            ->sidebarCollapsibleOnDesktop()
+            ->sidebarWidth('18rem')
+            // ->collapsedSidebarWidth('2rem')
+            ->collapsedSidebarWidth('9rem');
     }
 }

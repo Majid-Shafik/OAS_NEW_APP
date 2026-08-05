@@ -54,15 +54,15 @@ class ApplicantResource extends Resource
             'رقم الجلوس' => $record->SEC_SCHOOL_SEATNO,
             'عام التخرج' => $record->SEC_SCHOOL_YEAR,
             'الهاتف' => $record->MOBILE_PHONE,
-            'الجامعة' => $record->university->U_NAME,
+            'الجامعة' => $record->university->U_NAME ?? '',
             // 'المحافظة/المديرية' => $record->PROVINCE . ' - ' . $record->TERRITORY,
         ];
     }
 
-    // public static function canCreate(): bool
-    // {
-    //     return session('selected_unid', 0) != 0;
-    // }
+    public static function getGlobalSearchResultUrl(Model $record): ?string
+    {
+        return $record->getProfileUrl();
+    }
 
     public static function form(Schema $schema): Schema
     {
@@ -80,6 +80,33 @@ class ApplicantResource extends Resource
     public static function table(Table $table): Table
     {
         return ApplicantsTable::configure($table);
+    }
+
+    public static function resolveRecordRouteBinding(int | string $key, ?\Closure $modifyQuery = null): ?Model
+    {
+        $query = static::getRecordRouteBindingEloquentQuery();
+
+        if ($modifyQuery) {
+            $query = $modifyQuery($query) ?? $query;
+        }
+
+        if (is_string($key) && str_contains($key, '_')) {
+            $parts = explode('_', $key);
+            $modelInstance = app(static::getModel());
+            $table = $modelInstance->getTable();
+
+            if (auth()->check() && auth()->user()->UNID == 0) {
+                $query->withoutGlobalScope(\App\Models\Scopes\UniversityScope::class);
+            }
+
+            return $query->where("{$table}.UNID", $parts[0])
+                ->where("{$table}.APPLICANT_IDENT", $parts[1])
+                ->first();
+        }
+
+        return app(static::getModel())
+            ->resolveRouteBindingQuery($query, $key, static::getRecordRouteKeyName())
+            ->first();
     }
 
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder

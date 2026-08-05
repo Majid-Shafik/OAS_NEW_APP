@@ -2,8 +2,10 @@
 
 namespace App\Filament\Resources\Applicants\Schemas;
 
+use App\Filament\Traits\HasMinistryRefreshAction;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
@@ -46,6 +48,13 @@ class ApplicantInfolist
                                 Tab::make('بيانات الثانوية')
                                     ->icon('heroicon-o-academic-cap')
                                     ->schema([
+                                        Actions::make([
+                                            HasMinistryRefreshAction::getApiRefreshAction('fetchApiTab')
+                                                ->button(),
+                                        ])
+                                        ->columnSpanFull()
+                                        ->alignEnd(),
+
                                         TextEntry::make('SEC_SCHOOL_YEAR')->label('سنة التخرج')->placeholder('-'),
                                         TextEntry::make('SEC_SCHOOL_TYPE')->label('نوع الثانوية')->formatStateUsing(fn($state) => \App\Models\ComboValue::getLabel(1, $state))->placeholder('-'),
                                         TextEntry::make('SEC_SCHOOL_NAME')->label('اسم المدرسة')->placeholder('-'),
@@ -73,6 +82,52 @@ class ApplicantInfolist
                                                 TextEntry::make('applicationsClearing.NO_STUDY_YEARS')->label('عدد سنوات الدراسة')->placeholder('-'),
                                                 TextEntry::make('applicationsClearing.MOVING_REASON')->label('سبب الانتقال')->placeholder('-')->columnSpanFull(),
                                             ])->columns(4)->columnSpanFull(),
+                                        
+                                        Fieldset::make('نتائج المراجعة')
+                                            ->schema([
+                                                \Filament\Infolists\Components\RepeatableEntry::make('review_results')
+                                                    ->label('')
+                                                    ->getStateUsing(function ($record) {
+                                                        if (!$record) return [];
+                                                        $results = [];
+                                                        $results[] = [
+                                                            'phase' => 'المراجعة الأولى',
+                                                            'reviewer' => $record->reviewBy?->USER_NAME ?? '-',
+                                                            'status' => $record->REVIEWED,
+                                                            'date' => $record->REVIEW_ON,
+                                                            'reason' => $record->REJECT_REASON ?? '-',
+                                                        ];
+                                                        $results[] = [
+                                                            'phase' => 'المراجعة الثانية',
+                                                            'reviewer' => $record->secondReviewedBy?->USER_NAME ?? '-',
+                                                            'status' => $record->SECOND_REVIEWED,
+                                                            'date' => $record->SECOND_REVIEWED_ON,
+                                                            'reason' => $record->SECOND_REJECT_REASON ?? '-',
+                                                        ];
+                                                        return $results;
+                                                    })
+                                                    ->schema([
+                                                        TextEntry::make('phase')->label('مرحلة المراجعة')->weight('bold'),
+                                                        TextEntry::make('reviewer')->label('المراجعة بواسطة'),
+                                                        TextEntry::make('status')
+                                                            ->label('نتيجة المراجعة')
+                                                            ->badge()
+                                                            ->formatStateUsing(fn ($state) => match ((int) $state) {
+                                                                1 => 'معتمد',
+                                                                2 => 'مرفوض',
+                                                                default => 'قيد المراجعة',
+                                                            })
+                                                            ->color(fn ($state) => match ((int) $state) {
+                                                                1 => 'success',
+                                                                2 => 'danger',
+                                                                default => 'warning',
+                                                            }),
+                                                        TextEntry::make('date')->label('تاريخ المراجعة')->dateTime('Y-m-d H:i')->placeholder('-'),
+                                                        TextEntry::make('reason')->label('سبب الرفض'),
+                                                    ])
+                                                    ->columns(5)
+                                                    ->columnSpanFull()
+                                            ])->columnSpanFull(),
                                     ]),
                                 Tab::make('التخصص المقبول')
                                     ->icon('heroicon-o-academic-cap')
@@ -96,14 +151,7 @@ class ApplicantInfolist
                                         TextEntry::make('APPROVED_ON')->label('تاريخ الاعتماد')->dateTime()->placeholder('-'),
                                         TextEntry::make('IMPORTED')->label('طريقة الإدخال')->translateFromConfig('imported')->placeholder('-'),
                                         IconEntry::make('EXPORTED')->label('مُصدّر')->boolean(),
-                                        IconEntry::make('REVIEWED')->label('تمت المراجعة')->boolean(),
-                                        TextEntry::make('reviewBy.USER_NAME')->label('المراجع')->placeholder('-'),
-                                        TextEntry::make('REVIEW_ON')->label('تاريخ المراجعة')->dateTime()->placeholder('-'),
-                                        TextEntry::make('REJECT_REASON')->label('سبب الرفض')->placeholder('-'),
-                                        IconEntry::make('SECOND_REVIEWED')->label('مراجعة ثانية')->boolean(),
-                                        TextEntry::make('secondReviewedBy.USER_NAME')->label('المراجع الثاني')->placeholder('-'),
-                                        TextEntry::make('SECOND_REVIEWED_ON')->label('تاريخ المراجعة الثانية')->dateTime()->placeholder('-'),
-                                        TextEntry::make('SECOND_REJECT_REASON')->label('سبب الرفض الثاني')->placeholder('-'),
+
                                     ])->columns(3),
 
                                 Tab::make('المرفقات')
@@ -114,9 +162,8 @@ class ApplicantInfolist
                                             ->label('')
                                             ->getStateUsing(function ($record) {
                                                 if (!$record) return [];
-                                                $activeConnection = $record->getConnectionName() ?? config('database.default');
-                                                $dbName = config("database.connections.{$activeConnection}.database");
-                                                $baseDir = config("legacy_attachments.systems.{$dbName}", config("legacy_attachments.systems.{$activeConnection}", "uploads/{$activeConnection}"));
+                                                $portalPrefix = \App\Helpers\PortalHelper::getPortalPrefix();
+                                                $baseDir = "uploads/{$portalPrefix}";
                                                 $disk = \Illuminate\Support\Facades\Storage::disk(config('legacy_attachments.disk', 'public'));
 
                                                 $attachments = [];

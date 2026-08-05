@@ -83,8 +83,8 @@ class HighSchoolDegreeBType extends Model
             if ($model->isDirty('SEC_SCHOOL_CERTIFICATE')) {
                 $oldBasename = $model->getOriginal('SEC_SCHOOL_CERTIFICATE');
                 if ($oldBasename) {
-                    $portalYear =  PortalHelper::getActiveYear();
-                    $path = "uploads/p{$portalYear}/images/attachments/secondary/{$oldBasename}.jpg";
+                    $portalPrefix = PortalHelper::getPortalPrefix();
+                    $path = "uploads/{$portalPrefix}/images/attachments/secondary/{$oldBasename}.jpg";
                     \Illuminate\Support\Facades\Storage::disk(config('legacy_attachments.disk', 'public'))->delete($path);
                 }
             }
@@ -92,8 +92,8 @@ class HighSchoolDegreeBType extends Model
 
         static::deleted(function ($model) {
             if ($model->SEC_SCHOOL_CERTIFICATE) {
-                $portalYear =  PortalHelper::getActiveYear();
-                $path = "uploads/p{$portalYear}/images/attachments/secondary/{$model->SEC_SCHOOL_CERTIFICATE}.jpg";
+                $portalPrefix = PortalHelper::getPortalPrefix();
+                $path = "uploads/{$portalPrefix}/images/attachments/secondary/{$model->SEC_SCHOOL_CERTIFICATE}.jpg";
                 \Illuminate\Support\Facades\Storage::disk(config('legacy_attachments.disk', 'public'))->delete($path);
             }
         });

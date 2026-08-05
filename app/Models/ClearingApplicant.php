@@ -7,6 +7,12 @@ use Illuminate\Database\Eloquent\Builder;
 class ClearingApplicant extends Applicant
 {
     protected $table = 'applicant';
+    // protected $primaryKey = ['UNID', 'APPLICANT_IDENT'];
+    public $incrementing = false;
+    // protected $keyType = 'array';
+
+    protected $IS_CLEARING=1;
+
 
     protected static function booted()
     {

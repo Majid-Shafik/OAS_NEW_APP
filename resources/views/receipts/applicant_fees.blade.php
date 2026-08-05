@@ -7,12 +7,50 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @media print {
+            @page {
+                size: A4 portrait;
+                margin: 5mm; /* تقليل حواف الصفحة لتوفير مساحة */
+            }
             .no-print {
-                display: none;
+                display: none !important;
             }
             body {
-                background: white;
+                background: white !important;
+                padding: 0 !important;
             }
+            #print-area {
+                padding: 0 !important;
+                box-shadow: none !important;
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+            /* تقليل المسافات والهوامش أثناء الطباعة */
+            .mb-8, .mb-6 { margin-bottom: 10px !important; }
+            .pb-4 { padding-bottom: 8px !important; }
+            .p-8 { padding: 10px !important; }
+            .p-4 { padding: 8px !important; }
+            .p-3 { padding: 6px !important; }
+            .p-2 { padding: 4px !important; }
+            
+            /* تصغير الخطوط والعناوين */
+            .text-3xl { font-size: 1.25rem !important; padding: 4px 16px !important; }
+            .text-xl { font-size: 1.1rem !important; }
+            .text-lg { font-size: 0.95rem !important; }
+            .font-bold { font-size: 0.9rem !important; }
+            .text-sm { font-size: 0.8rem !important; }
+            
+            /* تصغير الشعار */
+            img.w-24.h-24 {
+                width: 4rem !important;
+                height: 4rem !important;
+            }
+            
+            /* تصغير هوامش الجدول */
+            table th, table td {
+                padding: 4px !important;
+                font-size: 0.85rem !important;
+            }
+
             * {
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
