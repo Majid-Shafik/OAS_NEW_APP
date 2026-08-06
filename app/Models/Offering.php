@@ -6,7 +6,10 @@ use App\Traits\HasUniversityScope;
 use Awobaz\Compoships\Compoships;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use App\Observers\OfferingObserver;
 
+#[ObservedBy([OfferingObserver::class])]
 class Offering extends Model
 {
     use Compoships, HasFactory, HasUniversityScope;
