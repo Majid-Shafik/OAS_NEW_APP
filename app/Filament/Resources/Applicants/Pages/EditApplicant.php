@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Applicants\Pages;
 
 use App\Filament\Resources\Applicants\ApplicantResource;
+use App\Filament\Traits\HandlesApplicantAttachmentUploads;
 use App\Filament\Traits\HasMinistryRefreshAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
@@ -11,6 +12,7 @@ use Filament\Resources\Pages\EditRecord;
 class EditApplicant extends EditRecord
 {
     use HasMinistryRefreshAction;
+    use HandlesApplicantAttachmentUploads;
 
     protected static string $resource = ApplicantResource::class;
 
@@ -23,7 +25,12 @@ class EditApplicant extends EditRecord
             }
         }
 
-        return $data;
+        return $this->mutateApplicantAttachmentData($data);
+    }
+
+    protected function afterSave(): void
+    {
+        $this->syncApplicantAttachments();
     }
 
     protected function getHeaderActions(): array

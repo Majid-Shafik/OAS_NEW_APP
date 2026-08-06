@@ -678,218 +678,123 @@ class ApplicantForm
                                                     TextInput::make('IDENT_NO')->label('رقم الهوية'),
                                                     Toggle::make('YEMEN_NATIONAL')->label('جنسية يمنية')->default(true)->required()
                                                         ->disabled(fn(Get $get) => ($get('is_searched') && !$get('is_not_found')) || $get('is_hs_degree_b'))->dehydrated(),
-                                                    TextInput::make('EMAIL')->label('البريد الإلكتروني'),
-                                                    TextInput::make('MOBILE_PHONE')->label('رقم الهاتف')->tel()->required(),
-                                                    Select::make('BLOOD_GROUP')->label('فصيلة الدم')->options(\App\Models\ComboValue::getOptionsValuesByCode(8))->searchable(),
-
-                                                ]
-                                            ),
-
-                                        \Filament\Forms\Components\Repeater::make('clearing_attachments_list')
-                                            ->label('مرفقات المقاصة')
-                                            ->addActionLabel('إضافة مرفق جديد')
-                                            ->visible(fn(Get $get) => $get('IS_CLEARING') == 1)
-                                            ->schema([
-                                                \Filament\Forms\Components\Select::make('ATTACH_IDENT')
-                                                    ->label('نوع المرفق')
-                                                    ->options([
-                                                        3 => 'كشف درجات الطالب',
-                                                        4 => 'استمارة المقاصة',
-                                                        5 => 'صورة الاستثناء ان وجد',
-                                                    ])
-                                                    ->required()
-                                                    ->distinct()
-                                                    ->disableOptionsWhenSelectedInSiblingRepeaterItems(),
-                                                \Filament\Forms\Components\FileUpload::make('FILE_PATH')
-                                                    ->label('الملف')
-                                                    ->disk(config('legacy_attachments.disk', 'public'))
-                                                    ->acceptedFileTypes(['application/pdf'])
-                                                    ->maxSize(7500)
-                                                    ->required(),
+                                                        TextInput::make('EMAIL')->label('البريد الإلكتروني'),
+                                                        TextInput::make('MOBILE_PHONE')->label('رقم الهاتف')->tel()->required(),
+                                                        Select::make('BLOOD_GROUP')->label('فصيلة الدم')->options(\App\Models\ComboValue::getOptionsValuesByCode(8))->searchable(),
+                                                    ])->columns(4),
                                             ])
-                                            ->columns(2)
-                                            ->dehydrated(false)
-                                            ->afterStateHydrated(function ($component, $record, $set) {
-                                                if (!$record) return;
-                                                $attachments = [];
-                                                $activeConnection = $record->getConnectionName() ?? config('database.default');
-                                                $baseDir = config("legacy_attachments.systems.{$activeConnection}", "uploads/{$activeConnection}");
-                                                
-                                                $paths = [
-                                                    3 => '/images/attachments/grades/',
-                                                    4 => '/images/attachments/clearing/',
-                                                    5 => '/images/attachments/exceptions/',
-                                                ];
-                                                
-                                                foreach ($paths as $ident => $path) {
-                                                    $filePath = rtrim($baseDir, '/') . $path . $record->UNID . '-' . $record->APPLICANT_IDENT . '.pdf';
-                                                    if (\Illuminate\Support\Facades\Storage::disk(config('legacy_attachments.disk', 'public'))->exists($filePath)) {
-                                                        $attachments[(string)$ident] = [
-                                                            'ATTACH_IDENT' => $ident,
-                                                            'FILE_PATH' => $filePath,
-                                                        ];
-                                                    }
-                                                }
-                                                $set('clearing_attachments_list', $attachments);
-                                            })
-                                            ->saveRelationshipsUsing(function ($record, $state) {
-                                                if (!is_array($state)) return;
-                                                
-                                                $activeConnection = $record->getConnectionName() ?? config('database.default');
-                                                $baseDir = config("legacy_attachments.systems.{$activeConnection}", "uploads/{$activeConnection}");
-                                                
-                                                $paths = [
-                                                    3 => '/images/attachments/grades',
-                                                    4 => '/images/attachments/clearing',
-                                                    5 => '/images/attachments/exceptions',
-                                                ];
-                                                
-                                                $keptIdents = [];
-                                                
-                                                foreach ($state as $item) {
-                                                    $ident = $item['ATTACH_IDENT'] ?? null;
-                                                    $file = $item['FILE_PATH'] ?? null;
-                                                    if (!$ident || !$file) continue;
-                                                    
-                                                    $keptIdents[] = $ident;
-                                                    $file = is_array($file) ? reset($file) : $file;
-                                                    
-                                                    if ($file instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile) {
-                                                        $path = rtrim($baseDir, '/') . $paths[$ident];
-                                                        $filename = "{$record->UNID}-{$record->APPLICANT_IDENT}.pdf";
-                                                        $file->storeAs($path, $filename, config('legacy_attachments.disk', 'public'));
-                                                        
-                                                        \App\Models\ApplicantAttachment::updateOrCreate(
-                                                            ['UNID' => $record->UNID, 'APPLICANT_IDENT' => $record->APPLICANT_IDENT, 'ATTACH_IDENT' => $ident],
-                                                            []
-                                                        );
-                                                    }
-                                                }
-                                                
-                                                $allPossible = [3, 4, 5];
-                                                $toRemove = array_diff($allPossible, $keptIdents);
-                                                
-                                                foreach ($toRemove as $identToRemove) {
-                                                    \App\Models\ApplicantAttachment::where('UNID', $record->UNID)
-                                                        ->where('APPLICANT_IDENT', $record->APPLICANT_IDENT)
-                                                        ->where('ATTACH_IDENT', $identToRemove)
-                                                        ->delete();
-                                                        
-                                                    $filePath = rtrim($baseDir, '/') . $paths[$identToRemove] . "/{$record->UNID}-{$record->APPLICANT_IDENT}.pdf";
-                                                    if (\Illuminate\Support\Facades\Storage::disk(config('legacy_attachments.disk', 'public'))->exists($filePath)) {
-                                                        \Illuminate\Support\Facades\Storage::disk(config('legacy_attachments.disk', 'public'))->delete($filePath);
-                                                    }
-                                                }
-                                            })->columnSpanFull(),
-
-
-
-                                    ])->columns(3),
+                                            ->columns(2),
 
                                 Step::make('بيانات التنسيق')
                                     ->description('اختيار الرغبة / التخصص المطلوب التنسيق فيه')
                                     ->icon('heroicon-o-academic-cap')
-                                    ->hidden(fn(Get $get) => 
+                                    ->hidden(fn(Get $get, $livewire) => 
                                         $get('hs_degree_not_approved') === true || 
                                         $get('applicant_exists') === true || 
-                                        $get('is_not_found') === true ||
-                                        $get('is_confirmed') === true
+                                        $get('is_not_found') === true || 
+                                        $get('is_confirmed') === true ||
+                                        (($get('IS_CLEARING') instanceof \App\Enums\IsClearingType ? $get('IS_CLEARING')->value == 1 : in_array($get('IS_CLEARING'), [1, '1'])) || str_contains(class_basename($livewire), 'Clearing'))
                                     )
                                     ->schema(OfferingFields::get(includeUniversity: false, dehydrated: false))
                                     ->columns(2),
 
                                 Step::make('بيانات المقاصة')
-                                    ->description('تحديد نوع المتقدم والقبول في الكلية والتخصص')
+                                    ->description('بيانات المقاصاة والجامعة والتخصص السابق')
                                     ->icon('heroicon-o-document-check')
                                     ->visible(fn(Get $get, $livewire) => 
                                         $get('hs_degree_not_approved') !== true && 
+                                        $get('applicant_exists') !== true && 
                                         (($get('IS_CLEARING') instanceof \App\Enums\IsClearingType ? $get('IS_CLEARING')->value == 1 : in_array($get('IS_CLEARING'), [1, '1'])) || str_contains(class_basename($livewire), 'Clearing'))
                                     )
-                                    ->schema(function (Get $get) {
-                                        if ($get('is_not_found')) {
-                                            return [
-                                                TextEntry::make('type_b_notice')
-                                                    ->label('')
-                                                    ->state(new \Illuminate\Support\HtmlString('
-                                                        <div class="p-6 bg-blue-50 border-r-4 border-blue-500 rounded-lg shadow-sm" style="direction: rtl;">
-                                                            <div class="flex items-center mb-4">
-                                                                <svg class="w-8 h-8 text-blue-600 ml-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                                                <h3 class="text-xl font-bold text-blue-800">حفظ كشهادة (نوع B)</h3>
-                                                            </div>
-                                                            <p class="text-blue-700 text-lg mb-2">
-                                                                نظراً لعدم وجود بيانات هذا الطالب في النظام أو في بيانات الوزارة، سيتم حفظ هذه البيانات كشهادة ثانوية من النوع B.
-                                                            </p>
-                                                            <p class="text-blue-700 text-lg font-bold">
-                                                                يرجى النقر على زر <span class="bg-primary-600 text-white px-2 py-1 rounded text-sm mx-1">تأكيد / إنشاء</span> بالأسفل لحفظ البيانات. سيتم بعد ذلك نقلك تلقائياً إلى شاشة عرض ملف الطالب لمراجعة بياناته واعتمادها حتى تستطيع تسجيله في تخصص.
-                                                            </p>
-                                                        </div>
-                                                    ')),
-                                            ];
-                                        }
-                                        return [
-                                             Fieldset::make('applicationsClearing')
-                                                ->relationship('applicationsClearing')
-                                                ->label('بيانات الجامعة والتخصص التي جاء منها (المقاصاة)')
-                                                ->visible(fn (Get $get, $livewire) => ($get('IS_CLEARING') instanceof \App\Enums\IsClearingType ? $get('IS_CLEARING')->value == 1 : in_array($get('IS_CLEARING'), [1, '1'])) || str_contains(class_basename($livewire), 'Clearing'))
-                                                ->schema([
-                                                    Select::make('FROM_COUNTRY_IDENT')
-                                                        ->label('الدولة القادم منها')
-                                                        ->options(fn() => Country::withoutGlobalScopes()->get()->mapWithKeys(fn($c) => [$c->COUNTRY_IDENT => (string) ($c->COUNTRY_NAME ?? $c->COUNTRY_IDENT)]))
-                                                        ->getOptionLabelUsing(fn ($value) => (string) (\App\Models\Country::withoutGlobalScopes()->find($value)?->COUNTRY_NAME ?? $value))
-                                                        ->searchable()
-                                                        ->required(),
-                                                    
-                                                    Select::make('FROM_UNIV_IDENT')
-                                                        ->label('الجامعة القادم منها')
-                                                        ->options(fn() => \App\Models\University::withoutGlobalScopes()->clearing()->get()->mapWithKeys(fn($u) => [$u->UNID => (string) ($u->U_NAME ?? $u->UNID)]))
-                                                        ->getOptionLabelUsing(fn ($value) => (string) (\App\Models\University::withoutGlobalScopes()->find($value)?->U_NAME ?? $value))
-                                                        ->searchable()
-                                                        ->live()
-                                                        ->afterStateUpdated(function (\Filament\Schemas\Components\Utilities\Set $set, $state) {
-                                                            $set('FROM_FACULTY_IDENT', null);
-                                                            $set('FROM_PROGRAM_IDENT', null);
-                                                        })
-                                                        ->required(),
-                                
-                                                    Select::make('FROM_FACULTY_IDENT')
-                                                        ->label('الكلية القادم منها')
-                                                        ->options(function (\Filament\Schemas\Components\Utilities\Get $get) {
-                                                            $unid = $get('FROM_UNIV_IDENT');
-                                                            if (!$unid) return [];
-                                                            return \App\Models\Faculty::withoutGlobalScopes()->where('UNID', $unid)->get()
-                                                                ->mapWithKeys(fn($f) => [$f->FACULTY_IDENT => (string) ($f->FACULTY_NAME ?? $f->FACULTY_IDENT)]);
-                                                        })
-                                                        ->getOptionLabelUsing(fn ($value, \Filament\Schemas\Components\Utilities\Get $get) => (string) (\App\Models\Faculty::withoutGlobalScopes()->where('UNID', $get('FROM_UNIV_IDENT'))->where('FACULTY_IDENT', $value)->first()?->FACULTY_NAME ?? $value))
-                                                        ->searchable()
-                                                        ->live()
-                                                        ->afterStateUpdated(function (\Filament\Schemas\Components\Utilities\Set $set, \Filament\Schemas\Components\Utilities\Get $get, $state) {
-                                                            $set('FROM_PROGRAM_IDENT', null);
-                                                        })
-                                                        ->required(),
-                                
-                                                     Select::make('FROM_PROGRAM_IDENT')
-                                                        ->label('التخصص القادم منه')
-                                                        ->options(function (\Filament\Schemas\Components\Utilities\Get $get) {
-                                                            $unid = $get('FROM_UNIV_IDENT');
-                                                            $faculty = $get('FROM_FACULTY_IDENT');
-                                                            if (!$unid || !$faculty) return [];
-                                                            return \App\Models\Program::where('UNID', $unid)->where('FACULTY_IDENT', $faculty)->get()
-                                                                ->mapWithKeys(fn($p) => [$p->PROGRAM_IDENT => (string) ($p->PROGRAM_NAME ?? $p->PROGRAM_IDENT)]);
-                                                        })
-                                                        ->getOptionLabelUsing(fn ($value, \Filament\Schemas\Components\Utilities\Get $get) => (string) (\App\Models\Program::where('UNID', $get('FROM_UNIV_IDENT'))->where('FACULTY_IDENT', $get('FROM_FACULTY_IDENT'))->where('PROGRAM_IDENT', $value)->first()?->PROGRAM_NAME ?? $value))
-                                                        ->searchable()
-                                                        ->live()
-                                                        ->required(),
-                                                     TextInput::make('NO_STUDY_YEARS')->label('عدد سنوات الدراسة')->numeric(),
-                                                     TextInput::make('STUDY_LEVEL')->label('مستوى الدراسة')->numeric(),
-                                                     TextInput::make('FROM_YEAR')->label('عام الانضمام')->numeric(),
-                                                     Textarea::make('MOVING_REASON')->label('سبب الانتقال')->required()->columnSpanFull(),
-                                                ])
-                                                ->columns(4)
-                                                ->columnSpanFull(),
-                                        ];
-                                    })
+                                    ->schema([
+                                        Fieldset::make('applicationsClearing')
+                                            ->relationship('applicationsClearing')
+                                            ->label('بيانات الجامعة والتخصص التي جاء منها (المقاصاة)')
+                                            ->schema([
+                                                Select::make('FROM_COUNTRY_IDENT')
+                                                    ->label('الدولة القادم منها')
+                                                    ->options(fn() => Country::withoutGlobalScopes()->get()->mapWithKeys(fn($c) => [$c->COUNTRY_IDENT => (string) ($c->COUNTRY_NAME ?? $c->COUNTRY_IDENT)]))
+                                                    ->getOptionLabelUsing(fn ($value) => (string) (\App\Models\Country::withoutGlobalScopes()->find($value)?->COUNTRY_NAME ?? $value))
+                                                    ->searchable()
+                                                    ->required(),
+                                                
+                                                Select::make('FROM_UNIV_IDENT')
+                                                    ->label('الجامعة القادم منها')
+                                                    ->options(fn() => \App\Models\University::withoutGlobalScopes()->clearing()->get()->mapWithKeys(fn($u) => [$u->UNID => (string) ($u->U_NAME ?? $u->UNID)]))
+                                                    ->getOptionLabelUsing(fn ($value) => (string) (\App\Models\University::withoutGlobalScopes()->find($value)?->U_NAME ?? $value))
+                                                    ->searchable()
+                                                    ->live()
+                                                    ->afterStateUpdated(function (\Filament\Schemas\Components\Utilities\Set $set, $state) {
+                                                        $set('FROM_FACULTY_IDENT', null);
+                                                        $set('FROM_PROGRAM_IDENT', null);
+                                                    })
+                                                    ->required(),
+                            
+                                                Select::make('FROM_FACULTY_IDENT')
+                                                    ->label('الكلية القادم منها')
+                                                    ->options(function (\Filament\Schemas\Components\Utilities\Get $get) {
+                                                        $unid = $get('FROM_UNIV_IDENT');
+                                                        if (!$unid) return [];
+                                                        return \App\Models\Faculty::withoutGlobalScopes()->where('UNID', $unid)->get()
+                                                            ->mapWithKeys(fn($f) => [$f->FACULTY_IDENT => (string) ($f->FACULTY_NAME ?? $f->FACULTY_IDENT)]);
+                                                    })
+                                                    ->getOptionLabelUsing(fn ($value, \Filament\Schemas\Components\Utilities\Get $get) => (string) (\App\Models\Faculty::withoutGlobalScopes()->where('UNID', $get('FROM_UNIV_IDENT'))->where('FACULTY_IDENT', $value)->first()?->FACULTY_NAME ?? $value))
+                                                    ->searchable()
+                                                    ->live()
+                                                    ->afterStateUpdated(function (\Filament\Schemas\Components\Utilities\Set $set, \Filament\Schemas\Components\Utilities\Get $get, $state) {
+                                                        $set('FROM_PROGRAM_IDENT', null);
+                                                    })
+                                                    ->required(),
+                            
+                                                Select::make('FROM_PROGRAM_IDENT')
+                                                    ->label('التخصص القادم منه')
+                                                    ->options(function (\Filament\Schemas\Components\Utilities\Get $get) {
+                                                        $unid = $get('FROM_UNIV_IDENT');
+                                                        $faculty = $get('FROM_FACULTY_IDENT');
+                                                        if (!$unid || !$faculty) return [];
+                                                        return \App\Models\Program::withoutGlobalScopes()->where('UNID', $unid)->where('FACULTY_IDENT', $faculty)->get()
+                                                            ->mapWithKeys(fn($p) => [$p->PROGRAM_IDENT => (string) ($p->PROGRAM_NAME ?? $p->PROGRAM_IDENT)]);
+                                                    })
+                                                    ->getOptionLabelUsing(fn ($value, \Filament\Schemas\Components\Utilities\Get $get) => (string) (\App\Models\Program::withoutGlobalScopes()->where('UNID', $get('FROM_UNIV_IDENT'))->where('FACULTY_IDENT', $get('FROM_FACULTY_IDENT'))->where('PROGRAM_IDENT', $value)->first()?->PROGRAM_NAME ?? $value))
+                                                    ->searchable()
+                                                    ->live()
+                                                    ->required(),
+                                                TextInput::make('NO_STUDY_YEARS')->label('عدد سنوات الدراسة')->numeric(),
+                                                TextInput::make('STUDY_LEVEL')->label('مستوى الدراسة')->numeric(),
+                                                TextInput::make('FROM_YEAR')->label('عام الانضمام')->numeric(),
+                                                Textarea::make('MOVING_REASON')->label('سبب الانتقال')->required()->columnSpanFull(),
+                                            ])
+                                            ->columns(4)
+                                            ->columnSpanFull(),
+                                    ])
                                     ->columns(2),
+
+                                Step::make('تأكيد حفظ كشهادة نوع B')
+                                    ->description('مراجعة واعتماد بيانات الشهادة غير الموجودة بالوزارة')
+                                    ->icon('heroicon-o-shield-exclamation')
+                                    ->visible(fn(Get $get, $livewire) => 
+                                        $get('is_not_found') === true && 
+                                        $get('applicant_exists') !== true && 
+                                        !(($get('IS_CLEARING') instanceof \App\Enums\IsClearingType ? $get('IS_CLEARING')->value == 1 : in_array($get('IS_CLEARING'), [1, '1'])) || str_contains(class_basename($livewire), 'Clearing'))
+                                    )
+                                    ->schema([
+                                        TextEntry::make('type_b_notice')
+                                            ->label('')
+                                            ->state(new \Illuminate\Support\HtmlString('
+                                                <div class="p-6 bg-blue-50 border-r-4 border-blue-500 rounded-lg shadow-sm" style="direction: rtl;">
+                                                    <div class="flex items-center mb-4">
+                                                        <svg class="w-8 h-8 text-blue-600 ml-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                                        <h3 class="text-xl font-bold text-blue-800">حفظ كشهادة (نوع B)</h3>
+                                                    </div>
+                                                    <p class="text-blue-700 text-lg mb-2">
+                                                        نظراً لعدم وجود بيانات هذا الطالب في النظام أو في بيانات الوزارة، سيتم حفظ هذه البيانات كشهادة ثانوية من النوع B.
+                                                    </p>
+                                                    <p class="text-blue-700 text-lg font-bold">
+                                                        يرجى النقر على زر <span class="bg-primary-600 text-white px-2 py-1 rounded text-sm mx-1">تأكيد / إنشاء</span> بالأسفل لحفظ البيانات. سيتم بعد ذلك نقلك تلقائياً إلى شاشة عرض ملف الطالب لمراجعة بياناته واعتمادها حتى تستطيع تسجيله في تخصص.
+                                                    </p>
+                                                </div>
+                                            ')),
+                                    ]),
                             ])
                                 ->columnSpan('full'),
                         ])->columnSpan(12),

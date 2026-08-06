@@ -311,191 +311,194 @@ class ApplicantEditForm
                                     Tab::make('المرفقات')
                                         ->icon('heroicon-o-paper-clip')
                                         ->visible(function (Get $get, ?\Illuminate\Database\Eloquent\Model $record) {
-                                            $isClearing = $record ? $record->IS_CLEARING?->value === 1 : $get('IS_CLEARING') == 1;
-                                            return $isClearing || $get('APPLICANT_TYPE') == 2;
+                                            $isClearing = $record ? ($record->IS_CLEARING instanceof \App\Enums\IsClearingType ? $record->IS_CLEARING->value === 1 : in_array($record->IS_CLEARING, [1, '1'])) : in_array($get('IS_CLEARING'), [1, '1']);
+                                            return $isClearing || $get('APPLICANT_TYPE') == 2 || ($record && $record->APPLICANT_TYPE == 2);
                                         })
                                         ->schema([
-                                            FileUpload::make('secondary_certificate')
-                                                ->label('صورة شهادة الثانوية')
-                                                ->columnSpanFull()
-                                                ->disk(config('legacy_attachments.disk', 'public'))
-                                                ->acceptedFileTypes(['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'])
-                                                ->maxSize(1500)
-                                                ->openable()
-                                                ->imageEditor()
-                                                ->downloadable()
-                                                ->formatStateUsing(function ($record) {
-                                                    if (!$record) return null;
-                                                    $portalPrefix = \App\Helpers\PortalHelper::getPortalPrefix();
-                                                    $baseDir = "uploads/{$portalPrefix}";
-
-                                                    // Check for JPG first, then PDF
-                                                    $filePathJpg = rtrim($baseDir, '/') . '/images/attachments/secondary/' . $record->UNID . '-' . $record->APPLICANT_IDENT . '.jpg';
-                                                    $filePathPdf = rtrim($baseDir, '/') . '/images/attachments/secondary/' . $record->UNID . '-' . $record->APPLICANT_IDENT . '.pdf';
-
-                                                    if (\Illuminate\Support\Facades\Storage::disk(config('legacy_attachments.disk', 'public'))->exists($filePathJpg)) {
-                                                        return [$filePathJpg];
-                                                    }
-                                                    if (\Illuminate\Support\Facades\Storage::disk(config('legacy_attachments.disk', 'public'))->exists($filePathPdf)) {
-                                                        return [$filePathPdf];
-                                                    }
-
-                                                    $degreeB = \App\Models\HighSchoolDegreeBType::where('UNID', $record->UNID)
-                                                        ->where('SEC_SCHOOL_SEATNO', $record->SEC_SCHOOL_SEATNO)
-                                                        ->where('SEC_SCHOOL_YEAR', $record->SEC_SCHOOL_YEAR)
-                                                        ->first();
-                                                    if ($degreeB && $degreeB->SEC_SCHOOL_CERTIFICATE) {
-                                                        $typeB_jpgPath = rtrim($baseDir, '/') . '/images/attachments/secondary/' . $degreeB->SEC_SCHOOL_CERTIFICATE . '.jpg';
-                                                        if (\Illuminate\Support\Facades\Storage::disk(config('legacy_attachments.disk', 'public'))->exists($typeB_jpgPath)) {
-                                                            return [$typeB_jpgPath];
-                                                        }
-                                                    }
-
-                                                    return [];
+                                            Section::make('مرفقات طالب المقاصاة')
+                                                ->description('يرجى إرفاق المستندات المطلوبة الخاصة بطلب المقاصاة بصيغة PDF')
+                                                ->visible(function (Get $get, ?\Illuminate\Database\Eloquent\Model $record) {
+                                                    return $record ? ($record->IS_CLEARING instanceof \App\Enums\IsClearingType ? $record->IS_CLEARING->value === 1 : in_array($record->IS_CLEARING, [1, '1'])) : in_array($get('IS_CLEARING'), [1, '1']);
                                                 })
-                                                ->dehydrated(false)
-                                                ->saveRelationshipsUsing(function (\Illuminate\Database\Eloquent\Model $record, $state) {
-                                                    if (!$state) return;
-                                                    $file = is_array($state) ? reset($state) : $state;
-                                                    if ($file instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile) {
-                                                        $portalPrefix = \App\Helpers\PortalHelper::getPortalPrefix();
-                                                        $path = "uploads/{$portalPrefix}/images/attachments/secondary";
-                                                        $extension = $file->getClientOriginalExtension();
-                                                        $filename = "{$record->UNID}-{$record->APPLICANT_IDENT}.{$extension}";
-                                                        $file->storeAs($path, $filename, config('legacy_attachments.disk', 'public'));
-                                                        \App\Models\ApplicantAttachment::updateOrCreate(
-                                                            ['UNID' => $record->UNID, 'APPLICANT_IDENT' => $record->APPLICANT_IDENT, 'ATTACH_IDENT' => 2],
-                                                            []
-                                                        );
-                                                    }
-                                                })
+                                                ->schema([
+                                                    Grid::make(3)->schema([
+                                                        FileUpload::make('clearing_attachment_grades')
+                                                            ->label('كشف درجات الطالب (مرفق إجباري)')
+                                                            ->acceptedFileTypes(['application/pdf'])
+                                                            ->disk(config('legacy_attachments.disk', 'public'))
+                                                            ->directory(fn ($record) => "uploads/" . \App\Helpers\PortalHelper::getPortalPrefix() . "/images/attachments/grades")
+                                                            ->getUploadedFileNameForStorageUsing(fn ($record) => "{$record->UNID}-{$record->APPLICANT_IDENT}.pdf")
+                                                            ->maxSize(7500)
+                                                            ->openable()
+                                                            ->downloadable()
+                                                            ->formatStateUsing(function ($record) {
+                                                                if (!$record) return null;
+                                                                $portalPrefix = \App\Helpers\PortalHelper::getPortalPrefix();
+                                                                $path = "uploads/{$portalPrefix}/images/attachments/grades/{$record->UNID}-{$record->APPLICANT_IDENT}.pdf";
+                                                                return \Illuminate\Support\Facades\Storage::disk(config('legacy_attachments.disk', 'public'))->exists($path) ? $path : null;
+                                                            })
+                                                            ->deleteUploadedFileUsing(function ($file, $record) {
+                                                                if (!$record) return;
+                                                                $portalPrefix = \App\Helpers\PortalHelper::getPortalPrefix();
+                                                                $path = "uploads/{$portalPrefix}/images/attachments/grades/{$record->UNID}-{$record->APPLICANT_IDENT}.pdf";
+                                                                $disk = \Illuminate\Support\Facades\Storage::disk(config('legacy_attachments.disk', 'public'));
+                                                                if ($disk->exists($path)) {
+                                                                    $disk->delete($path);
+                                                                }
+                                                                \App\Models\ApplicantAttachment::where('UNID', $record->UNID)
+                                                                    ->where('APPLICANT_IDENT', $record->APPLICANT_IDENT)
+                                                                    ->where('ATTACH_IDENT', 3)
+                                                                    ->delete();
+                                                            })
+                                                            ->required(function (Get $get, ?\Illuminate\Database\Eloquent\Model $record) {
+                                                                if (!$record) return true;
+                                                                $portalPrefix = \App\Helpers\PortalHelper::getPortalPrefix();
+                                                                $path = "uploads/{$portalPrefix}/images/attachments/grades/{$record->UNID}-{$record->APPLICANT_IDENT}.pdf";
+                                                                return !\Illuminate\Support\Facades\Storage::disk(config('legacy_attachments.disk', 'public'))->exists($path);
+                                                            }),
+
+                                                        FileUpload::make('clearing_attachment_form')
+                                                            ->label('استمارة المقاصاة (مرفق إجباري)')
+                                                            ->acceptedFileTypes(['application/pdf'])
+                                                            ->disk(config('legacy_attachments.disk', 'public'))
+                                                            ->directory(fn ($record) => "uploads/" . \App\Helpers\PortalHelper::getPortalPrefix() . "/images/attachments/clearing")
+                                                            ->getUploadedFileNameForStorageUsing(fn ($record) => "{$record->UNID}-{$record->APPLICANT_IDENT}.pdf")
+                                                            ->maxSize(7500)
+                                                            ->openable()
+                                                            ->downloadable()
+                                                            ->formatStateUsing(function ($record) {
+                                                                if (!$record) return null;
+                                                                $portalPrefix = \App\Helpers\PortalHelper::getPortalPrefix();
+                                                                $path = "uploads/{$portalPrefix}/images/attachments/clearing/{$record->UNID}-{$record->APPLICANT_IDENT}.pdf";
+                                                                return \Illuminate\Support\Facades\Storage::disk(config('legacy_attachments.disk', 'public'))->exists($path) ? $path : null;
+                                                            })
+                                                            ->deleteUploadedFileUsing(function ($file, $record) {
+                                                                if (!$record) return;
+                                                                $portalPrefix = \App\Helpers\PortalHelper::getPortalPrefix();
+                                                                $path = "uploads/{$portalPrefix}/images/attachments/clearing/{$record->UNID}-{$record->APPLICANT_IDENT}.pdf";
+                                                                $disk = \Illuminate\Support\Facades\Storage::disk(config('legacy_attachments.disk', 'public'));
+                                                                if ($disk->exists($path)) {
+                                                                    $disk->delete($path);
+                                                                }
+                                                                \App\Models\ApplicantAttachment::where('UNID', $record->UNID)
+                                                                    ->where('APPLICANT_IDENT', $record->APPLICANT_IDENT)
+                                                                    ->where('ATTACH_IDENT', 4)
+                                                                    ->delete();
+                                                            })
+                                                            ->required(function (Get $get, ?\Illuminate\Database\Eloquent\Model $record) {
+                                                                if (!$record) return true;
+                                                                $portalPrefix = \App\Helpers\PortalHelper::getPortalPrefix();
+                                                                $path = "uploads/{$portalPrefix}/images/attachments/clearing/{$record->UNID}-{$record->APPLICANT_IDENT}.pdf";
+                                                                return !\Illuminate\Support\Facades\Storage::disk(config('legacy_attachments.disk', 'public'))->exists($path);
+                                                            }),
+
+                                                        FileUpload::make('clearing_attachment_exception')
+                                                            ->label('صورة الاستثناء إن وجد (مرفق اختياري)')
+                                                            ->acceptedFileTypes(['application/pdf'])
+                                                            ->disk(config('legacy_attachments.disk', 'public'))
+                                                            ->directory(fn ($record) => "uploads/" . \App\Helpers\PortalHelper::getPortalPrefix() . "/images/attachments/exceptions")
+                                                            ->getUploadedFileNameForStorageUsing(fn ($record) => "{$record->UNID}-{$record->APPLICANT_IDENT}.pdf")
+                                                            ->maxSize(7500)
+                                                            ->openable()
+                                                            ->downloadable()
+                                                            ->formatStateUsing(function ($record) {
+                                                                if (!$record) return null;
+                                                                $portalPrefix = \App\Helpers\PortalHelper::getPortalPrefix();
+                                                                $path = "uploads/{$portalPrefix}/images/attachments/exceptions/{$record->UNID}-{$record->APPLICANT_IDENT}.pdf";
+                                                                return \Illuminate\Support\Facades\Storage::disk(config('legacy_attachments.disk', 'public'))->exists($path) ? $path : null;
+                                                            })
+                                                            ->deleteUploadedFileUsing(function ($file, $record) {
+                                                                if (!$record) return;
+                                                                $portalPrefix = \App\Helpers\PortalHelper::getPortalPrefix();
+                                                                $path = "uploads/{$portalPrefix}/images/attachments/exceptions/{$record->UNID}-{$record->APPLICANT_IDENT}.pdf";
+                                                                $disk = \Illuminate\Support\Facades\Storage::disk(config('legacy_attachments.disk', 'public'));
+                                                                if ($disk->exists($path)) {
+                                                                    $disk->delete($path);
+                                                                }
+                                                                \App\Models\ApplicantAttachment::where('UNID', $record->UNID)
+                                                                    ->where('APPLICANT_IDENT', $record->APPLICANT_IDENT)
+                                                                    ->where('ATTACH_IDENT', 5)
+                                                                    ->delete();
+                                                            }),
+                                                    ]),
+                                                ]),
+
+                                            Section::make('شهادة الثانوية العامة')
                                                 ->visible(function (Get $get, ?\Illuminate\Database\Eloquent\Model $record) {
                                                     if ($get('APPLICANT_TYPE') == 1) return false;
-                                                    $isClearing = $record ? $record->IS_CLEARING?->value === 1 : $get('IS_CLEARING') == 1;
-                                                    return $get('APPLICANT_TYPE') == 2 || $isClearing;
+                                                    $isClearing = $record ? ($record->IS_CLEARING instanceof \App\Enums\IsClearingType ? $record->IS_CLEARING->value === 1 : in_array($record->IS_CLEARING, [1, '1'])) : in_array($get('IS_CLEARING'), [1, '1']);
+                                                    return $get('APPLICANT_TYPE') == 2 || $isClearing || ($record && $record->APPLICANT_TYPE == 2);
                                                 })
-                                                ->required(function (Get $get, ?\Illuminate\Database\Eloquent\Model $record) {
-                                                    if ($get('APPLICANT_TYPE') == 1) return false;
-                                                    $isClearing = $record ? $record->IS_CLEARING?->value === 1 : $get('IS_CLEARING') == 1;
-                                                    if ($get('is_hs_degree_b')) {
-                                                        return false; // Not required if already pulled from Type B database
-                                                    }
-                                                    if ($get('is_searched') && !$get('is_not_found')) {
-                                                        return false;
-                                                    }
-                                                    return $get('APPLICANT_TYPE') == 2 || $isClearing;
-                                                }),
-                                            Repeater::make('clearing_attachments_list')
-                                                ->label('مرفقات المقاصة')
-                                                ->addActionLabel('إضافة مرفق جديد')
-                                                ->visible(fn(Get $get, ?\Illuminate\Database\Eloquent\Model $record) => ($record ? $record->IS_CLEARING?->value === 1 : $get('IS_CLEARING') == 1))
                                                 ->schema([
-                                                    Select::make('ATTACH_IDENT')
-                                                        ->label('نوع المرفق')
-                                                        ->options([
-                                                            3 => 'كشف درجات الطالب',
-                                                            4 => 'استمارة المقاصة',
-                                                            5 => 'صورة الاستثناء ان وجد',
-                                                        ])
-                                                        ->required()
-                                                        ->distinct()
-                                                        ->disableOptionsWhenSelectedInSiblingRepeaterItems(),
-                                                    FileUpload::make('FILE_PATH')
-                                                        ->label('الملف')
-                                                        ->openable()
+                                                    FileUpload::make('secondary_certificate')
+                                                        ->label('صورة شهادة الثانوية')
+                                                        ->columnSpanFull()
                                                         ->disk(config('legacy_attachments.disk', 'public'))
-                                                        ->acceptedFileTypes(['application/pdf'])
+                                                        ->acceptedFileTypes(['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'])
+                                                        ->directory(fn ($record) => "uploads/" . \App\Helpers\PortalHelper::getPortalPrefix() . "/images/attachments/secondary")
+                                                        ->getUploadedFileNameForStorageUsing(function ($file, $record) {
+                                                            $ext = $file->getClientOriginalExtension();
+                                                            return "{$record->UNID}-{$record->APPLICANT_IDENT}.{$ext}";
+                                                        })
                                                         ->maxSize(7500)
-                                                        ->required(),
-                                                ])
-                                                ->columns(2)
-                                                ->dehydrated(false)
-                                                ->afterStateHydrated(function ($component, $record, $set) {
-                                                    if (!$record) return;
-                                                    $attachments = [];
-                                                    $activeConnection = $record->getConnectionName() ?? config('database.default');
-                                                    $dbName = config("database.connections.{$activeConnection}.database");
-                                                    $baseDir = config("legacy_attachments.systems.{$dbName}", config("legacy_attachments.systems.{$activeConnection}", "uploads/{$activeConnection}"));
+                                                        ->openable()
+                                                        ->imageEditor()
+                                                        ->downloadable()
+                                                        ->formatStateUsing(function ($record) {
+                                                            if (!$record) return null;
+                                                            $portalPrefix = \App\Helpers\PortalHelper::getPortalPrefix();
+                                                            $disk = \Illuminate\Support\Facades\Storage::disk(config('legacy_attachments.disk', 'public'));
+                                                            $filePathJpg = "uploads/{$portalPrefix}/images/attachments/secondary/{$record->UNID}-{$record->APPLICANT_IDENT}.jpg";
+                                                            $filePathPdf = "uploads/{$portalPrefix}/images/attachments/secondary/{$record->UNID}-{$record->APPLICANT_IDENT}.pdf";
 
-                                                    $paths = [
-                                                        3 => '/images/attachments/grades/',
-                                                        4 => '/images/attachments/clearing/',
-                                                        5 => '/images/attachments/exceptions/',
-                                                    ];
+                                                            if ($disk->exists($filePathJpg)) {
+                                                                return $filePathJpg;
+                                                            }
+                                                            if ($disk->exists($filePathPdf)) {
+                                                                return $filePathPdf;
+                                                            }
 
-                                                    foreach ($paths as $ident => $path) {
-                                                        $filePath = rtrim($baseDir, '/') . $path . $record->UNID . '-' . $record->APPLICANT_IDENT . '.pdf';
-                                                        if (\Illuminate\Support\Facades\Storage::disk(config('legacy_attachments.disk', 'public'))->exists($filePath)) {
-                                                            $attachments[(string)$ident] = [
-                                                                'ATTACH_IDENT' => $ident,
-                                                                'FILE_PATH' => [$filePath],
-                                                            ];
-                                                        }
-                                                    }
-                                                    $set('clearing_attachments_list', $attachments);
-                                                })
-                                                ->saveRelationshipsUsing(function ($record, $state) {
-                                                    if (!is_array($state)) return;
+                                                            $degreeB = \App\Models\HighSchoolDegreeBType::where('UNID', $record->UNID)
+                                                                ->where('SEC_SCHOOL_SEATNO', $record->SEC_SCHOOL_SEATNO)
+                                                                ->where('SEC_SCHOOL_YEAR', $record->SEC_SCHOOL_YEAR)
+                                                                ->first();
+                                                            if ($degreeB && $degreeB->SEC_SCHOOL_CERTIFICATE) {
+                                                                $typeB_jpgPath = "uploads/{$portalPrefix}/images/attachments/secondary/{$degreeB->SEC_SCHOOL_CERTIFICATE}.jpg";
+                                                                if ($disk->exists($typeB_jpgPath)) {
+                                                                    return $typeB_jpgPath;
+                                                                }
+                                                            }
 
-                                                    $activeConnection = $record->getConnectionName() ?? config('database.default');
-                                                    $dbName = config("database.connections.{$activeConnection}.database");
-                                                    $baseDir = config("legacy_attachments.systems.{$dbName}", config("legacy_attachments.systems.{$activeConnection}", "uploads/{$activeConnection}"));
-
-                                                    $paths = [
-                                                        3 => '/images/attachments/grades',
-                                                        4 => '/images/attachments/clearing',
-                                                        5 => '/images/attachments/exceptions',
-                                                    ];
-
-                                                    $keptIdents = [];
-
-                                                    foreach ($state as $item) {
-                                                        $ident = $item['ATTACH_IDENT'] ?? null;
-                                                        $file = $item['FILE_PATH'] ?? null;
-                                                        if (!$ident || !$file) continue;
-
-                                                        $keptIdents[] = $ident;
-                                                        $file = is_array($file) ? reset($file) : $file;
-
-                                                        if ($file instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile) {
-                                                            $path = rtrim($baseDir, '/') . $paths[$ident];
-                                                            $filename = "{$record->UNID}-{$record->APPLICANT_IDENT}.pdf";
-                                                            $file->storeAs($path, $filename, config('legacy_attachments.disk', 'public'));
-
-                                                            \App\Models\ApplicantAttachment::updateOrCreate(
-                                                                ['UNID' => $record->UNID, 'APPLICANT_IDENT' => $record->APPLICANT_IDENT, 'ATTACH_IDENT' => $ident],
-                                                                []
-                                                            );
-                                                        }
-                                                    }
-
-                                                    $allPossible = [3, 4, 5];
-                                                    $toRemove = array_diff($allPossible, $keptIdents);
-
-                                                    foreach ($toRemove as $identToRemove) {
-                                                        \App\Models\ApplicantAttachment::where('UNID', $record->UNID)
-                                                            ->where('APPLICANT_IDENT', $record->APPLICANT_IDENT)
-                                                            ->where('ATTACH_IDENT', $identToRemove)
-                                                            ->delete();
-
-                                                        $filePath = rtrim($baseDir, '/') . $paths[$identToRemove] . "/{$record->UNID}-{$record->APPLICANT_IDENT}.pdf";
-                                                        if (\Illuminate\Support\Facades\Storage::disk(config('legacy_attachments.disk', 'public'))->exists($filePath)) {
-                                                            \Illuminate\Support\Facades\Storage::disk(config('legacy_attachments.disk', 'public'))->delete($filePath);
-                                                        }
-                                                    }
-                                                })->columnSpanFull(),
-
-
-
-
+                                                            return null;
+                                                        })
+                                                        ->deleteUploadedFileUsing(function ($file, $record) {
+                                                            if (!$record) return;
+                                                            $portalPrefix = \App\Helpers\PortalHelper::getPortalPrefix();
+                                                            $disk = \Illuminate\Support\Facades\Storage::disk(config('legacy_attachments.disk', 'public'));
+                                                            $filePathJpg = "uploads/{$portalPrefix}/images/attachments/secondary/{$record->UNID}-{$record->APPLICANT_IDENT}.jpg";
+                                                            $filePathPdf = "uploads/{$portalPrefix}/images/attachments/secondary/{$record->UNID}-{$record->APPLICANT_IDENT}.pdf";
+                                                            if ($disk->exists($filePathJpg)) $disk->delete($filePathJpg);
+                                                            if ($disk->exists($filePathPdf)) $disk->delete($filePathPdf);
+                                                            \App\Models\ApplicantAttachment::where('UNID', $record->UNID)
+                                                                ->where('APPLICANT_IDENT', $record->APPLICANT_IDENT)
+                                                                ->where('ATTACH_IDENT', 2)
+                                                                ->delete();
+                                                        })
+                                                        ->required(function (Get $get, ?\Illuminate\Database\Eloquent\Model $record) {
+                                                            if ($get('APPLICANT_TYPE') == 1) return false;
+                                                            $isClearing = $record ? ($record->IS_CLEARING instanceof \App\Enums\IsClearingType ? $record->IS_CLEARING->value === 1 : in_array($record->IS_CLEARING, [1, '1'])) : in_array($get('IS_CLEARING'), [1, '1']);
+                                                            if ($get('is_hs_degree_b')) {
+                                                                return false;
+                                                            }
+                                                            if ($get('is_searched') && !$get('is_not_found')) {
+                                                                return false;
+                                                            }
+                                                            return ($get('APPLICANT_TYPE') == 2 || $isClearing) && !$record;
+                                                        }),
+                                                ]),
                                         ]),
-                                ])
-                                ->columnSpan('full'),
+                                ]),
                         ])->columnSpan(12),
-
-                        // القسم الأيسر (عرض 3)
-
-
                     ])->columnSpan('full'),
             ]);
     }

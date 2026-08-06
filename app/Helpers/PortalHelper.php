@@ -23,10 +23,14 @@ class PortalHelper
      */
     public static function getPortalPrefix(): string
     {
-        $dbName = config('database.connections.tenant.database') ?? config('database.connections.' . config('database.default') . '.database');
+        $dbName = (string) (config('database.connections.tenant.database') ?? config('database.connections.' . config('database.default') . '.database'));
         
-        if (preg_match('/_([a-z])_oas_db_(\d{4})$/', $dbName, $matches)) {
-            return $matches[1] . $matches[2];
+        if (preg_match('/(?:^|_)([a-z])_oas_db_(\d{4})$/i', $dbName, $matches)) {
+            return strtolower($matches[1]) . $matches[2];
+        }
+
+        if (preg_match('/([a-z])(\d{4})$/i', $dbName, $matches)) {
+            return strtolower($matches[1]) . $matches[2];
         }
         
         return 'p' . substr($dbName, -4); // Fallback

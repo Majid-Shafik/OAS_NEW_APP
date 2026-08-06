@@ -40,6 +40,31 @@ class ApplicationsClearing extends Model
         'MOVING_REASON',
     ];
 
+    protected static function booted()
+    {
+        static::saving(function ($clearing) {
+            if ($clearing->FROM_COUNTRY_IDENT && empty($clearing->FROM_COUNTRY_NAME)) {
+                $clearing->FROM_COUNTRY_NAME = \App\Models\Country::withoutGlobalScopes()->where('COUNTRY_IDENT', $clearing->FROM_COUNTRY_IDENT)->value('COUNTRY_NAME');
+            }
+            if ($clearing->FROM_UNIV_IDENT && empty($clearing->FROM_UNIV_NAME)) {
+                $clearing->FROM_UNIV_NAME = \App\Models\University::withoutGlobalScopes()->where('UNID', $clearing->FROM_UNIV_IDENT)->value('U_NAME');
+            }
+            if ($clearing->FROM_FACULTY_IDENT && empty($clearing->FROM_FACULTY_NAME)) {
+                $clearing->FROM_FACULTY_NAME = \App\Models\Faculty::withoutGlobalScopes()
+                    ->where('UNID', $clearing->FROM_UNIV_IDENT)
+                    ->where('FACULTY_IDENT', $clearing->FROM_FACULTY_IDENT)
+                    ->value('FACULTY_NAME');
+            }
+            if ($clearing->FROM_PROGRAM_IDENT && empty($clearing->FROM_PROGRAM_NAME)) {
+                $clearing->FROM_PROGRAM_NAME = \App\Models\Program::withoutGlobalScopes()
+                    ->where('UNID', $clearing->FROM_UNIV_IDENT)
+                    ->where('FACULTY_IDENT', $clearing->FROM_FACULTY_IDENT)
+                    ->where('PROGRAM_IDENT', $clearing->FROM_PROGRAM_IDENT)
+                    ->value('PROGRAM_NAME');
+            }
+        });
+    }
+
     public function applicant()
     {
         return $this->belongsTo(Applicant::class, ['UNID', 'APPLICANT_IDENT'], ['UNID', 'APPLICANT_IDENT']);

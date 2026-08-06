@@ -216,21 +216,23 @@ class ApplicantInfolist
                                                     }
                                                 }
 
-                                                if ($record->IS_CLEARING?->value === 1) {
+                                                $isClearing = ($record->IS_CLEARING instanceof \App\Enums\IsClearingType) 
+                                                    ? ($record->IS_CLEARING->value === 1) 
+                                                    : in_array($record->IS_CLEARING, [1, '1']);
+
+                                                if ($isClearing) {
                                                     $clearingPaths = [
-                                                        'كشف درجات الطالب' => '/images/attachments/grades/',
-                                                        'استمارة المقاصة' => '/images/attachments/clearing/',
-                                                        'صورة الاستثناء ان وجد' => '/images/attachments/exceptions/',
+                                                        'كشف درجات الطالب' => 'grades',
+                                                        'استمارة المقاصاة' => 'clearing',
+                                                        'صورة الاستثناء ان وجد' => 'exceptions',
                                                     ];
 
-                                                    foreach ($clearingPaths as $title => $path) {
-                                                        $filePath = rtrim($baseDir, '/') . $path . $record->UNID . '-' . $record->APPLICANT_IDENT . '.pdf';
+                                                    foreach ($clearingPaths as $title => $folder) {
+                                                        $filePath = rtrim($baseDir, '/') . "/images/attachments/{$folder}/{$record->UNID}-{$record->APPLICANT_IDENT}.pdf";
                                                         if ($disk->exists($filePath)) {
-                                                            $type = trim($path, '/');
-                                                            $type = basename($type);
                                                             $attachments[] = [
                                                                 'title' => $title,
-                                                                'url' => route('clearing.attachment.download', ['unid' => $record->UNID, 'applicant_ident' => $record->APPLICANT_IDENT, 'type' => $type]),
+                                                                'url' => route('clearing.attachment.download', ['unid' => $record->UNID, 'applicant_ident' => $record->APPLICANT_IDENT, 'type' => $folder]),
                                                                 'is_pdf' => true,
                                                             ];
                                                         }

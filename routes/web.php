@@ -134,7 +134,7 @@ Route::get('/admin/clearing-attachments/{unid}/{applicant_ident}/{type}', functi
     $record = \App\Models\ClearingApplicant::where('UNID', $unid)->where('APPLICANT_IDENT', $applicant_ident)->firstOrFail();
 
     // Check authorization
-    if (!auth()->user()->can('showClearingAttachments', $record) && !auth()->user()->can('approve', $record)) {
+    if (!auth()->user()->can('showClearingAttachments', $record) && !auth()->user()->can('approve', $record) && !auth()->user()->can('view', $record) && !auth()->user()->can('update', $record)) {
         abort(403, 'عذراً، ليس لديك صلاحية لاستعراض هذا المرفق.');
     }
 
