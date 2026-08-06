@@ -142,4 +142,36 @@ class Applicant extends Model
             $applicant->LAST_UPDATED_ON = now();
         });
     }
+
+    /**
+     * تحديث حالة المتقدم إلى تحت التعديل (UPDATED) وفك التجميد (UNFROZEN)
+     * دالة موحدة يتم استدعاؤها عند إضافة أو حذف أي رغبة تقديم.
+     *
+     * @param int|string $unid
+     * @param int|string $applicantIdent
+     * @return void
+     */
+    public static function handleApplicationChanged(int|string $unid, int|string $applicantIdent): void
+    {
+        static::withoutGlobalScopes()
+            ->where('UNID', $unid)
+            ->where('APPLICANT_IDENT', $applicantIdent)
+            ->update([
+                'STATUS' => \App\Enums\ApplicantStatus::Updated->value,
+                'FREEZE' => \App\Enums\FreezeStatus::UNFROZEN->value,
+                'LAST_UPDATED_BY' => auth()->id() ?? -1,
+                'LAST_UPDATED_ON' => now(),
+            ]);
+    }
+
+    /**
+     * دالة مثيلة لتحديث حالة هذا المتقدم وفك تجميده
+     */
+    public function syncStatusAfterApplicationChange(): void
+    {
+        self::handleApplicationChanged($this->UNID, $this->APPLICANT_IDENT);
+
+        $this->STATUS = \App\Enums\ApplicantStatus::Updated;
+        $this->FREEZE = \App\Enums\FreezeStatus::UNFROZEN;
+    }
 }

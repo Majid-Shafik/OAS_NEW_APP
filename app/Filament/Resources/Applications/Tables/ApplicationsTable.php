@@ -646,7 +646,16 @@ class ApplicationsTable
                     ViewAction::make(),
                     EditAction::make(),
                     DeleteAction::make()
-                        ->visible(fn($record) => empty($record->PAYMENT_FLAG) || $record->PAYMENT_FLAG === \App\Enums\PaymentMethodEnum::NONE),
+                        ->visible(fn($record) => empty($record->PAYMENT_FLAG) || $record->PAYMENT_FLAG === \App\Enums\PaymentMethodEnum::NONE)
+                        ->after(function ($record, $livewire = null) {
+                            \App\Models\Applicant::handleApplicationChanged($record->UNID, $record->APPLICANT_IDENT);
+                            if ($livewire && method_exists($livewire, 'getOwnerRecord')) {
+                                $owner = $livewire->getOwnerRecord();
+                                if ($owner && method_exists($owner, 'getProfileUrl')) {
+                                    $livewire->redirect($owner->getProfileUrl());
+                                }
+                            }
+                        }),
                 ]),
             ])
             ->defaultSort('SEC_SCHOOL_RATE', 'desc');

@@ -173,12 +173,7 @@ class Application extends Model
         });
 
         static::created(function ($application) {
-            if ($application->applicant) {
-                $application->applicant->update([
-                    'STATUS' => \App\Enums\ApplicantStatus::Updated,
-                    'FREEZE' => \App\Enums\FreezeStatus::UNFROZEN,
-                ]);
-            }
+            \App\Models\Applicant::handleApplicationChanged($application->UNID, $application->APPLICANT_IDENT);
         });
 
         static::deleting(function ($application) {
@@ -194,12 +189,7 @@ class Application extends Model
         });
 
         static::deleted(function ($application) {
-            if ($application->applicant) {
-                $application->applicant->update([
-                    'STATUS' => \App\Enums\ApplicantStatus::Updated,
-                    'FREEZE' => \App\Enums\FreezeStatus::UNFROZEN,
-                ]);
-            }
+            \App\Models\Applicant::handleApplicationChanged($application->UNID, $application->APPLICANT_IDENT);
 
             $data = $application->toArray();
             $data['deleted_at'] = now();

@@ -57,7 +57,8 @@ class UniversitiesTable
                     ->label('إعدادات')
                     ->icon('heroicon-o-currency-dollar')
                     ->color('warning')
-                    ->visible(fn(University $record) => auth()->user()->can('updateUniversitySettings', $record) || auth()->user()->isAdmin())
+                    ->authorize('updateUniversitySettings')
+                    ->visible(fn(University $record) => auth()->user()->can('updateUniversitySettings', $record))
                     ->schema([
                         Fieldset::make('إعدادات السداد')
                         ->schema([

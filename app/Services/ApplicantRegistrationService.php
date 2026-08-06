@@ -136,11 +136,8 @@ class ApplicantRegistrationService
                     // Application successfully added
                     $successCount++;
                     
-                    // Update Applicant Status to UPDATED if it was READY
-                    if ($applicant->STATUS && $applicant->STATUS->value === 'READY') {
-                        $applicant->STATUS = 'UPDATED';
-                        $applicant->save();
-                    }
+                    // Update Applicant Status to UPDATED and FREEZE to UNFROZEN
+                    $applicant->syncStatusAfterApplicationChange();
 
                     // 5. Update Applicant Group (Bill) Apps Count
                     $this->updateApplicantGroupNum($appGroup, $offerGroup);
@@ -180,11 +177,26 @@ class ApplicantRegistrationService
      */
     public function checkIfAllowed(Applicant $applicant, Offering $offering): void
     {
+        $this->checkNotConfirmed($applicant);
         $this->checkLimitApp($applicant, $offering);
         $this->checkStandardApp($applicant, $offering);
         $this->checkRegisterDate($offering);
         $this->checkApproving($offering);
         $this->checkGroupPaid($applicant, $offering);
+    }
+
+    private function checkNotConfirmed(Applicant $applicant): void
+    {
+        $confirmedApp = Application::where('UNID', $applicant->UNID)
+            ->where('APPLICANT_IDENT', $applicant->APPLICANT_IDENT)
+            ->where('CONFIRMED_BY_APPLICANT', 1)
+            ->with('program')
+            ->first();
+
+        if ($confirmedApp || (!empty($applicant->ADMITTED_OFFERING) && $applicant->ADMITTED_OFFERING > 0)) {
+            $progName = $confirmedApp?->program?->PROGRAM_NAME ?? '';
+            throw new Exception("المتقدم مؤكد في تخصص" . ($progName ? " ({$progName})" : '') . "، يجب إلغاء تأكيده في ذلك التخصص أولاً حتى يستطيع إضافة رغبة جديدة.");
+        }
     }
 
     private function checkLimitApp(Applicant $applicant, Offering $offering): void

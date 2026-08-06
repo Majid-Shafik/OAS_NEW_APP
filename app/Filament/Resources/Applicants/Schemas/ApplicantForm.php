@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Applicants\Schemas;
 
 use App\Enums\ApplicantStatus;
 use App\Enums\Gender;
+use App\Filament\Schemas\OfferingFields;
 use App\Models\Applicant;
 use App\Models\Country;
 use App\Models\Faculty;
@@ -117,6 +118,15 @@ class ApplicantForm
                                             $set('applicant_exists', true);
                                             $set('applicant_id', $existing->APPLICANT_IDENT);
 
+                                            $confirmedApp = \App\Models\Application::where('UNID', $existing->UNID)
+                                                ->where('APPLICANT_IDENT', $existing->APPLICANT_IDENT)
+                                                ->where('CONFIRMED_BY_APPLICANT', 1)
+                                                ->with('program')
+                                                ->first();
+                                            $isConfirmed = $confirmedApp !== null || (!empty($existing->ADMITTED_OFFERING) && $existing->ADMITTED_OFFERING > 0);
+                                            $set('is_confirmed', (bool)$isConfirmed);
+                                            $set('confirmed_program_name', $confirmedApp?->program?->PROGRAM_NAME ?? '');
+
                                             $set('SEC_SCHOOL_SEATNO', $existing->SEC_SCHOOL_SEATNO);
                                             $set('SEC_SCHOOL_YEAR', $existing->SEC_SCHOOL_YEAR);
                                             $set('SEC_SCHOOL_MARK', $existing->SEC_SCHOOL_MARK);
@@ -171,10 +181,33 @@ class ApplicantForm
                                                 $student = isset($data[0]) ? $data[0] : $data;
                                             }
 
+                                            $mapProvince = function($inputGov) {
+                                                $inputGov = trim($inputGov);
+                                                if (empty($inputGov)) return '';
+                                                
+                                                if (in_array($inputGov, ['الامانة', 'الأمانة', 'امانة العاصمة', 'أمانة العاصمة', 'الامانه', 'الأمانه', 'امانه العاصمه', 'أمانه العاصمه'])) {
+                                                    return \App\Models\Province::where('NAME', 'like', '%امانة%')->orWhere('NAME', 'like', '%أمانة%')->value('NAME') ?? $inputGov;
+                                                }
+                                                
+                                                $match = \App\Models\Province::where('NAME', 'like', "%{$inputGov}%")->value('NAME');
+                                                if ($match) return $match;
+                                                
+                                                $allProvinces = \App\Models\Province::pluck('NAME')->toArray();
+                                                foreach($allProvinces as $p) {
+                                                    $firstWord = explode(' ', $inputGov)[0];
+                                                    if ($firstWord && (mb_strpos($p, $firstWord) !== false || mb_strpos($inputGov, $p) !== false)) {
+                                                        return $p;
+                                                    }
+                                                }
+                                                return $inputGov;
+                                            };
+
                                             // التعبئة التلقائية
                                             $set('is_searched', true);
                                             $set('is_not_found', false);
                                             $set('applicant_exists', false);
+                                            $set('is_confirmed', false);
+                                            $set('confirmed_program_name', '');
                                             $set('APPLICANT_TYPE', 1);
 
                                             $set('SEC_SCHOOL_SEATNO', $student['seat_number'] ?? $student['SEC_SCHOOL_SEATNO'] ?? $seat);
@@ -226,21 +259,11 @@ class ApplicantForm
 
                                             // Map Governorate to exact DB string
                                             $gov = trim($student['governorate'] ?? $student['PROVINCE'] ?? '');
-                                            if (in_array($gov, ['الامانة', 'الأمانة', 'امانة العاصمة', 'أمانة العاصمة', 'الامانه', 'الأمانه', 'امانه العاصمه', 'أمانه العاصمه'])) {
-                                                $gov = \App\Models\Province::where('NAME', 'like', '%امانة%')->orWhere('NAME', 'like', '%أمانة%')->value('NAME') ?? $gov;
-                                            } else {
-                                                $gov = \App\Models\Province::where('NAME', 'like', "%{$gov}%")->value('NAME') ?? $gov;
-                                            }
-                                            $set('PROVINCE', $gov);
+                                            $set('PROVINCE', $mapProvince($gov));
 
                                             // Map School Governorate to exact DB string
                                             $secGov = trim($student['school_governorate'] ?? $student['SEC_SCHOOL_PROVINCE'] ?? '');
-                                            if (in_array($secGov, ['الامانة', 'الأمانة', 'امانة العاصمة', 'أمانة العاصمة', 'الامانه', 'الأمانه', 'امانه العاصمه', 'أمانه العاصمه'])) {
-                                                $secGov = \App\Models\Province::where('NAME', 'like', '%امانة%')->orWhere('NAME', 'like', '%أمانة%')->value('NAME') ?? $secGov;
-                                            } else {
-                                                $secGov = \App\Models\Province::where('NAME', 'like', "%{$secGov}%")->value('NAME') ?? $secGov;
-                                            }
-                                            $set('SEC_SCHOOL_PROVINCE', $secGov);
+                                            $set('SEC_SCHOOL_PROVINCE', $mapProvince($secGov));
 
                                             // Map Nationality to exact DB string
                                             $nationality = trim($student['nationality'] ?? $student['NATIONALITY'] ?? $student['COUNTRY_NAME'] ?? '');
@@ -271,8 +294,28 @@ class ApplicantForm
                                                     $set('is_searched', true);
                                                     $set('is_not_found', false);
                                                     $set('applicant_exists', false);
+                                                    $set('is_confirmed', false);
+                                                    $set('confirmed_program_name', '');
                                                     $set('hs_degree_not_approved', false);
                                                     $set('is_hs_degree_b', true);
+                                                    
+                                                    $mapProvinceTypeB = function($inputGov) {
+                                                        $inputGov = trim($inputGov);
+                                                        if (empty($inputGov)) return '';
+                                                        if (in_array($inputGov, ['الامانة', 'الأمانة', 'امانة العاصمة', 'أمانة العاصمة', 'الامانه', 'الأمانه', 'امانه العاصمه', 'أمانه العاصمه'])) {
+                                                            return \App\Models\Province::where('NAME', 'like', '%امانة%')->orWhere('NAME', 'like', '%أمانة%')->value('NAME') ?? $inputGov;
+                                                        }
+                                                        $match = \App\Models\Province::where('NAME', 'like', "%{$inputGov}%")->value('NAME');
+                                                        if ($match) return $match;
+                                                        $allProvinces = \App\Models\Province::pluck('NAME')->toArray();
+                                                        foreach($allProvinces as $p) {
+                                                            $firstWord = explode(' ', $inputGov)[0];
+                                                            if ($firstWord && (mb_strpos($p, $firstWord) !== false || mb_strpos($inputGov, $p) !== false)) {
+                                                                return $p;
+                                                            }
+                                                        }
+                                                        return $inputGov;
+                                                    };
 
                                                     $set('SEC_SCHOOL_SEATNO', $hsDegree->SEC_SCHOOL_SEATNO);
                                                     $set('SEC_SCHOOL_YEAR', $hsDegree->SEC_SCHOOL_YEAR);
@@ -284,12 +327,7 @@ class ApplicantForm
                                                     $set('SEC_SCHOOL_PLACE', $hsDegree->SEC_SCHOOL_PLACE);
                                                     // Map School Governorate to exact DB string
                                                     $secGov = trim($hsDegree->SEC_SCHOOL_PROVINCE ?? '');
-                                                    if (in_array($secGov, ['الامانة', 'الأمانة', 'امانة العاصمة', 'أمانة العاصمة', 'الامانه', 'الأمانه', 'امانه العاصمه', 'أمانه العاصمه'])) {
-                                                        $secGov = \App\Models\Province::where('NAME', 'like', '%امانة%')->orWhere('NAME', 'like', '%أمانة%')->value('NAME') ?? $secGov;
-                                                    } else {
-                                                        $secGov = \App\Models\Province::where('NAME', 'like', "%{$secGov}%")->value('NAME') ?? $secGov;
-                                                    }
-                                                    $set('SEC_SCHOOL_PROVINCE', $secGov);
+                                                    $set('SEC_SCHOOL_PROVINCE', $mapProvinceTypeB($secGov));
                                                     $set('SEC_SCHOOL_TERRITORY', $hsDegree->SEC_SCHOOL_TERRITORY);
 
                                                     $set('FULL_NAME', $hsDegree->STUDENT_NAME);
@@ -312,12 +350,7 @@ class ApplicantForm
                                                     $set('PLACE_OF_BIRTH', $hsDegree->PLACE_OF_BIRTH);
                                                     // Map Governorate to exact DB string
                                                     $gov = trim($hsDegree->PROVINCE ?? '');
-                                                    if (in_array($gov, ['الامانة', 'الأمانة', 'امانة العاصمة', 'أمانة العاصمة', 'الامانه', 'الأمانه', 'امانه العاصمه', 'أمانه العاصمه'])) {
-                                                        $gov = \App\Models\Province::where('NAME', 'like', '%امانة%')->orWhere('NAME', 'like', '%أمانة%')->value('NAME') ?? $gov;
-                                                    } else {
-                                                        $gov = \App\Models\Province::where('NAME', 'like', "%{$gov}%")->value('NAME') ?? $gov;
-                                                    }
-                                                    $set('PROVINCE', $gov);
+                                                    $set('PROVINCE', $mapProvinceTypeB($gov));
                                                     $set('TERRITORY', $hsDegree->TERRITORY);
                                                     $set('COUNTRY_NAME', $hsDegree->COUNTRY_NAME);
                                                     $set('YEMEN_NATIONAL', $hsDegree->YEMEN_NATIONAL ? 1 : 0);
@@ -343,6 +376,8 @@ class ApplicantForm
                                             $set('is_searched', true);
                                             $set('is_not_found', true);
                                             $set('applicant_exists', false);
+                                            $set('is_confirmed', false);
+                                            $set('confirmed_program_name', '');
                                             $set('hs_degree_not_approved', false);
                                             $set('IMPORTED', 2);
                                             $set('APPLICANT_TYPE', 2); // النوع B
@@ -356,6 +391,15 @@ class ApplicantForm
                                     ->description('بيانات المؤهل الثانوي والمعلومات الشخصية')
                                     ->icon('heroicon-o-user')
                                     ->schema([
+                                        Callout::make('تنبيه: المتقدم مؤكد في تخصص')
+                                            ->description(function (Get $get) {
+                                                $prog = $get('confirmed_program_name') ?: '';
+                                                return "المتقدم مؤكد في تخصص" . ($prog ? " ({$prog})" : '') . "، يجب إلغاء تأكيده في ذلك التخصص أولاً حتى يستطيع إضافة رغبة جديدة.";
+                                            })
+                                            ->danger()
+                                            ->visible(fn(Get $get) => $get('is_confirmed') === true)
+                                            ->columnSpanFull(),
+
                                         Callout::make('بيانات الطالب الأساسية')
                                             ->description(function (Get $get) {
                                                 $id = $get('applicant_id');
@@ -742,19 +786,31 @@ class ApplicantForm
 
                                     ])->columns(3),
 
+                                Step::make('بيانات التنسيق')
+                                    ->description('اختيار الرغبة / التخصص المطلوب التنسيق فيه')
+                                    ->icon('heroicon-o-academic-cap')
+                                    ->hidden(fn(Get $get) => 
+                                        $get('hs_degree_not_approved') === true || 
+                                        $get('applicant_exists') === true || 
+                                        $get('is_not_found') === true ||
+                                        $get('is_confirmed') === true
+                                    )
+                                    ->schema(OfferingFields::get(includeUniversity: false, dehydrated: false))
+                                    ->columns(2),
+
                                 Step::make('بيانات المقاصة')
                                     ->description('تحديد نوع المتقدم والقبول في الكلية والتخصص')
                                     ->icon('heroicon-o-document-check')
-                                    ->visible(fn(\Filament\Schemas\Components\Utilities\Get $get, $livewire) => 
+                                    ->visible(fn(Get $get, $livewire) => 
                                         $get('hs_degree_not_approved') !== true && 
                                         (($get('IS_CLEARING') instanceof \App\Enums\IsClearingType ? $get('IS_CLEARING')->value == 1 : in_array($get('IS_CLEARING'), [1, '1'])) || str_contains(class_basename($livewire), 'Clearing'))
                                     )
                                     ->schema(function (Get $get) {
                                         if ($get('is_not_found')) {
                                             return [
-                                                Placeholder::make('type_b_notice')
+                                                TextEntry::make('type_b_notice')
                                                     ->label('')
-                                                    ->content(new \Illuminate\Support\HtmlString('
+                                                    ->state(new \Illuminate\Support\HtmlString('
                                                         <div class="p-6 bg-blue-50 border-r-4 border-blue-500 rounded-lg shadow-sm" style="direction: rtl;">
                                                             <div class="flex items-center mb-4">
                                                                 <svg class="w-8 h-8 text-blue-600 ml-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -771,19 +827,19 @@ class ApplicantForm
                                             ];
                                         }
                                         return [
-                                            \Filament\Schemas\Components\Fieldset::make('applicationsClearing')
+                                             Fieldset::make('applicationsClearing')
                                                 ->relationship('applicationsClearing')
                                                 ->label('بيانات الجامعة والتخصص التي جاء منها (المقاصاة)')
-                                                ->visible(fn (\Filament\Schemas\Components\Utilities\Get $get, $livewire) => ($get('IS_CLEARING') instanceof \App\Enums\IsClearingType ? $get('IS_CLEARING')->value == 1 : in_array($get('IS_CLEARING'), [1, '1'])) || str_contains(class_basename($livewire), 'Clearing'))
+                                                ->visible(fn (Get $get, $livewire) => ($get('IS_CLEARING') instanceof \App\Enums\IsClearingType ? $get('IS_CLEARING')->value == 1 : in_array($get('IS_CLEARING'), [1, '1'])) || str_contains(class_basename($livewire), 'Clearing'))
                                                 ->schema([
-                                                    \Filament\Forms\Components\Select::make('FROM_COUNTRY_IDENT')
+                                                    Select::make('FROM_COUNTRY_IDENT')
                                                         ->label('الدولة القادم منها')
-                                                        ->options(fn() => \App\Models\Country::withoutGlobalScopes()->get()->mapWithKeys(fn($c) => [$c->COUNTRY_IDENT => (string) ($c->COUNTRY_NAME ?? $c->COUNTRY_IDENT)]))
+                                                        ->options(fn() => Country::withoutGlobalScopes()->get()->mapWithKeys(fn($c) => [$c->COUNTRY_IDENT => (string) ($c->COUNTRY_NAME ?? $c->COUNTRY_IDENT)]))
                                                         ->getOptionLabelUsing(fn ($value) => (string) (\App\Models\Country::withoutGlobalScopes()->find($value)?->COUNTRY_NAME ?? $value))
                                                         ->searchable()
                                                         ->required(),
                                                     
-                                                    \Filament\Forms\Components\Select::make('FROM_UNIV_IDENT')
+                                                    Select::make('FROM_UNIV_IDENT')
                                                         ->label('الجامعة القادم منها')
                                                         ->options(fn() => \App\Models\University::withoutGlobalScopes()->clearing()->get()->mapWithKeys(fn($u) => [$u->UNID => (string) ($u->U_NAME ?? $u->UNID)]))
                                                         ->getOptionLabelUsing(fn ($value) => (string) (\App\Models\University::withoutGlobalScopes()->find($value)?->U_NAME ?? $value))
@@ -795,7 +851,7 @@ class ApplicantForm
                                                         })
                                                         ->required(),
                                 
-                                                    \Filament\Forms\Components\Select::make('FROM_FACULTY_IDENT')
+                                                    Select::make('FROM_FACULTY_IDENT')
                                                         ->label('الكلية القادم منها')
                                                         ->options(function (\Filament\Schemas\Components\Utilities\Get $get) {
                                                             $unid = $get('FROM_UNIV_IDENT');
@@ -811,7 +867,7 @@ class ApplicantForm
                                                         })
                                                         ->required(),
                                 
-                                                    \Filament\Forms\Components\Select::make('FROM_PROGRAM_IDENT')
+                                                     Select::make('FROM_PROGRAM_IDENT')
                                                         ->label('التخصص القادم منه')
                                                         ->options(function (\Filament\Schemas\Components\Utilities\Get $get) {
                                                             $unid = $get('FROM_UNIV_IDENT');
@@ -824,10 +880,10 @@ class ApplicantForm
                                                         ->searchable()
                                                         ->live()
                                                         ->required(),
-                                                    \Filament\Forms\Components\TextInput::make('NO_STUDY_YEARS')->label('عدد سنوات الدراسة')->numeric(),
-                                                    \Filament\Forms\Components\TextInput::make('STUDY_LEVEL')->label('مستوى الدراسة')->numeric(),
-                                                    \Filament\Forms\Components\TextInput::make('FROM_YEAR')->label('عام الانضمام')->numeric(),
-                                                    \Filament\Forms\Components\Textarea::make('MOVING_REASON')->label('سبب الانتقال')->required()->columnSpanFull(),
+                                                     TextInput::make('NO_STUDY_YEARS')->label('عدد سنوات الدراسة')->numeric(),
+                                                     TextInput::make('STUDY_LEVEL')->label('مستوى الدراسة')->numeric(),
+                                                     TextInput::make('FROM_YEAR')->label('عام الانضمام')->numeric(),
+                                                     Textarea::make('MOVING_REASON')->label('سبب الانتقال')->required()->columnSpanFull(),
                                                 ])
                                                 ->columns(4)
                                                 ->columnSpanFull(),

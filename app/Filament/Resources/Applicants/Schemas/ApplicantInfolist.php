@@ -6,6 +6,7 @@ use App\Filament\Traits\HasMinistryRefreshAction;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Actions;
+use Filament\Schemas\Components\Callout;
 use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
@@ -19,6 +20,18 @@ class ApplicantInfolist
     {
         return $schema
             ->components([
+                Callout::make('تنبيه: تعذر تسجيل الرغبة أثناء إضافة المتقدم')
+                    ->description(function () {
+                        $flash = session('offering_registration_failed');
+                        if (is_array($flash)) {
+                            return 'تم حفظ بيانات المتقدم بنجاح، ولكن لم يتم تسجيل الرغبة نظراً لـ: ' . ($flash['reasons'] ?? '');
+                        }
+                        return 'تم حفظ بيانات المتقدم بنجاح، ولكن لم يتم تسجيل الرغبة نظراً لـ: ' . (string)$flash;
+                    })
+                    ->warning()
+                    ->visible(fn() => session()->has('offering_registration_failed'))
+                    ->columnSpanFull(),
+
                 Grid::make(12)->schema([
                     // القسم الأيمن الأكبر (عرض 9)
                     Grid::make(1)->schema([

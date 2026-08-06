@@ -95,6 +95,22 @@ class CreateClearingApplicant extends CreateRecord
         if (!empty($data['applicant_exists']) && !empty($data['applicant_id'])) {
             $existing = \App\Models\Applicant::find($data['applicant_id']);
             if ($existing) {
+                $confirmedApp = \App\Models\Application::where('UNID', $existing->UNID)
+                    ->where('APPLICANT_IDENT', $existing->APPLICANT_IDENT)
+                    ->where('CONFIRMED_BY_APPLICANT', 1)
+                    ->with('program')
+                    ->first();
+                $isConfirmed = $confirmedApp !== null || (!empty($existing->ADMITTED_OFFERING) && $existing->ADMITTED_OFFERING > 0);
+                if ($isConfirmed) {
+                    $progName = $confirmedApp?->program?->PROGRAM_NAME ?? '';
+                    \Filament\Notifications\Notification::make()
+                        ->warning()
+                        ->title('لا يمكن إكمال العملية')
+                        ->body('المتقدم مؤكد في تخصص' . ($progName ? " ({$progName})" : '') . '، يجب إلغاء تأكيده في ذلك التخصص أولاً حتى يستطيع إضافة رغبة جديدة.')
+                        ->send();
+                    throw new \Filament\Support\Exceptions\Halt();
+                }
+
                 $existing->update([
                     'EMAIL' => $data['EMAIL'] ?? $existing->EMAIL,
                     'MOBILE_PHONE' => $data['MOBILE_PHONE'] ?? $existing->MOBILE_PHONE,
@@ -107,13 +123,22 @@ class CreateClearingApplicant extends CreateRecord
             }
         }
 
+        // إزالة أي حقول تبدأ بـ ADMITTED_ لمنع حفظها أثناء الإضافة حيث يتم تعبئتها وقت تأكيد القبول
+        foreach (array_keys($data) as $key) {
+            if (str_starts_with($key, 'ADMITTED_')) {
+                unset($data[$key]);
+            }
+        }
+
         return static::getModel()::create($data);
     }
+
+    protected ?\Filament\Notifications\Notification $customCreatedNotification = null;
 
     protected function afterCreate(): void
     {
         $applicant = $this->record;
-        $offeringIdent = $this->data['ADMITTED_OFFERING'] ?? null;
+        $offeringIdent = $this->data['OFFERING_IDENT'] ?? $this->data['ADMITTED_OFFERING'] ?? null;
         $imported = $this->data['IMPORTED'] ?? 2;
 
         if ($offeringIdent) {
@@ -122,26 +147,38 @@ class CreateClearingApplicant extends CreateRecord
                 $result = $service->registerApplications($applicant, [$offeringIdent], true, $imported);
 
                 if (empty($result['failed'])) {
-                    \Filament\Notifications\Notification::make()
-                        ->title('تم إضافة رغبة المقاصاة بنجاح')
-                        ->success()
-                        ->send();
+                    $this->customCreatedNotification = \Filament\Notifications\Notification::make()
+                        ->title('تم إضافة المتقدم ورغبة المقاصاة بنجاح')
+                        ->success();
                 } else {
                     $reasons = collect($result['failed'])->pluck('reason')->unique()->join(', ');
-                    \Filament\Notifications\Notification::make()
-                        ->title('تم حفظ المتقدم ولكن تعذر تسجيل رغبة المقاصاة')
-                        ->body('السبب: ' . $reasons)
+                    session()->flash('offering_registration_failed', [
+                        'reasons' => $reasons,
+                        'offering_ident' => $offeringIdent,
+                    ]);
+                    $this->customCreatedNotification = \Filament\Notifications\Notification::make()
+                        ->title('تم حفظ بيانات المتقدم بنجاح')
+                        ->body("ولكن تعذر تسجيل رغبة المقاصاة للأسباب التالية: {$reasons}")
                         ->warning()
-                        ->send();
+                        ->persistent();
                 }
             } catch (\Exception $e) {
-                \Filament\Notifications\Notification::make()
-                    ->title('تم حفظ المتقدم مع حدوث خطأ في عملية المقاصاة')
-                    ->body($e->getMessage())
+                session()->flash('offering_registration_failed', [
+                    'reasons' => $e->getMessage(),
+                    'offering_ident' => $offeringIdent,
+                ]);
+                $this->customCreatedNotification = \Filament\Notifications\Notification::make()
+                    ->title('تم حفظ بيانات المتقدم')
+                    ->body("حدث خطأ أثناء تسجيل رغبة المقاصاة: {$e->getMessage()}")
                     ->danger()
-                    ->send();
+                    ->persistent();
             }
         }
+    }
+
+    protected function getCreatedNotification(): ?\Filament\Notifications\Notification
+    {
+        return $this->customCreatedNotification ?? parent::getCreatedNotification();
     }
 
     protected function getRedirectUrl(): string
