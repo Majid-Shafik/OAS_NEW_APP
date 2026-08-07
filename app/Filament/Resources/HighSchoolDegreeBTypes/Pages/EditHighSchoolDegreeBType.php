@@ -14,8 +14,13 @@ class EditHighSchoolDegreeBType extends EditRecord
     {
         if (!empty($data['SEC_SCHOOL_CERTIFICATE'])) {
             $portalPrefix = \App\Helpers\PortalHelper::getPortalPrefix();
-            $basename = $data['SEC_SCHOOL_CERTIFICATE'];
-            $data['SEC_SCHOOL_CERTIFICATE'] = "uploads/{$portalPrefix}/images/attachments/secondary/{$basename}.jpg";
+            $disk = \Illuminate\Support\Facades\Storage::disk(config('legacy_attachments.disk', 'public'));
+            $cert = basename($data['SEC_SCHOOL_CERTIFICATE'], '.jpg');
+            $jpgPath = "uploads/{$portalPrefix}/images/attachments/secondary/{$cert}.jpg";
+
+            if ($disk->exists($jpgPath)) {
+                $data['SEC_SCHOOL_CERTIFICATE'] = $jpgPath;
+            }
         }
         return $data;
     }

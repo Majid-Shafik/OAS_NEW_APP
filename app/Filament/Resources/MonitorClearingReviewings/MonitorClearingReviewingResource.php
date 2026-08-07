@@ -46,7 +46,7 @@ class MonitorClearingReviewingResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('UNID')->label('الجامعة')->sortable(),
+                TextColumn::make('university.U_NAME')->label('الجامعة')->sortable(),
                 TextColumn::make('applicant.FULL_NAME')
                     ->label('اسم المتقدم')
                     ->searchable()

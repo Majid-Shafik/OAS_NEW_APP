@@ -43,10 +43,6 @@ class ProgramCapacityForm
                     ->label('الطاقة الاستيعابية')
                     ->numeric()
                     ->required(),
-                    
-                TextInput::make('ACADEMIC_YEAR')
-                    ->label('العام الجامعي')
-                    ->numeric(),
             ]);
     }
 }

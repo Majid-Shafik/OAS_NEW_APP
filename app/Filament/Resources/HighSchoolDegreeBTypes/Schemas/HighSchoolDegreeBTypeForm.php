@@ -8,6 +8,7 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Callout;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
@@ -106,10 +107,20 @@ class HighSchoolDegreeBTypeForm
                                             ->label('البريد الإلكتروني')
                                             ->email()
                                             ->maxLength(50),
+                                        Callout::make('تنبيه: نوع الملف المسموح به لرفع الشهادة')
+                                            ->description('يرجى العلم بأنه يُسمح فقط برفع الصور بصيغة JPG (.jpg) لشهادة الثانوية العامة وبحجم أقصاه 500 كيلوبايت.')
+                                            ->info()
+                                            ->columnSpanFull(),
                                         FileUpload::make('SEC_SCHOOL_CERTIFICATE')
                                             ->label('صورة شهادة الثانوية')
                                             ->required()
-                                            ->acceptedFileTypes(['image/jpeg', 'image/jpg'])
+                                            ->acceptedFileTypes(['image/jpeg'])
+                                            ->helperText('نوع الملف المسموح به: JPG (.jpg) فقط، الحجم الأقصى 500 كيلوبايت.')
+                                            ->validationMessages([
+                                                'accepted_file_types' => 'نوع الملف غير صالح، يجب أن تكون الصورة المرفقة بصيغة JPG (.jpg) فقط.',
+                                                'required' => 'صورة شهادة الثانوية مطلوبة إجبارياً.',
+                                            ])
+                                            ->maxSize(500)
                                             ->disk(config('legacy_attachments.disk', 'public'))
                                             ->openable()
                                             ->imageEditor()

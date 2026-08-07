@@ -95,8 +95,16 @@ class ApplicantResource extends Resource
             $modelInstance = app(static::getModel());
             $table = $modelInstance->getTable();
 
-            if (auth()->check() && auth()->user()->UNID == 0) {
-                $query->withoutGlobalScope(\App\Models\Scopes\UniversityScope::class);
+            // Enforce strict university isolation
+            if (auth()->check()) {
+                $user = auth()->user();
+                if ($user->UNID != 0 && (int)$parts[0] !== (int)$user->UNID) {
+                    return null;
+                }
+                $selectedUnid = (int)session('selected_unid', 0);
+                if ($user->UNID == 0 && $selectedUnid !== 0 && (int)$parts[0] !== $selectedUnid) {
+                    return null;
+                }
             }
 
             return $query->where("{$table}.UNID", $parts[0])

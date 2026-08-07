@@ -53,6 +53,11 @@ class OfferingDhResource extends Resource
     public static function getSharedTableColumns(bool $isRelation = false): array
     {
         $columns = [
+            TextColumn::make('OFFERING_IDENT')->label('رقم المعيار')->sortable()->searchable(),
+            TextColumn::make('university.U_NAME')->label('الجامعة')->sortable()->searchable(),
+            TextColumn::make('faculty.FACULTY_NAME')->label('الكلية')->words(4)->sortable()->searchable(),
+            TextColumn::make('program.PROGRAM_NAME')->label('التخصص')->sortable()->searchable(),
+            TextColumn::make('studyType.STUDYTYPE_NAME')->label('النظام الدراسي')->sortable()->searchable(),
             TextColumn::make('REVESION')->label('رقم المراجعة')->sortable(),
             TextColumn::make('ACTION')->label('نوع الإجراء')->badge(),
             TextColumn::make('SEC_SCHOOL_TYPE')->label('نوع الثانوية')
@@ -72,15 +77,8 @@ class OfferingDhResource extends Resource
             TextColumn::make('APPROVAL_REGECT_REASON')->label('سبب الرفض'),
         ];
 
-        if (! $isRelation) {
-            array_unshift($columns, TextColumn::make('OFFERING_IDENT')->label('رقم المعيار')->sortable());
-            array_push(
-                $columns,
-                TextColumn::make('university.U_NAME')->label('الجامعة')->searchable()->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('faculty.FACULTY_NAME')->label('الكلية')->words(4)->searchable()->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('program.PROGRAM_NAME')->label('التخصص')->searchable()->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('studyType.STUDYTYPE_NAME')->label('النوع الدراسي')->searchable()->toggleable(isToggledHiddenByDefault: true)
-            );
+        if ($isRelation) {
+            array_splice($columns, 0, 5);
         }
 
         return $columns;
@@ -118,7 +116,7 @@ class OfferingDhResource extends Resource
                         TextEntry::make('university.U_NAME')->label('الجامعة'),
                         TextEntry::make('faculty.FACULTY_NAME')->label('الكلية'),
                         TextEntry::make('program.PROGRAM_NAME')->label('التخصص'),
-                        TextEntry::make('studyType.STUDYTYPE_NAME')->label('النوع الدراسي'),
+                        TextEntry::make('studyType.STUDYTYPE_NAME')->label('النظام الدراسي'),
                         TextEntry::make('SEC_SCHOOL_TYPE')->label('نوع الثانوية')
                             ->formatStateUsing(fn ($state) => \App\Models\ComboValue::getLabel(1, $state)),
                         TextEntry::make('SEC_SCHOOL_ACCEPT_RATE')->label('معدل القبول')->suffix('%'),

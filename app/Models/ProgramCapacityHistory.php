@@ -3,13 +3,14 @@
 namespace App\Models;
 
 use App\Traits\HasCompositeKey;
+use App\Traits\HasUniversityScope;
 use Awobaz\Compoships\Compoships;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class ProgramCapacityHistory extends Model
 {
-    use HasFactory, Compoships;
+    use HasFactory, Compoships, HasUniversityScope;
 
     protected $table = 'programs_capacity_history';
 

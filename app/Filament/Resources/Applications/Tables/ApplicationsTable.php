@@ -42,10 +42,11 @@ class ApplicationsTable
                 TextColumn::make('index')
                     ->rowIndex()
                     ->label('م'),
-                TextColumn::make('UNID')
-                    ->label(__('UNID'))
+                TextColumn::make('university.U_NAME')
+                    ->label('الجامعة')
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->searchable()
+                    ->toggleable(),
                 TextColumn::make('APPLICATION_IDENT')
                     ->label(__('APPLICATION_IDENT'))
                     ->sortable()

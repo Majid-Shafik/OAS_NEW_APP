@@ -32,6 +32,10 @@ class MonitorClearingReviewing extends Model
         'RECORD_DATE',
     ];
 
+    public function university()
+    {
+        return $this->belongsTo(University::class, 'UNID', 'UNID');
+    }
     public function applicant()
     {
         return $this->belongsTo(Applicant::class, ['UNID', 'APPLICANT_IDENT'], ['UNID', 'APPLICANT_IDENT']);
@@ -41,4 +45,6 @@ class MonitorClearingReviewing extends Model
     {
         return $this->belongsTo(User::class, 'REVIEW_BY', 'USER_IDENT');
     }
+
+
 }

@@ -561,39 +561,82 @@ class ApplicantForm
 
                                                         TextInput::make('SEC_SCHOOL_PLACE')->label('مكان الثانوية')
                                                         ->readOnly(fn(Get $get) => ($get('is_searched') && !$get('is_not_found')) || $get('is_hs_degree_b')),
+                                                           Callout::make('تنبيه: نوع الملف المسموح به لرفع الشهادة')
+                                            ->description('يرجى العلم بأنه يُسمح فقط برفع الصور بصيغة JPG (.jpg) لشهادة الثانوية العامة وبحجم أقصاه 500 كيلوبايت.')
+                                            ->info()
+                                            ->columnSpanFull(),
                                                     FileUpload::make('secondary_certificate')
-                                                        ->label('صورة شهادة الثانوية')
+                                                        ->label('صورة شهادة الثانوية (إجباري للنوع B)')
                                                         ->columnSpanFull()
                                                         ->disk(config('legacy_attachments.disk', 'public'))
-                                                        ->acceptedFileTypes(['image/jpeg', 'image/jpg', 'image/png'])
-                                                        ->maxSize(1500)
+                                                        ->directory(fn () => "uploads/" . \App\Helpers\PortalHelper::getPortalPrefix() . "/images/attachments/secondary")
+                                                        ->acceptedFileTypes(['image/jpeg'])
+                                                        ->helperText('نوع الملف المسموح به: JPG (.jpg) فقط، الحجم الأقصى 500 كيلوبايت.')
+                                                        ->maxSize(500)
                                                         ->openable()
                                                         ->imageEditor()
                                                         ->downloadable()
                                                         ->formatStateUsing(function ($record) {
                                                             if (!$record) return null;
                                                             $portalPrefix = \App\Helpers\PortalHelper::getPortalPrefix();
-                                                            $baseDir = "uploads/{$portalPrefix}";
-                                                            
-                                                            // Check for JPG first, then PDF
-                                                            $filePathJpg = rtrim($baseDir, '/') . '/images/attachments/secondary/' . $record->UNID . '-' . $record->APPLICANT_IDENT . '.jpg';
-                                                            $filePathPdf = rtrim($baseDir, '/') . '/images/attachments/secondary/' . $record->UNID . '-' . $record->APPLICANT_IDENT . '.pdf';
-                                                            
-                                                            if (\Illuminate\Support\Facades\Storage::disk(config('legacy_attachments.disk', 'public'))->exists($filePathJpg)) {
-                                                                return $filePathJpg;
+                                                            $disk = \Illuminate\Support\Facades\Storage::disk(config('legacy_attachments.disk', 'public'));
+
+                                                            $jpgPath = "uploads/{$portalPrefix}/images/attachments/secondary/{$record->UNID}-{$record->APPLICANT_IDENT}.jpg";
+
+                                                            if ($disk->exists($jpgPath)) {
+                                                                return $jpgPath;
                                                             }
-                                                            return \Illuminate\Support\Facades\Storage::disk(config('legacy_attachments.disk', 'public'))->exists($filePathPdf) ? $filePathPdf : null;
+
+                                                            $degreeB = \App\Models\HighSchoolDegreeBType::withoutGlobalScopes()
+                                                                ->where('UNID', $record->UNID)
+                                                                ->where('SEC_SCHOOL_SEATNO', $record->SEC_SCHOOL_SEATNO)
+                                                                ->where('SEC_SCHOOL_YEAR', $record->SEC_SCHOOL_YEAR)
+                                                                ->first();
+
+                                                            if (!$degreeB && !empty($record->SEC_SCHOOL_SEATNO) && !empty($record->SEC_SCHOOL_YEAR)) {
+                                                                $degreeB = \App\Models\HighSchoolDegreeBType::withoutGlobalScopes()
+                                                                    ->where('SEC_SCHOOL_SEATNO', $record->SEC_SCHOOL_SEATNO)
+                                                                    ->where('SEC_SCHOOL_YEAR', $record->SEC_SCHOOL_YEAR)
+                                                                    ->first();
+                                                            }
+
+                                                            if (!$degreeB && !empty($record->SEC_SCHOOL_SEATNO)) {
+                                                                $degreeB = \App\Models\HighSchoolDegreeBType::withoutGlobalScopes()
+                                                                    ->where('SEC_SCHOOL_SEATNO', $record->SEC_SCHOOL_SEATNO)
+                                                                    ->first();
+                                                            }
+
+                                                            if ($degreeB && $degreeB->SEC_SCHOOL_CERTIFICATE) {
+                                                                $cert = basename($degreeB->SEC_SCHOOL_CERTIFICATE, '.jpg');
+                                                                $typeB_jpg = "uploads/{$portalPrefix}/images/attachments/secondary/{$cert}.jpg";
+
+                                                                if ($disk->exists($typeB_jpg)) {
+                                                                    return $typeB_jpg;
+                                                                }
+                                                            }
+
+                                                            return null;
                                                         })
                                                         ->dehydrated(false)
                                                         ->saveRelationshipsUsing(function (\Illuminate\Database\Eloquent\Model $record, $state) {
                                                             if (!$state) return;
                                                             $file = is_array($state) ? reset($state) : $state;
+                                                            $portalPrefix = \App\Helpers\PortalHelper::getPortalPrefix();
+                                                            $disk = \Illuminate\Support\Facades\Storage::disk(config('legacy_attachments.disk', 'public'));
+                                                            $targetDir = "uploads/{$portalPrefix}/images/attachments/secondary";
+                                                            $filename = "{$record->UNID}-{$record->APPLICANT_IDENT}.jpg";
+
                                                             if ($file instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile) {
-                                                                $portalPrefix = \App\Helpers\PortalHelper::getPortalPrefix();
-                                                                $path = "uploads/{$portalPrefix}/images/attachments/secondary";
-                                                                $extension = $file->getClientOriginalExtension();
-                                                                $filename = "{$record->UNID}-{$record->APPLICANT_IDENT}.{$extension}";
-                                                                $file->storeAs($path, $filename, config('legacy_attachments.disk', 'public'));
+                                                                $file->storeAs($targetDir, $filename, config('legacy_attachments.disk', 'public'));
+                                                                \App\Models\ApplicantAttachment::updateOrCreate(
+                                                                    ['UNID' => $record->UNID, 'APPLICANT_IDENT' => $record->APPLICANT_IDENT, 'ATTACH_IDENT' => 2],
+                                                                    []
+                                                                );
+                                                            } elseif (is_string($file)) {
+                                                                $targetPath = "{$targetDir}/{$filename}";
+                                                                if ($file !== $targetPath && $disk->exists($file)) {
+                                                                    $disk->copy($file, $targetPath);
+                                                                }
                                                                 \App\Models\ApplicantAttachment::updateOrCreate(
                                                                     ['UNID' => $record->UNID, 'APPLICANT_IDENT' => $record->APPLICANT_IDENT, 'ATTACH_IDENT' => 2],
                                                                     []
@@ -616,8 +659,11 @@ class ApplicantForm
                                                             if ($get('is_searched') && !$get('is_not_found')) {
                                                                 return false;
                                                             }
-                                                            return $get('APPLICANT_TYPE') == 2;
-                                                        }),
+                                                            return $get('APPLICANT_TYPE') == 2 || $get('is_not_found') === true;
+                                                        })
+                                                        ->validationMessages([
+                                                            'required' => 'صورة شهادة الثانوية مطلوبة إجبارياً للمتقدمين من نوع شهادة (B).',
+                                                        ]),
                                                 ]
                                             )->columns(4),
                                         Fieldset::make('بيانات المتقدم')

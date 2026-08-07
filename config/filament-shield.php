@@ -222,6 +222,8 @@ return [
                 'deleteAny',
                 'firstReview',
                 'secondReview',
+                'reReviewFirst',
+                'reReviewSecond',
                 'showClearingAttachments',
                 'convertToApplicant',
             ],

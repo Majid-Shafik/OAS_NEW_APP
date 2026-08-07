@@ -331,6 +331,7 @@ class ApplicantEditForm
                                                             ->maxSize(7500)
                                                             ->openable()
                                                             ->downloadable()
+                                                            ->deletable()
                                                             ->formatStateUsing(function ($record) {
                                                                 if (!$record) return null;
                                                                 $portalPrefix = \App\Helpers\PortalHelper::getPortalPrefix();
@@ -343,18 +344,12 @@ class ApplicantEditForm
                                                                 $path = "uploads/{$portalPrefix}/images/attachments/grades/{$record->UNID}-{$record->APPLICANT_IDENT}.pdf";
                                                                 $disk = \Illuminate\Support\Facades\Storage::disk(config('legacy_attachments.disk', 'public'));
                                                                 if ($disk->exists($path)) {
-                                                                    $disk->delete($path);
+                                                                  $disk->delete($path);
                                                                 }
                                                                 \App\Models\ApplicantAttachment::where('UNID', $record->UNID)
                                                                     ->where('APPLICANT_IDENT', $record->APPLICANT_IDENT)
                                                                     ->where('ATTACH_IDENT', 3)
                                                                     ->delete();
-                                                            })
-                                                            ->required(function (Get $get, ?\Illuminate\Database\Eloquent\Model $record) {
-                                                                if (!$record) return true;
-                                                                $portalPrefix = \App\Helpers\PortalHelper::getPortalPrefix();
-                                                                $path = "uploads/{$portalPrefix}/images/attachments/grades/{$record->UNID}-{$record->APPLICANT_IDENT}.pdf";
-                                                                return !\Illuminate\Support\Facades\Storage::disk(config('legacy_attachments.disk', 'public'))->exists($path);
                                                             }),
 
                                                         FileUpload::make('clearing_attachment_form')
@@ -366,6 +361,7 @@ class ApplicantEditForm
                                                             ->maxSize(7500)
                                                             ->openable()
                                                             ->downloadable()
+                                                            ->deletable()
                                                             ->formatStateUsing(function ($record) {
                                                                 if (!$record) return null;
                                                                 $portalPrefix = \App\Helpers\PortalHelper::getPortalPrefix();
@@ -384,12 +380,6 @@ class ApplicantEditForm
                                                                     ->where('APPLICANT_IDENT', $record->APPLICANT_IDENT)
                                                                     ->where('ATTACH_IDENT', 4)
                                                                     ->delete();
-                                                            })
-                                                            ->required(function (Get $get, ?\Illuminate\Database\Eloquent\Model $record) {
-                                                                if (!$record) return true;
-                                                                $portalPrefix = \App\Helpers\PortalHelper::getPortalPrefix();
-                                                                $path = "uploads/{$portalPrefix}/images/attachments/clearing/{$record->UNID}-{$record->APPLICANT_IDENT}.pdf";
-                                                                return !\Illuminate\Support\Facades\Storage::disk(config('legacy_attachments.disk', 'public'))->exists($path);
                                                             }),
 
                                                         FileUpload::make('clearing_attachment_exception')
@@ -401,6 +391,7 @@ class ApplicantEditForm
                                                             ->maxSize(7500)
                                                             ->openable()
                                                             ->downloadable()
+                                                            ->deletable()
                                                             ->formatStateUsing(function ($record) {
                                                                 if (!$record) return null;
                                                                 $portalPrefix = \App\Helpers\PortalHelper::getPortalPrefix();
@@ -430,42 +421,65 @@ class ApplicantEditForm
                                                     return $get('APPLICANT_TYPE') == 2 || $isClearing || ($record && $record->APPLICANT_TYPE == 2);
                                                 })
                                                 ->schema([
+                                                    Callout::make('تنبيه: صيغة الصورة المسموحة')
+                                                        ->description('يُسمح فقط برفع صورة شهادة الثانوية بصيغة JPG (.jpg) وبحجم أقصاه 500 كيلوبايت.')
+                                                        ->info()
+                                                        ->columnSpanFull(),
                                                     FileUpload::make('secondary_certificate')
-                                                        ->label('صورة شهادة الثانوية')
+                                                        ->label('صورة شهادة الثانوية (إجباري للنوع B)')
                                                         ->columnSpanFull()
                                                         ->disk(config('legacy_attachments.disk', 'public'))
-                                                        ->acceptedFileTypes(['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'])
+                                                        ->acceptedFileTypes(['image/jpeg'])
+                                                        ->helperText('نوع الملف المسموح به: JPG (.jpg) فقط، الحجم الأقصى 500 كيلوبايت.')
+                                                        ->validationMessages([
+                                                            'accepted_file_types' => 'نوع الملف غير صالح، يجب أن تكون الصورة بصيغة JPG (.jpg) فقط.',
+                                                            'required' => 'صورة شهادة الثانوية مطلوبة إجبارياً للمتقدمين من نوع شهادة (B).',
+                                                        ])
                                                         ->directory(fn ($record) => "uploads/" . \App\Helpers\PortalHelper::getPortalPrefix() . "/images/attachments/secondary")
                                                         ->getUploadedFileNameForStorageUsing(function ($file, $record) {
-                                                            $ext = $file->getClientOriginalExtension();
-                                                            return "{$record->UNID}-{$record->APPLICANT_IDENT}.{$ext}";
+                                                            return "{$record->UNID}-{$record->APPLICANT_IDENT}.jpg";
                                                         })
-                                                        ->maxSize(7500)
+                                                        ->maxSize(500)
                                                         ->openable()
                                                         ->imageEditor()
                                                         ->downloadable()
+                                                        ->deletable()
                                                         ->formatStateUsing(function ($record) {
                                                             if (!$record) return null;
                                                             $portalPrefix = \App\Helpers\PortalHelper::getPortalPrefix();
                                                             $disk = \Illuminate\Support\Facades\Storage::disk(config('legacy_attachments.disk', 'public'));
-                                                            $filePathJpg = "uploads/{$portalPrefix}/images/attachments/secondary/{$record->UNID}-{$record->APPLICANT_IDENT}.jpg";
-                                                            $filePathPdf = "uploads/{$portalPrefix}/images/attachments/secondary/{$record->UNID}-{$record->APPLICANT_IDENT}.pdf";
 
-                                                            if ($disk->exists($filePathJpg)) {
-                                                                return $filePathJpg;
-                                                            }
-                                                            if ($disk->exists($filePathPdf)) {
-                                                                return $filePathPdf;
+                                                            $jpgPath = "uploads/{$portalPrefix}/images/attachments/secondary/{$record->UNID}-{$record->APPLICANT_IDENT}.jpg";
+
+                                                            if ($disk->exists($jpgPath)) {
+                                                                return $jpgPath;
                                                             }
 
-                                                            $degreeB = \App\Models\HighSchoolDegreeBType::where('UNID', $record->UNID)
+                                                            $degreeB = \App\Models\HighSchoolDegreeBType::withoutGlobalScopes()
+                                                                ->where('UNID', $record->UNID)
                                                                 ->where('SEC_SCHOOL_SEATNO', $record->SEC_SCHOOL_SEATNO)
                                                                 ->where('SEC_SCHOOL_YEAR', $record->SEC_SCHOOL_YEAR)
                                                                 ->first();
+
+                                                            if (!$degreeB && !empty($record->SEC_SCHOOL_SEATNO) && !empty($record->SEC_SCHOOL_YEAR)) {
+                                                                $degreeB = \App\Models\HighSchoolDegreeBType::withoutGlobalScopes()
+                                                                    ->where('SEC_SCHOOL_SEATNO', $record->SEC_SCHOOL_SEATNO)
+                                                                    ->where('SEC_SCHOOL_YEAR', $record->SEC_SCHOOL_YEAR)
+                                                                    ->first();
+                                                            }
+
+                                                            if (!$degreeB && !empty($record->SEC_SCHOOL_SEATNO)) {
+                                                                $degreeB = \App\Models\HighSchoolDegreeBType::withoutGlobalScopes()
+                                                                    ->where('SEC_SCHOOL_SEATNO', $record->SEC_SCHOOL_SEATNO)
+                                                                    ->first();
+                                                            }
+
                                                             if ($degreeB && $degreeB->SEC_SCHOOL_CERTIFICATE) {
-                                                                $typeB_jpgPath = "uploads/{$portalPrefix}/images/attachments/secondary/{$degreeB->SEC_SCHOOL_CERTIFICATE}.jpg";
-                                                                if ($disk->exists($typeB_jpgPath)) {
-                                                                    return $typeB_jpgPath;
+                                                                $cert = basename($degreeB->SEC_SCHOOL_CERTIFICATE, '.jpg');
+                                                                $typeB_jpg = "uploads/{$portalPrefix}/images/attachments/secondary/{$cert}.jpg";
+
+                                                                if ($disk->exists($typeB_jpg)) {
+                                                                  return $typeB_jpg;
                                                                 }
                                                             }
 
@@ -475,26 +489,20 @@ class ApplicantEditForm
                                                             if (!$record) return;
                                                             $portalPrefix = \App\Helpers\PortalHelper::getPortalPrefix();
                                                             $disk = \Illuminate\Support\Facades\Storage::disk(config('legacy_attachments.disk', 'public'));
-                                                            $filePathJpg = "uploads/{$portalPrefix}/images/attachments/secondary/{$record->UNID}-{$record->APPLICANT_IDENT}.jpg";
-                                                            $filePathPdf = "uploads/{$portalPrefix}/images/attachments/secondary/{$record->UNID}-{$record->APPLICANT_IDENT}.pdf";
-                                                            if ($disk->exists($filePathJpg)) $disk->delete($filePathJpg);
-                                                            if ($disk->exists($filePathPdf)) $disk->delete($filePathPdf);
+                                                            $jpgPath = "uploads/{$portalPrefix}/images/attachments/secondary/{$record->UNID}-{$record->APPLICANT_IDENT}.jpg";
+                                                            if ($disk->exists($jpgPath)) $disk->delete($jpgPath);
                                                             \App\Models\ApplicantAttachment::where('UNID', $record->UNID)
                                                                 ->where('APPLICANT_IDENT', $record->APPLICANT_IDENT)
                                                                 ->where('ATTACH_IDENT', 2)
                                                                 ->delete();
                                                         })
                                                         ->required(function (Get $get, ?\Illuminate\Database\Eloquent\Model $record) {
-                                                            if ($get('APPLICANT_TYPE') == 1) return false;
-                                                            $isClearing = $record ? ($record->IS_CLEARING instanceof \App\Enums\IsClearingType ? $record->IS_CLEARING->value === 1 : in_array($record->IS_CLEARING, [1, '1'])) : in_array($get('IS_CLEARING'), [1, '1']);
-                                                            if ($get('is_hs_degree_b')) {
-                                                                return false;
-                                                            }
-                                                            if ($get('is_searched') && !$get('is_not_found')) {
-                                                                return false;
-                                                            }
-                                                            return ($get('APPLICANT_TYPE') == 2 || $isClearing) && !$record;
-                                                        }),
+                                                            $applicantType = $get('APPLICANT_TYPE') ?? $record?->APPLICANT_TYPE;
+                                                            return (int)$applicantType === 2 || (bool)$get('is_hs_degree_b');
+                                                        })
+                                                        ->validationMessages([
+                                                            'required' => 'صورة شهادة الثانوية مطلوبة إجبارياً للمتقدمين من نوع شهادة (B).',
+                                                        ]),
                                                 ]),
                                         ]),
                                 ]),

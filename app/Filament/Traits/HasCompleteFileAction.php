@@ -42,23 +42,54 @@ trait HasCompleteFileAction
                     throw new \Filament\Support\Exceptions\Halt();
                 }
 
-                // 3. If Type B (External High School), check certificate approval and attachment
+                // 3. Physical file check for Type B (External High School)
+                $hasPhysicalSecondaryFile = false;
                 if ($record->APPLICANT_TYPE == 2) {
-                    $typeBRecord = \App\Models\HighSchoolDegreeBType::where('SEC_SCHOOL_YEAR', $record->SEC_SCHOOL_YEAR)
+                    $portalPrefix = \App\Helpers\PortalHelper::getPortalPrefix();
+                    $disk = \Illuminate\Support\Facades\Storage::disk(config('legacy_attachments.disk', 'public'));
+                    
+                    $secDirectPath = "uploads/{$portalPrefix}/images/attachments/secondary/{$record->UNID}-{$record->APPLICANT_IDENT}.jpg";
+                    if ($disk->exists($secDirectPath)) {
+                        $hasPhysicalSecondaryFile = true;
+                    }
+
+                    $typeBRecord = \App\Models\HighSchoolDegreeBType::withoutGlobalScopes()
+                        ->where('SEC_SCHOOL_YEAR', $record->SEC_SCHOOL_YEAR)
                         ->where('SEC_SCHOOL_SEATNO', $record->SEC_SCHOOL_SEATNO)
                         ->where('UNID', $record->UNID)
                         ->first();
 
-                    if (!$typeBRecord) {
+                    if (!$typeBRecord && !empty($record->SEC_SCHOOL_SEATNO) && !empty($record->SEC_SCHOOL_YEAR)) {
+                        $typeBRecord = \App\Models\HighSchoolDegreeBType::withoutGlobalScopes()
+                            ->where('SEC_SCHOOL_SEATNO', $record->SEC_SCHOOL_SEATNO)
+                            ->where('SEC_SCHOOL_YEAR', $record->SEC_SCHOOL_YEAR)
+                            ->first();
+                    }
+
+                    if (!$typeBRecord && !empty($record->SEC_SCHOOL_SEATNO)) {
+                        $typeBRecord = \App\Models\HighSchoolDegreeBType::withoutGlobalScopes()
+                            ->where('SEC_SCHOOL_SEATNO', $record->SEC_SCHOOL_SEATNO)
+                            ->first();
+                    }
+
+                    if ($typeBRecord && !empty($typeBRecord->SEC_SCHOOL_CERTIFICATE)) {
+                        $cert = basename($typeBRecord->SEC_SCHOOL_CERTIFICATE, '.jpg');
+                        $certJpg = "uploads/{$portalPrefix}/images/attachments/secondary/{$cert}.jpg";
+                        if ($disk->exists($certJpg)) {
+                            $hasPhysicalSecondaryFile = true;
+                        }
+                    }
+
+                    if (!$hasPhysicalSecondaryFile) {
                         \Filament\Notifications\Notification::make()
                             ->danger()
                             ->title('خطأ في إكمال الملف')
-                            ->body('بيانات شهادة الثانوية (نوع ب) غير موجودة.')
+                            ->body('المتقدم من نوع شهادة (B) وملف صورة الشهادة الثانوية غير مرفوع فيزيائياً على الخادم. يرجى رفع صورة الشهادة أولاً من شاشة تعديل الملف.')
                             ->send();
                         throw new \Filament\Support\Exceptions\Halt();
                     }
 
-                    if ($typeBRecord->APPROVED != 1) {
+                    if ($typeBRecord && $typeBRecord->APPROVED != 1) {
                         \Filament\Notifications\Notification::make()
                             ->danger()
                             ->title('خطأ في إكمال الملف')
@@ -66,31 +97,14 @@ trait HasCompleteFileAction
                             ->send();
                         throw new \Filament\Support\Exceptions\Halt();
                     }
-
-                    if (empty($typeBRecord->SEC_SCHOOL_CERTIFICATE)) {
-                        \Filament\Notifications\Notification::make()
-                            ->danger()
-                            ->title('خطأ في إكمال الملف')
-                            ->body('المتقدم من نوع شهادة (ب) ولم يتم إرفاق صورة شهادة الثانوية في قاعدة البيانات.')
-                            ->send();
-                        throw new \Filament\Support\Exceptions\Halt();
-                    }
-
-                    // Physical file check for Type B
-                    $portalPrefix = \App\Helpers\PortalHelper::getPortalPrefix();
-                    $certPath = "uploads/{$portalPrefix}/images/attachments/secondary/{$typeBRecord->SEC_SCHOOL_CERTIFICATE}.jpg";
-                    if (!\Illuminate\Support\Facades\Storage::disk(config('legacy_attachments.disk', 'public'))->exists($certPath)) {
-                        \Filament\Notifications\Notification::make()
-                            ->danger()
-                            ->title('خطأ في إكمال الملف')
-                            ->body('ملف صورة الشهادة الثانوية غير موجود فيزيائياً على الخادم.')
-                            ->send();
-                        throw new \Filament\Support\Exceptions\Halt();
-                    }
                 }
 
-                // 3. If Clearing (مقاصة)
-                if ($record->IS_CLEARING->value !== 0) {
+                // 4. If Clearing (مقاصة)
+                $isClearing = ($record->IS_CLEARING instanceof \App\Enums\IsClearingType) 
+                    ? ($record->IS_CLEARING->value === 1) 
+                    : in_array($record->IS_CLEARING, [1, '1']);
+
+                if ($isClearing) {
                     // Check if clearing data exists
                     if (!$record->applicationsClearing()->exists()) {
                         \Filament\Notifications\Notification::make()
@@ -101,17 +115,28 @@ trait HasCompleteFileAction
                         throw new \Filament\Support\Exceptions\Halt();
                     }
                     
-                    // Check if attachments (3 and 4) are uploaded physically
+                    // Check if attachments (grades, clearing form, and secondary if Type B) are uploaded physically
                     $portalPrefix = \App\Helpers\PortalHelper::getPortalPrefix();
                     $gradesPath = "uploads/{$portalPrefix}/images/attachments/grades/{$record->UNID}-{$record->APPLICANT_IDENT}.pdf";
                     $clearingPath = "uploads/{$portalPrefix}/images/attachments/clearing/{$record->UNID}-{$record->APPLICANT_IDENT}.pdf";
                     
                     $disk = \Illuminate\Support\Facades\Storage::disk(config('legacy_attachments.disk', 'public'));
-                    if (!$disk->exists($gradesPath) || !$disk->exists($clearingPath)) {
+                    $missing = [];
+                    if (!$disk->exists($gradesPath)) {
+                        $missing[] = 'كشف درجات الطالب (PDF)';
+                    }
+                    if (!$disk->exists($clearingPath)) {
+                        $missing[] = 'استمارة المقاصاة (PDF)';
+                    }
+                    if ($record->APPLICANT_TYPE == 2 && !$hasPhysicalSecondaryFile) {
+                        $missing[] = 'صورة شهادة الثانوية (JPG)';
+                    }
+
+                    if (count($missing) > 0) {
                         \Filament\Notifications\Notification::make()
                             ->danger()
-                            ->title('خطأ في إكمال الملف')
-                            ->body('لم يتم رفع الوثائق المطلوبة للمقاصة فيزيائياً (السجل الأكاديمي، توصيف المقررات).')
+                            ->title('خطأ في إكمال ملف المقاصاة')
+                            ->body('يرجى رفع الوثائق الإجبارية أولاً من شاشة تعديل الملف: (' . implode('، ', $missing) . ').')
                             ->send();
                         throw new \Filament\Support\Exceptions\Halt();
                     }

@@ -37,7 +37,7 @@ class OfferingsTable
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('studyType.STUDYTYPE_NAME')
-                    ->label('النوع الدراسي')
+                    ->label('النظام الدراسي')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('SEC_SCHOOL_TYPE')

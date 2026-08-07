@@ -47,8 +47,38 @@ trait HandlesApplicantAttachmentUploads
 
         // Secondary certificate (ATTACH_IDENT = 2)
         $secJpg = "uploads/{$portalPrefix}/images/attachments/secondary/{$record->UNID}-{$record->APPLICANT_IDENT}.jpg";
-        $secPdf = "uploads/{$portalPrefix}/images/attachments/secondary/{$record->UNID}-{$record->APPLICANT_IDENT}.pdf";
-        if ($disk->exists($secJpg) || $disk->exists($secPdf)) {
+        $hasSec = $disk->exists($secJpg);
+
+        if (!$hasSec) {
+            $degreeB = \App\Models\HighSchoolDegreeBType::withoutGlobalScopes()
+                ->where('UNID', $record->UNID)
+                ->where('SEC_SCHOOL_SEATNO', $record->SEC_SCHOOL_SEATNO)
+                ->where('SEC_SCHOOL_YEAR', $record->SEC_SCHOOL_YEAR)
+                ->first();
+
+            if (!$degreeB && !empty($record->SEC_SCHOOL_SEATNO) && !empty($record->SEC_SCHOOL_YEAR)) {
+                $degreeB = \App\Models\HighSchoolDegreeBType::withoutGlobalScopes()
+                    ->where('SEC_SCHOOL_SEATNO', $record->SEC_SCHOOL_SEATNO)
+                    ->where('SEC_SCHOOL_YEAR', $record->SEC_SCHOOL_YEAR)
+                    ->first();
+            }
+
+            if (!$degreeB && !empty($record->SEC_SCHOOL_SEATNO)) {
+                $degreeB = \App\Models\HighSchoolDegreeBType::withoutGlobalScopes()
+                    ->where('SEC_SCHOOL_SEATNO', $record->SEC_SCHOOL_SEATNO)
+                    ->first();
+            }
+
+            if ($degreeB && $degreeB->SEC_SCHOOL_CERTIFICATE) {
+                $cert = basename($degreeB->SEC_SCHOOL_CERTIFICATE, '.jpg');
+                $bJpg = "uploads/{$portalPrefix}/images/attachments/secondary/{$cert}.jpg";
+                if ($disk->exists($bJpg)) {
+                    $hasSec = true;
+                }
+            }
+        }
+
+        if ($hasSec) {
             ApplicantAttachment::updateOrCreate(
                 ['UNID' => $record->UNID, 'APPLICANT_IDENT' => $record->APPLICANT_IDENT, 'ATTACH_IDENT' => 2],
                 []

@@ -129,16 +129,20 @@ class RequestAdjustOfferingResource extends Resource
                 TextColumn::make('university.U_NAME')
                     ->label('الجامعة')
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->searchable(),
                 TextColumn::make('faculty.FACULTY_NAME')
                     ->label('الكلية')
                     ->words(4)
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->searchable(),
                 TextColumn::make('program.PROGRAM_NAME')
                     ->label('التخصص')
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->searchable(),
+                TextColumn::make('offering.studyType.STUDYTYPE_NAME')
+                    ->label('النظام الدراسي')
+                    ->sortable()
+                    ->searchable(),
                 TextColumn::make('OFFERING_IDENT')
                     ->label('رقم الرغبة')
                     ->numeric()
@@ -321,11 +325,12 @@ class RequestAdjustOfferingResource extends Resource
                         TextEntry::make('university.U_NAME')->label('الجامعة')->placeholder('-'),
                         TextEntry::make('faculty.FACULTY_NAME')->label('الكلية')->placeholder('-'),
                         TextEntry::make('program.PROGRAM_NAME')->label('التخصص')->placeholder('-'),
+                        TextEntry::make('offering.studyType.STUDYTYPE_NAME')->label('النظام الدراسي')->placeholder('-'),
                         TextEntry::make('OFFERING_IDENT')->label('رقم الرغبة'),
                         TextEntry::make('TYPE_UPDATE')
                             ->label('نوع التعديل')
                             ->badge(),
-                    ])->columns(5)
+                    ])->columns(6)
                     ->columnSpanFull(),
 
                 Section::make('تفاصيل التعديل')

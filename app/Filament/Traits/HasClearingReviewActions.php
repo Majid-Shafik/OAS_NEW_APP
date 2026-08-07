@@ -116,6 +116,60 @@ trait HasClearingReviewActions
                         ]);
                         Notification::make()->danger()->title('تم الرفض من قبل الوزارة')->send();
                     }),
+
+                $actionClass::make('reReviewFirst')
+                    ->label('إعادة للمراجعة الأولى')
+                    ->icon('heroicon-o-arrow-path')
+                    ->color('warning')
+                    ->visible(fn (Model $record) => $record->IS_CLEARING?->value === 1 && $record->REVIEWED == 2 && auth()->user()->can('reReviewFirst', $record))
+                    ->requiresConfirmation()
+                    ->modalHeading('إعادة فتح ملف المقاصة للمراجعة الأولى')
+                    ->modalDescription('هل أنت متأكد من رغبتك في إعادة ملف الطالب إلى قيد المراجعة الأولى؟')
+                    ->action(function (Model $record) {
+                        $record->update([
+                            'REVIEWED' => 0,
+                            'REJECT_REASON' => null,
+                            'REVIEW_BY' => auth()->id(),
+                            'REVIEW_ON' => now(),
+                            'FREEZE' => \App\Enums\FreezeStatus::UNFROZEN,
+                        ]);
+                        \App\Models\MonitorClearingReviewing::create([
+                            'UNID' => $record->UNID,
+                            'APPLICANT_IDENT' => $record->APPLICANT_IDENT,
+                            'REVIEW_RESULTE' => 'ReReview',
+                            'REJECT_REASON' => 'إعادة فتح المراجعة بعد الرفض الأول',
+                            'REVIEW_BY' => auth()->id(),
+                            'RECORD_DATE' => now(),
+                        ]);
+                        Notification::make()->info()->title('تمت إعادة الملف للمراجعة الأولى بنجاح')->send();
+                    }),
+
+                $actionClass::make('reReviewSecond')
+                    ->label('إعادة للمراجعة النهائية')
+                    ->icon('heroicon-o-arrow-path')
+                    ->color('warning')
+                    ->visible(fn (Model $record) => $record->IS_CLEARING?->value === 1 && $record->SECOND_REVIEWED == 2 && auth()->user()->can('reReviewSecond', $record))
+                    ->requiresConfirmation()
+                    ->modalHeading('إعادة فتح ملف المقاصة للمراجعة النهائية')
+                    ->modalDescription('هل أنت متأكد من رغبتك في إعادة ملف الطالب إلى قيد المراجعة النهائية؟')
+                    ->action(function (Model $record) {
+                        $record->update([
+                            'SECOND_REVIEWED' => 0,
+                            'SECOND_REJECT_REASON' => null,
+                            'SECOND_REVIEWED_BY' => auth()->id(),
+                            'SECOND_REVIEWED_ON' => now(),
+                            'FREEZE' => \App\Enums\FreezeStatus::UNFROZEN,
+                        ]);
+                        \App\Models\MonitorClearingReviewing::create([
+                            'UNID' => $record->UNID,
+                            'APPLICANT_IDENT' => $record->APPLICANT_IDENT,
+                            'REVIEW_RESULTE' => 'ReReview',
+                            'REJECT_REASON' => 'إعادة فتح المراجعة بعد الرفض النهائي',
+                            'REVIEW_BY' => auth()->id(),
+                            'RECORD_DATE' => now(),
+                        ]);
+                        Notification::make()->info()->title('تمت إعادة الملف للمراجعة النهائية بنجاح')->send();
+                    }),
             ])->icon('heroicon-m-ellipsis-vertical')->tooltip('إجراءات المراجعة')
             ->label('خيارات المراجعة'),
         ];

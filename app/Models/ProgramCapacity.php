@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\HasCompositeKey;
+use App\Traits\HasUniversityScope;
 use Awobaz\Compoships\Compoships;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -12,6 +13,7 @@ class ProgramCapacity extends Model
     use HasFactory, Compoships, HasCompositeKey {
         HasCompositeKey::setKeysForSaveQuery insteadof Compoships;
     }
+    use HasUniversityScope;
 
     protected $table = 'programs_capacity';
 
@@ -27,7 +29,6 @@ class ProgramCapacity extends Model
         'PROGRAM_IDENT',
         'STUDYTYPE_IDENT',
         'ENROLLMENT_CAPACITY',
-        'ACADEMIC_YEAR', // Might exist
         'NOTE',
     ];
 

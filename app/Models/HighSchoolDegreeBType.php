@@ -81,20 +81,23 @@ class HighSchoolDegreeBType extends Model
     {
         static::updated(function ($model) {
             if ($model->isDirty('SEC_SCHOOL_CERTIFICATE')) {
-                $oldBasename = $model->getOriginal('SEC_SCHOOL_CERTIFICATE');
+                $oldBasename = basename($model->getOriginal('SEC_SCHOOL_CERTIFICATE'), '.jpg');
                 if ($oldBasename) {
                     $portalPrefix = PortalHelper::getPortalPrefix();
-                    $path = "uploads/{$portalPrefix}/images/attachments/secondary/{$oldBasename}.jpg";
-                    \Illuminate\Support\Facades\Storage::disk(config('legacy_attachments.disk', 'public'))->delete($path);
+                    $disk = \Illuminate\Support\Facades\Storage::disk(config('legacy_attachments.disk', 'public'));
+                    $jpg = "uploads/{$portalPrefix}/images/attachments/secondary/{$oldBasename}.jpg";
+                    if ($disk->exists($jpg)) $disk->delete($jpg);
                 }
             }
         });
 
         static::deleted(function ($model) {
             if ($model->SEC_SCHOOL_CERTIFICATE) {
+                $cert = basename($model->SEC_SCHOOL_CERTIFICATE, '.jpg');
                 $portalPrefix = PortalHelper::getPortalPrefix();
-                $path = "uploads/{$portalPrefix}/images/attachments/secondary/{$model->SEC_SCHOOL_CERTIFICATE}.jpg";
-                \Illuminate\Support\Facades\Storage::disk(config('legacy_attachments.disk', 'public'))->delete($path);
+                $disk = \Illuminate\Support\Facades\Storage::disk(config('legacy_attachments.disk', 'public'));
+                $jpg = "uploads/{$portalPrefix}/images/attachments/secondary/{$cert}.jpg";
+                if ($disk->exists($jpg)) $disk->delete($jpg);
             }
         });
     }

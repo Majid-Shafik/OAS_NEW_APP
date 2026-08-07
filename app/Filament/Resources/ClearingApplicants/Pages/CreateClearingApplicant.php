@@ -71,11 +71,12 @@ class CreateClearingApplicant extends CreateRecord
                 $path = "uploads/{$portalPrefix}/images/attachments/secondary";
                 
                 if ($file instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile) {
-                    $filename = \Illuminate\Support\Str::random(15) . '.' . $file->getClientOriginalExtension();
+                    $randomName = \Illuminate\Support\Str::random(15);
+                    $filename = $randomName . '.jpg';
                     $file->storeAs($path, $filename, config('legacy_attachments.disk', 'public'));
-                    $typeB->SEC_SCHOOL_CERTIFICATE = $filename;
+                    $typeB->SEC_SCHOOL_CERTIFICATE = $randomName;
                 } else if (is_string($file)) {
-                    $typeB->SEC_SCHOOL_CERTIFICATE = basename($file);
+                    $typeB->SEC_SCHOOL_CERTIFICATE = basename($file, '.jpg');
                 }
             }
 

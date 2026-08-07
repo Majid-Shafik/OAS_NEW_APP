@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Number;
 use Illuminate\Support\ServiceProvider;
+use Filament\Forms\Components\TextInput;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -45,6 +46,10 @@ class AppServiceProvider extends ServiceProvider
         }
         Auth::provider('legacy', function ($app, array $config) {
             return new LegacyUserProvider($app['hash'], $config['model']);
+        });
+
+        TextInput::configureUsing(function (TextInput $component): void {
+            $component->trim();
         });
 
         $resolveConfigPath = function (?string $dbName, string $configKey, ?string $state = null) {

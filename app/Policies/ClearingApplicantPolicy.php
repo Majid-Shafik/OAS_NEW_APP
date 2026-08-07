@@ -18,8 +18,26 @@ class ClearingApplicantPolicy
         return $authUser->can('ViewAny:ClearingApplicant');
     }
 
+    protected function checkUniversityAccess(AuthUser $authUser, ClearingApplicant $clearingApplicant): bool
+    {
+        if ($authUser->UNID != 0 && (int)$clearingApplicant->UNID !== (int)$authUser->UNID) {
+            return false;
+        }
+        
+        $selectedUnid = (int)session('selected_unid', 0);
+        if ($authUser->UNID == 0 && $selectedUnid !== 0 && (int)$clearingApplicant->UNID !== $selectedUnid) {
+            return false;
+        }
+
+        return true;
+    }
+
     public function view(AuthUser $authUser, ClearingApplicant $clearingApplicant): bool
     {
+        if (!$this->checkUniversityAccess($authUser, $clearingApplicant)) {
+            return false;
+        }
+
         return $authUser->can('View:ClearingApplicant');
     }
 
@@ -30,6 +48,10 @@ class ClearingApplicantPolicy
 
     public function update(AuthUser $authUser, ClearingApplicant $clearingApplicant): bool
     {
+        if (!$this->checkUniversityAccess($authUser, $clearingApplicant)) {
+            return false;
+        }
+
         if ($clearingApplicant->STATUS === \App\Enums\ApplicantStatus::Ready && !$authUser->hasRole(['super_admin', 'admin'])) {
             return false;
         }
@@ -39,6 +61,10 @@ class ClearingApplicantPolicy
 
     public function delete(AuthUser $authUser, ClearingApplicant $clearingApplicant): bool
     {
+        if (!$this->checkUniversityAccess($authUser, $clearingApplicant)) {
+            return false;
+        }
+
         return $authUser->can('Delete:ClearingApplicant');
     }
 
@@ -49,21 +75,55 @@ class ClearingApplicantPolicy
 
     public function firstReview(AuthUser $authUser, ClearingApplicant $clearingApplicant): bool
     {
+        if (!$this->checkUniversityAccess($authUser, $clearingApplicant)) {
+            return false;
+        }
+
         return $authUser->can('FirstReview:ClearingApplicant');
     }
 
     public function secondReview(AuthUser $authUser, ClearingApplicant $clearingApplicant): bool
     {
+        if (!$this->checkUniversityAccess($authUser, $clearingApplicant)) {
+            return false;
+        }
+
         return $authUser->can('SecondReview:ClearingApplicant');
+    }
+
+    public function reReviewFirst(AuthUser $authUser, ClearingApplicant $clearingApplicant): bool
+    {
+        if (!$this->checkUniversityAccess($authUser, $clearingApplicant)) {
+            return false;
+        }
+
+        return $authUser->can('ReReviewFirst:ClearingApplicant');
+    }
+
+    public function reReviewSecond(AuthUser $authUser, ClearingApplicant $clearingApplicant): bool
+    {
+        if (!$this->checkUniversityAccess($authUser, $clearingApplicant)) {
+            return false;
+        }
+
+        return $authUser->can('ReReviewSecond:ClearingApplicant');
     }
 
     public function showClearingAttachments(AuthUser $authUser, ClearingApplicant $clearingApplicant): bool
     {
+        if (!$this->checkUniversityAccess($authUser, $clearingApplicant)) {
+            return false;
+        }
+
         return $authUser->can('ShowClearingAttachments:ClearingApplicant');
     }
 
-      public function convertToApplicant(AuthUser $authUser, ClearingApplicant $clearingApplicant): bool
+    public function convertToApplicant(AuthUser $authUser, ClearingApplicant $clearingApplicant): bool
     {
+        if (!$this->checkUniversityAccess($authUser, $clearingApplicant)) {
+            return false;
+        }
+
         return $authUser->can('ConvertToApplicant:ClearingApplicant');
     }
 }

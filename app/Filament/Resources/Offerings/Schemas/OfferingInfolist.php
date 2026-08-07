@@ -20,7 +20,7 @@ class OfferingInfolist
                         TextEntry::make('university.U_NAME')->label('الجامعة'),
                         TextEntry::make('faculty.FACULTY_NAME')->label('الكلية'),
                         TextEntry::make('program.PROGRAM_NAME')->label('التخصص'),
-                        TextEntry::make('studyType.STUDYTYPE_NAME')->label('النوع الدراسي'),
+                        TextEntry::make('studyType.STUDYTYPE_NAME')->label('النظام الدراسي'),
                         TextEntry::make('SEC_SCHOOL_TYPE')->label('نوع الثانوية')
                             ->formatStateUsing(fn ($state) => \App\Models\ComboValue::getLabel(1, $state)),
                     ])->columns(3),

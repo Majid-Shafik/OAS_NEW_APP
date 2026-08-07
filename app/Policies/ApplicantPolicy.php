@@ -17,8 +17,26 @@ class ApplicantPolicy
         return $authUser->can('ViewAny:Applicant');
     }
 
+    protected function checkUniversityAccess(AuthUser $authUser, Applicant $applicant): bool
+    {
+        if ($authUser->UNID != 0 && (int)$applicant->UNID !== (int)$authUser->UNID) {
+            return false;
+        }
+        
+        $selectedUnid = (int)session('selected_unid', 0);
+        if ($authUser->UNID == 0 && $selectedUnid !== 0 && (int)$applicant->UNID !== $selectedUnid) {
+            return false;
+        }
+
+        return true;
+    }
+
     public function view(AuthUser $authUser, Applicant $applicant): bool
     {
+        if (!$this->checkUniversityAccess($authUser, $applicant)) {
+            return false;
+        }
+
         return $authUser->can('View:Applicant');
     }
 
@@ -29,6 +47,10 @@ class ApplicantPolicy
 
     public function update(AuthUser $authUser, Applicant $applicant): bool
     {
+        if (!$this->checkUniversityAccess($authUser, $applicant)) {
+            return false;
+        }
+
         if ($applicant->STATUS === \App\Enums\ApplicantStatus::Ready && !$authUser->hasRole(['super_admin', 'admin'])) {
             return false;
         }
@@ -38,6 +60,10 @@ class ApplicantPolicy
 
     public function delete(AuthUser $authUser, Applicant $applicant): bool
     {
+        if (!$this->checkUniversityAccess($authUser, $applicant)) {
+            return false;
+        }
+
         return $authUser->can('Delete:Applicant');
     }
 
@@ -48,16 +74,28 @@ class ApplicantPolicy
 
     public function updateFromMinistryApplicant(AuthUser $authUser, Applicant $applicant): bool
     {
+        if (!$this->checkUniversityAccess($authUser, $applicant)) {
+            return false;
+        }
+
         return $authUser->can('UpdateFromMinistryApplicant:Applicant');
     }
 
     public function convertToClearing(AuthUser $authUser, Applicant $applicant): bool
     {
+        if (!$this->checkUniversityAccess($authUser, $applicant)) {
+            return false;
+        }
+
         return $authUser->can('ConvertToClearing:Applicant');
     }
 
     public function completeFile(AuthUser $authUser, Applicant $applicant): bool
     {
+        if (!$this->checkUniversityAccess($authUser, $applicant)) {
+            return false;
+        }
+
         return $authUser->can('CompleteFile:Applicant');
     }
 

@@ -52,6 +52,14 @@ trait HasCompositeKey
      */
     public function getRouteKey()
     {
+        if (isset($this->compositeKeys)) {
+            $values = [];
+            foreach ($this->compositeKeys as $key) {
+                $values[] = $this->getAttribute($key);
+            }
+            return implode('_', $values);
+        }
+
         return $this->getKey();
     }
 
@@ -63,6 +71,17 @@ trait HasCompositeKey
         if (isset($this->compositeKeys)) {
             $parts = explode('_', (string) $value);
             if (count($parts) === count($this->compositeKeys)) {
+                if ($this->compositeKeys[0] === 'UNID' && auth()->check()) {
+                    $user = auth()->user();
+                    if ($user->UNID != 0 && (int)$parts[0] !== (int)$user->UNID) {
+                        return null;
+                    }
+                    $selectedUnid = (int)session('selected_unid', 0);
+                    if ($user->UNID == 0 && $selectedUnid !== 0 && (int)$parts[0] !== $selectedUnid) {
+                        return null;
+                    }
+                }
+
                 $query = $this->newQuery();
                 foreach ($this->compositeKeys as $index => $key) {
                     $query->where($this->getTable() . '.' . $key, $parts[$index]);
@@ -83,6 +102,17 @@ trait HasCompositeKey
         if (isset($this->compositeKeys)) {
             $parts = explode('_', (string) $value);
             if (count($parts) === count($this->compositeKeys)) {
+                if ($this->compositeKeys[0] === 'UNID' && auth()->check()) {
+                    $user = auth()->user();
+                    if ($user->UNID != 0 && (int)$parts[0] !== (int)$user->UNID) {
+                        return $query->whereRaw('1 = 0');
+                    }
+                    $selectedUnid = (int)session('selected_unid', 0);
+                    if ($user->UNID == 0 && $selectedUnid !== 0 && (int)$parts[0] !== $selectedUnid) {
+                        return $query->whereRaw('1 = 0');
+                    }
+                }
+
                 foreach ($this->compositeKeys as $index => $key) {
                     $query->where($this->getTable() . '.' . $key, $parts[$index]);
                 }
