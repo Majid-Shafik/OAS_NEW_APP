@@ -35,7 +35,7 @@ return [
             'pages' => true,
             'widgets' => true,
             'resources' => true,
-            'custom_permissions' => false,
+            'custom_permissions' => true,
         ],
     ],
 
@@ -318,7 +318,12 @@ return [
     |
     */
 
-    'custom_permissions' => [],
+    'custom_permissions' => [
+        'Export:ClearingStatistics' => 'تصدير إحصائيات المقاصاة',
+        'Export:ApplicationStatistics' => 'تصدير إحصائيات طلبات التقديم',
+        'Export:ApplicantStatistics' => 'تصدير إحصائيات المتقدمين',
+        'Export:Statistics' => 'تصدير جميع الإحصائيات (شامل)',
+    ],
 
     /*
     |--------------------------------------------------------------------------

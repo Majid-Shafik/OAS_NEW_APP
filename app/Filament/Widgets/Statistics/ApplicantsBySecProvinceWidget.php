@@ -106,7 +106,10 @@ class ApplicantsBySecProvinceWidget extends BaseWidget
                     ->exporter(\App\Filament\Exports\Statistics\ApplicantsBySecProvinceExporter::class)
                     ->label('تصدير إكسل')
                     ->icon('heroicon-o-arrow-down-tray')
-                    ->color('success'),
+                    ->color('success')
+                    ->visible(fn () => auth()->user()?->isAdmin()
+                        || auth()->user()?->can('Export:ApplicantStatistics')
+                        || auth()->user()?->can('Export:Statistics')),
             ])
             ->paginated([5, 10, 25, 50, 'all'])
             

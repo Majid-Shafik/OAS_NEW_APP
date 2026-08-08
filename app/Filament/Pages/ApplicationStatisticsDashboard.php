@@ -18,6 +18,21 @@ class ApplicationStatisticsDashboard extends BaseDashboard
     protected static string $routePath = 'application-statistics';
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-document-text';
 
+    public static function canAccess(): bool
+    {
+        $user = auth()->user();
+
+        if (! $user) {
+            return false;
+        }
+
+        if ($user->isAdmin()) {
+            return true;
+        }
+
+        return $user->can('View:ApplicationStatisticsDashboard');
+    }
+
     public function filtersForm(Schema $schema): Schema
     {
         return $schema->components(

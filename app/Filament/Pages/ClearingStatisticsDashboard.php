@@ -20,6 +20,21 @@ class ClearingStatisticsDashboard extends BaseDashboard
     protected static string $routePath = 'clearing-statistics';
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-chart-bar-square';
 
+    public static function canAccess(): bool
+    {
+        $user = auth()->user();
+
+        if (! $user) {
+            return false;
+        }
+
+        if ($user->isAdmin()) {
+            return true;
+        }
+
+        return $user->can('View:ClearingStatisticsDashboard');
+    }
+
     public function filtersForm(Schema $schema): Schema
     {
         return $schema->components(

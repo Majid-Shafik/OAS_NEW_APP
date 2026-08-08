@@ -18,14 +18,27 @@ class ApplicantStatisticsDashboard extends BaseDashboard
     protected static string $routePath = 'applicant-statistics';
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-users';
 
+    public static function canAccess(): bool
+    {
+        $user = auth()->user();
+
+        if (! $user) {
+            return false;
+        }
+
+        if ($user->isAdmin()) {
+            return true;
+        }
+
+        return $user->can('View:ApplicantStatisticsDashboard');
+    }
+
     public function filtersForm(Schema $schema): Schema
     {
         return $schema->components(
             $this->getDashboardFiltersSchema()
         );
     }
-
-
 
     public function getWidgets(): array
     {
